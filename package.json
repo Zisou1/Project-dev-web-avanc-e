@@ -1,0 +1,35 @@
+{
+  "name": "yumzo-food-delivery-platform",
+  "version": "1.0.0",
+  "description": "Full-stack food delivery platform with microservices backend and React frontend",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/start-dev.js",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "dev:gateway": "cd server/services/api-gateway && npm run dev",
+    "dev:auth": "cd server/services/auth-service && npm run dev",
+    "install:all": "npm run install:client && npm run install:server",
+    "install:client": "cd client && npm install",
+    "install:server": "npm run install:gateway && npm run install:auth && npm run install:shared",
+    "install:gateway": "cd server/services/api-gateway && npm install",
+    "install:auth": "cd server/services/auth-service && npm install",
+    "install:shared": "cd server/shared && npm install",
+    "test": "npm run test:server && npm run test:client",
+    "test:server": "node scripts/test-auth.js",
+    "test:client": "cd client && npm run test",
+    "build": "cd client && npm run build",
+    "start:prod": "node scripts/start-production.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.1",
+    "nodemon": "^2.0.22"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "axios": "^1.4.0"
+  },
+  "keywords": ["microservices", "food-delivery", "api-gateway", "jwt"],
+  "author": "",
+  "license": "ISC"
+}

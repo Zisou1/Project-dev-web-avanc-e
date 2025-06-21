@@ -1,0 +1,14 @@
+{
+  "name": "shared-modules",
+  "version": "1.0.0",
+  "description": "Shared modules for microservices",
+  "main": "index.js",
+  "dependencies": {
+    "sequelize": "^6.32.0",
+    "mysql2": "^3.3.3",
+    "dotenv": "^16.0.3"
+  },
+  "keywords": ["shared", "database", "microservices"],
+  "author": "",
+  "license": "ISC"
+}

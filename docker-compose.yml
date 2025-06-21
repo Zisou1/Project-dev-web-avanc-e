@@ -1,0 +1,91 @@
+version: "3.8"
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: yumzo_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: zaki2king
+      MYSQL_DATABASE: yumzo
+      MYSQL_USER: yumzo_user
+      MYSQL_PASSWORD: yumzo_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - yumzo_network
+
+  # API Gateway
+  api-gateway:
+    build: ./services/api-gateway
+    container_name: yumzo_api_gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - GATEWAY_PORT=3000
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=yumzo
+      - DB_USERNAME=root
+      - DB_PASSWORD=zaki2king
+      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+      - JWT_REFRESH_SECRET=your-super-secret-refresh-key-change-this-in-production
+    depends_on:
+      - mysql
+    networks:
+      - yumzo_network
+
+  # Auth Service
+  auth-service:
+    build: ./services/auth-service
+    container_name: yumzo_auth_service
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - AUTH_SERVICE_PORT=3001
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=yumzo
+      - DB_USERNAME=root
+      - DB_PASSWORD=zaki2king
+      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+      - JWT_REFRESH_SECRET=your-super-secret-refresh-key-change-this-in-production
+    depends_on:
+      - mysql
+    networks:
+      - yumzo_network
+
+  # User Service
+  user-service:
+    build: ./services/user-service
+    container_name: yumzo_user_service
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - USER_SERVICE_PORT=3004
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=yumzo
+      - DB_USERNAME=root
+      - DB_PASSWORD=zaki2king
+    depends_on:
+      - mysql
+    networks:
+      - yumzo_network
+
+volumes:
+  mysql_data:
+
+networks:
+  yumzo_network:
+    driver: bridge

@@ -1,16 +1,25 @@
 {
-  "name": "server",
+  "name": "yumzo-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Yumzo backend microservices",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "concurrently \"npm run dev:gateway\" \"npm run dev:auth\"",
+    "dev:gateway": "cd services/api-gateway && npm run dev",
+    "dev:auth": "cd services/auth-service && npm run dev",
+    "start": "concurrently \"npm run start:gateway\" \"npm run start:auth\"",
+    "start:gateway": "cd services/api-gateway && npm start",
+    "start:auth": "cd services/auth-service && npm start",
+    "install:all": "npm run install:gateway && npm run install:auth && npm run install:shared",
+    "install:gateway": "cd services/api-gateway && npm install",
+    "install:auth": "cd services/auth-service && npm install",
+    "install:shared": "cd shared && npm install",
+    "test": "node ../scripts/test-auth.js"
   },
-  "keywords": [],
+  "devDependencies": {
+    "concurrently": "^8.0.1"
+  },
+  "keywords": ["microservices", "backend", "api"],
   "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "express": "^5.1.0",
-    "nodemon": "^3.1.10"
-  }
+  "license": "ISC"
 }
