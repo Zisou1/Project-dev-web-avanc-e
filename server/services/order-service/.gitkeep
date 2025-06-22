@@ -1,0 +1,15 @@
+# Order Service
+
+This directory is reserved for the order management microservice implementation.
+
+## Planned Features:
+- Order creation and management
+- Order status tracking
+- Order history
+- Order validation
+- Cart management
+- Order analytics
+
+## Port: 3003
+
+This service will handle all order-related functionality from creation to completion.

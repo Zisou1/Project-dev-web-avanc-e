@@ -1,0 +1,14 @@
+# Shared Middleware
+
+This directory is reserved for common middleware functions used across all microservices.
+
+## Planned Middleware:
+- Authentication middleware
+- Rate limiting middleware
+- Request validation middleware
+- Error handling middleware
+- Logging middleware
+- CORS middleware
+- Security headers middleware
+
+This directory will contain reusable middleware components that can be shared across all microservices in the Yumzo platform.

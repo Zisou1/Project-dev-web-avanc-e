@@ -1,0 +1,16 @@
+# Restaurant Service
+
+This directory is reserved for the restaurant management microservice implementation.
+
+## Planned Features:
+- Restaurant profile management
+- Menu management
+- Restaurant hours and availability
+- Restaurant analytics
+- Review and rating management
+- Restaurant onboarding
+- Inventory management
+
+## Port: 3005
+
+This service will handle all restaurant-related functionality including menu management and restaurant operations.

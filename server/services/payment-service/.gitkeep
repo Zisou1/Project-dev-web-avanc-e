@@ -1,0 +1,16 @@
+# Payment Service
+
+This directory is reserved for the payment processing microservice implementation.
+
+## Planned Features:
+- Payment processing
+- Payment method management
+- Refund handling
+- Payment gateway integration
+- Transaction history
+- Payment analytics
+- Security and compliance
+
+## Port: 3002
+
+This service will handle all payment-related functionality including secure transaction processing and payment method management.

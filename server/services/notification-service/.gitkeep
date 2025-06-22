@@ -1,0 +1,15 @@
+# Notification Service
+
+This directory is reserved for the notification management microservice implementation.
+
+## Planned Features:
+- Email notifications
+- SMS notifications
+- Push notifications
+- In-app notifications
+- Notification templates
+- Notification preferences
+
+## Port: 3008
+
+This service will handle all notification functionality across different channels and user preferences.

@@ -1,0 +1,14 @@
+# Delivery Service
+
+This directory is reserved for the delivery management microservice implementation.
+
+## Planned Features:
+- Delivery tracking
+- Driver assignment
+- Route optimization
+- Delivery status updates
+- Real-time location tracking
+
+## Port: 3006
+
+This service will handle all delivery-related functionality including driver management and order tracking.

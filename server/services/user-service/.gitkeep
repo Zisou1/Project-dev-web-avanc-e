@@ -1,0 +1,16 @@
+# User Service
+
+This directory is reserved for the user management microservice implementation.
+
+## Planned Features:
+- User profile management
+- User preferences
+- User address management
+- User favorites
+- User activity tracking
+- Account management
+- User verification
+
+## Port: 3004
+
+This service will handle all user-related functionality including profile management and user preferences.

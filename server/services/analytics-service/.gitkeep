@@ -1,0 +1,14 @@
+# Analytics Service
+
+This directory is reserved for the analytics microservice implementation.
+
+## Planned Features:
+- User behavior analytics
+- Order analytics
+- Restaurant performance metrics
+- Revenue analytics
+- Real-time dashboards
+
+## Port: 3009
+
+This service will handle all analytics and reporting functionality for the Yumzo food delivery platform.
