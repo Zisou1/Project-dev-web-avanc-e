@@ -3,6 +3,7 @@
 This directory is reserved for the analytics microservice implementation.
 
 ## Planned Features:
+
 - User behavior analytics
 - Order analytics
 - Restaurant performance metrics
