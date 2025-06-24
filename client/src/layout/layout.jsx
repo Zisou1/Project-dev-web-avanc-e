@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import UserProfile from '../components/UserProfile';
+import logo from '../assets/yumzo.png'; // Adjust path as needed
 
 const Layout = ({ children, title = "Food Delivery App" }) => {
   const { isAuthenticated } = useAuth();
@@ -14,10 +15,7 @@ const Layout = ({ children, title = "Food Delivery App" }) => {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">FD</span>
-              </div>
-              <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+              <img src={logo} alt="Logo" className="h-10 w-auto" />
             </div>
 
             {/* Navigation */}
