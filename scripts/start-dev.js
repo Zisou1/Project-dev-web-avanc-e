@@ -27,6 +27,14 @@ const services = [
     port: process.env.AUTH_SERVICE_PORT || 3001
   },
   {
+    name: 'Restaurant Service',
+    command: 'npm',
+    args: ['run', 'dev'],
+    cwd: path.join(__dirname, '../server/services/restaurant-service'),
+    color: '\x1b[31m', 
+    port: process.env.RESTAURANT_SERVICE_PORT || 3005
+  },
+  {
     name: 'Frontend',
     command: 'npm',
     args: ['run', 'dev'],
