@@ -1,4 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import SearchBar from '../../components/SearchBar';
+import FilterButton from '../../components/FilterButton';
+import RestaurantCard from '../../components/RestaurantCard';
 
 const categories = [
   { label: 'Courses', emoji: '🛒' },
@@ -16,108 +20,52 @@ const categories = [
   { label: 'Poke (poisson)', emoji: '🥙' },
 ];
 
-const restaurants = [
-  {
-    name: 'BB FOOD',
-    rating: '4.4★',
-    reviews: '(2,000+)',
-    time: '35 min',
-    image: 'https://source.unsplash.com/400x300/?burger', // Replace with your real images
-  },
-  {
-    name: "O'CLASSIC CORNER",
-    rating: '4.6★',
-    reviews: '(4,000+)',
-    time: '40 min',
-    image: 'https://source.unsplash.com/400x300/?sandwich',
-  },
-  {
-    name: 'Poopeye GRILL',
-    rating: '4.4★',
-    reviews: '(300+)',
-    time: '30 min',
-    image: 'https://source.unsplash.com/400x300/?grill',
-  },
-];
-
-const recommended = [
-  {
-    name: 'Eleven Street Arnouville(by les reufs)',
-    rating: '4.2★',
-    reviews: '(1,500+)',
-    time: '30 min',
-    image: 'https://source.unsplash.com/400x300/?pizza',
-  },
-  {
-    name: "Crep'Way",
-    rating: '4.1★',
-    reviews: '(500+)',
-    time: '30 min',
-    image: 'https://source.unsplash.com/400x300/?crepes',
-  },
-  {
-    name: 'PIZZA FACTORY BY AFRICAN BRAISE',
-    rating: '4.4★',
-    reviews: '(190+)',
-    time: '25 min',
-    image: 'https://source.unsplash.com/400x300/?african-pizza',
-  },
-];
-
 const ClientPage = () => {
-  return (
-    <div className="space-y-6">
-      {/* Search bar */}
-      <div>
-        <input
-          type="text"
-          placeholder="search"
-          className="w-full border border-gray-300 rounded-full px-4 py-2"
-        />
-      </div>
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [restaurants, setRestaurants] = useState([]);
 
-      {/* Categories */}
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const response = await axios.get(`https://api.yumzo.com/api/restaurants?category=${selectedCategory}`);
+        setRestaurants(response.data);
+      } catch (error) {
+        console.error('Erreur lors du chargement des restaurants:', error);
+        setRestaurants([
+          { id: 1, name: 'BB FOOD', rating: '4.4★', reviews: '(2,000+)', time: '35 min', image: 'https://source.unsplash.com/400x300/?burger', category: 'Fast food' },
+          { id: 2, name: "O'CLASSIC CORNER", rating: '4.6★', reviews: '(4,000+)', time: '40 min', image: 'https://source.unsplash.com/400x300/?sandwich', category: 'Burgers' },
+          { id: 3, name: 'Poopeye GRILL', rating: '4.4★', reviews: '(300+)', time: '30 min', image: 'https://source.unsplash.com/400x300/?grill', category: 'Grill' },
+          { id: 4, name: 'Eleven Street Arnouville', rating: '4.2★', reviews: '(1,500+)', time: '30 min', image: 'https://source.unsplash.com/400x300/?pizza', category: 'Pizzas' },
+          { id: 5, name: "Crep'Way", rating: '4.1★', reviews: '(500+)', time: '30 min', image: 'https://source.unsplash.com/400x300/?crepes', category: 'Desserts' },
+          { id: 6, name: 'PIZZA FACTORY', rating: '4.4★', reviews: '(190+)', time: '25 min', image: 'https://source.unsplash.com/400x300/?african-pizza', category: 'Pizzas' },
+        ].filter(rest => !selectedCategory || rest.category === selectedCategory));
+      }
+    };
+    fetchRestaurants();
+  }, [selectedCategory]);
+
+  const handleFilterClick = (category) => {
+    setSelectedCategory(category === selectedCategory ? '' : category);
+  };
+
+  return (
+    <div className="space-y-6 p-4">
+      <SearchBar />
       <div className="flex space-x-4 overflow-x-auto py-2">
         {categories.map((cat) => (
-          <div key={cat.label} className="flex-shrink-0 text-center text-sm">
-            <div className="text-2xl">{cat.emoji}</div>
-            <div>{cat.label}</div>
-          </div>
+          <FilterButton
+            key={cat.label}
+            category={cat}
+            isSelected={selectedCategory === cat.label}
+            onClick={handleFilterClick}
+          />
         ))}
       </div>
-
-      {/* Top restaurants */}
-      <div className="space-y-2">
+      <div className="space-y-6">
         <h2 className="text-lg font-semibold">Top restaurants</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {restaurants.map((rest) => (
-            <div key={rest.name} className="rounded-lg overflow-hidden shadow">
-              <img src={rest.image} alt={rest.name} className="w-full h-40 object-cover" />
-              <div className="p-4">
-                <h3 className="font-semibold">{rest.name}</h3>
-                <p className="text-sm text-gray-500">
-                  {rest.rating} <span>{rest.reviews}</span> • {rest.time}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Recommended */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold">Les incontournables du quartier</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {recommended.map((rest) => (
-            <div key={rest.name} className="rounded-lg overflow-hidden shadow">
-              <img src={rest.image} alt={rest.name} className="w-full h-40 object-cover" />
-              <div className="p-4">
-                <h3 className="font-semibold">{rest.name}</h3>
-                <p className="text-sm text-gray-500">
-                  {rest.rating} <span>{rest.reviews}</span> • {rest.time}
-                </p>
-              </div>
-            </div>
+          {restaurants.map((restaurant) => (
+            <RestaurantCard key={restaurant.id} restaurant={restaurant} />
           ))}
         </div>
       </div>
