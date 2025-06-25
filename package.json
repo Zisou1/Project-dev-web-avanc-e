@@ -26,10 +26,16 @@
     "nodemon": "^2.0.22"
   },
   "dependencies": {
+    "axios": "^1.4.0",
     "dotenv": "^16.0.3",
-    "axios": "^1.4.0"
+    "react-icons": "^5.5.0"
   },
-  "keywords": ["microservices", "food-delivery", "api-gateway", "jwt"],
+  "keywords": [
+    "microservices",
+    "food-delivery",
+    "api-gateway",
+    "jwt"
+  ],
   "author": "",
   "license": "ISC"
 }
