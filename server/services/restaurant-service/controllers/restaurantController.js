@@ -1,156 +1,148 @@
-const { getConnection } = require('../../../shared/database');
+const Restaurant = require('../models/Restaurant');
 
 /**
  * Create a new restaurant
  */
 const createRestaurant = async (req, res) => {
   try {
-    console.log('🧾 Create restaurant request received:', req.body);
+    const { name, user_id, kitchen_type } = req.body;
 
-    const { user_id, name } = req.body;
+    console.log('📥 Creating restaurant:', name);
 
-    if (!user_id || !name) {
-      return res.status(400).json({
-        error: 'Validation Error',
-        message: 'user_id and name are required'
+    // Check if a restaurant with this name already exists
+    const existing = await Restaurant.findOne({ where: { name } });
+    if (existing) {
+      return res.status(409).json({
+        error: 'Restaurant Exists',
+        message: 'A restaurant with this name already exists'
       });
     }
 
-    const db = getConnection();
-    const [result] = await db.execute(
-      'INSERT INTO Restaurant (user_id, name) VALUES (?, ?)',
-      [user_id, name]
-    );
-
-    console.log('✅ Restaurant created with ID:', result.insertId);
+    const restaurant = await Restaurant.create({ name, user_id, kitchen_type });
 
     res.status(201).json({
       message: 'Restaurant created successfully',
-      restaurant: {
-        restaurant_id: result.insertId,
-        user_id,
-        name
-      }
+      restaurant
     });
 
   } catch (error) {
-    console.error('❌ Error creating restaurant:', error);
+    console.error('❌ Create Restaurant Error:', error);
     res.status(500).json({
-      error: 'Create Failed',
+      error: 'Creation Failed',
       message: 'An error occurred while creating the restaurant'
     });
   }
 };
 
 /**
- * Get a restaurant by ID
+ * Get all restaurants
  */
-const getRestaurant = async (req, res) => {
+const getAllRestaurants = async (req, res) => {
+  try {
+    const restaurants = await Restaurant.findAll();
+    res.json({ restaurants });
+  } catch (error) {
+    console.error('❌ Fetch Error:', error);
+    res.status(500).json({
+      error: 'Fetch Failed',
+      message: 'Unable to retrieve restaurants'
+    });
+  }
+};
+
+/**
+ * Get restaurant by ID
+ */
+const getRestaurantById = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(`📦 Fetching restaurant with ID: ${id}`);
+    const restaurant = await Restaurant.findByPk(id);
 
-    const db = getConnection();
-    const [rows] = await db.execute(
-      'SELECT * FROM Restaurant WHERE restaurant_id = ?',
-      [id]
-    );
-
-    if (rows.length === 0) {
+    if (!restaurant) {
       return res.status(404).json({
         error: 'Not Found',
         message: 'Restaurant not found'
       });
     }
 
-    res.json({ restaurant: rows[0] });
+    res.json({ restaurant });
 
   } catch (error) {
-    console.error('❌ Error fetching restaurant:', error);
+    console.error('❌ Get by ID Error:', error);
     res.status(500).json({
       error: 'Fetch Failed',
-      message: 'An error occurred while fetching the restaurant'
+      message: 'Unable to retrieve restaurant'
     });
   }
 };
 
 /**
- * Update a restaurant by ID
+ * Update restaurant by ID
  */
 const updateRestaurant = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, kitchen_type } = req.body;
 
-    console.log(`🔧 Updating restaurant ${id} with data:`, req.body);
 
-    if (!name) {
-      return res.status(400).json({
-        error: 'Validation Error',
-        message: 'name is required'
-      });
-    }
-
-    const db = getConnection();
-    const [result] = await db.execute(
-      'UPDATE Restaurant SET name = ? WHERE restaurant_id = ?',
-      [name, id]
-    );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({
-        error: 'Not Found',
-        message: 'Restaurant not found or not updated'
-      });
-    }
-
-    res.json({ message: 'Restaurant updated successfully' });
-
-  } catch (error) {
-    console.error('❌ Error updating restaurant:', error);
-    res.status(500).json({
-      error: 'Update Failed',
-      message: 'An error occurred while updating the restaurant'
-    });
-  }
-};
-
-/**
- * Delete a restaurant by ID
- */
-const deleteRestaurant = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    console.log(`🗑️ Deleting restaurant with ID: ${id}`);
-
-    const db = getConnection();
-    const [result] = await db.execute(
-      'DELETE FROM Restaurant WHERE restaurant_id = ?',
-      [id]
-    );
-
-    if (result.affectedRows === 0) {
+    const restaurant = await Restaurant.findByPk(id);
+    if (!restaurant) {
       return res.status(404).json({
         error: 'Not Found',
         message: 'Restaurant not found'
       });
     }
 
-    res.json({ message: 'Restaurant deleted successfully' });
+    await restaurant.update({ name, kitchen_type });
+
+    res.json({
+      message: 'Restaurant updated successfully',
+      restaurant
+    });
 
   } catch (error) {
-    console.error('❌ Error deleting restaurant:', error);
+    console.error('❌ Update Error:', error);
+    res.status(500).json({
+      error: 'Update Failed',
+      message: 'An error occurred while updating'
+    });
+  }
+};
+
+/**
+ * Delete restaurant by ID (soft delete)
+ */
+const deleteRestaurant = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const restaurant = await Restaurant.findByPk(id);
+
+    if (!restaurant) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'Restaurant not found'
+      });
+    }
+
+    await restaurant.destroy(); // soft delete (paranoid: true)
+
+    res.json({
+      message: 'Restaurant deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Delete Error:', error);
     res.status(500).json({
       error: 'Delete Failed',
-      message: 'An error occurred while deleting the restaurant'
+      message: 'An error occurred while deleting'
     });
   }
 };
 
 module.exports = {
   createRestaurant,
-  getRestaurant,
+  getAllRestaurants,
+  getRestaurantById,
   updateRestaurant,
   deleteRestaurant
 };

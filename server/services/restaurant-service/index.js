@@ -1,14 +1,15 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
+const path = require('path');
 
 const express = require('express');
 const cors = require('cors');
 const restaurantRoutes = require('./routes/restaurantRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const { initializeDatabase } = require('../../shared/database');
+require('./models'); 
 
 const app = express();
 const PORT = process.env.RESTAURANT_SERVICE_PORT || 3005;
-require('./models/Restaurant');
 
 
 initializeDatabase().then(() => {
@@ -31,6 +32,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/restaurants', restaurantRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 app.use(errorHandler);

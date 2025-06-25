@@ -1,8 +1,51 @@
 const express = require('express');
 const router = express.Router();
 const restaurantController = require('../controllers/restaurantController');
+const menuController = require('../controllers/menuController');
+const menuItemController = require('../controllers/menuItemController');
+const itemController = require('../controllers/itemController');
+
+const upload = require('../middleware/upload'); 
+const {
+  validateRestaurant,
+  validateMenu,
+  validateItem,
+  validateItemMenu,
+  validateItemMenuUpdate,
+  validateItemUpdate,
+  validateMenuUpdate,
+  validateRestaurantUpdate
+} = require('../middleware/restaurantValidation');
+
 
 // Define routes
-router.post('/creat', restaurantController.createRestaurant);
+//restaurant routes
+router.post('/creat', validateRestaurant, restaurantController.createRestaurant);
+router.get('/getAll', restaurantController.getAllRestaurants);
+router.get('/getRestaurent/:id', restaurantController.getRestaurantById);
+router.put('/update/:id', validateRestaurantUpdate, restaurantController.updateRestaurant);
+router.delete('/delete/:id', restaurantController.deleteRestaurant);
+//menu routes
+router.post('/menu/creat', upload.single('image'), validateMenu, menuController.createMenu);
+router.get('/menu/getAll', menuController.getAllMenus);
+router.get('/menu/getMenu/:id', menuController.getMenuById);
+router.put('/menu/update/:id', validateMenuUpdate, upload.single('image'), menuController.updateMenu);
+router.delete('/menu/delete/:id', menuController.deleteMenu);
+//item routes
+router.post('/item/creat', upload.single('image'), validateItem, itemController.createItem);
+router.get('/item/getAll', itemController.getAllItems);
+router.get('/item/getMenu/:id', itemController.getItemById);
+router.put('/item/update/:id', validateItemUpdate, upload.single('image'), itemController.updateItem);
+router.delete('/item/delete/:id', itemController.deleteItem);
+//menuItem routes
+router.post('/menuItem/add', validateItemMenu, menuItemController.addItemToMenu);
+router.get('/menuItem/getItemMenu/:menu_id', menuItemController.getItemsForMenu);
+router.put('/menuItem/update/:id', validateItemMenuUpdate, menuItemController.updateItemInMenu);
+router.delete('/menuItem/delete/:id', menuItemController.removeItemFromMenu);
+
+
+
+
+
 
 module.exports = router; 

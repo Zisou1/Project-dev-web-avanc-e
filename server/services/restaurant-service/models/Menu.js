@@ -1,17 +1,17 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../../shared/database/connection');
 
-const Restaurant = sequelize.define('Restaurant', {
+const Restaurant = sequelize.define('Menu', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  user_id: {
+  restaurant_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'users', 
+      model: 'restaurants', 
       key: 'id'
     },
     onUpdate: 'CASCADE',
@@ -25,23 +25,39 @@ const Restaurant = sequelize.define('Restaurant', {
       len: [2, 100]
     }
   },
-  kitchen_type: {
-    type: DataTypes.STRING,
+  price: {
+    type: DataTypes.INTEGER,
+    allowNull: false, 
+    validate: {
+      notEmpty: true,
+      len: [2, 100]
+    }
+  },
+  status: {
+    type: DataTypes.BOOLEAN,
     allowNull: false,
     validate: {
       notEmpty: true,
       len: [2, 100]
     }
+  },
+  imageUrl: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+    }
   }
 },
 {
-  tableName: 'restaurants',
+  tableName: 'menus',
   timestamps: true,
   paranoid: true,
   indexes: [
     {
-      fields: ['user_id']
-    }
+      fields: ['restaurant_id']
+    },
+   
   ]
 });
 
