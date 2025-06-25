@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import Layout from './layout/layout'
+import AdminLayout from './layout/AdminLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
@@ -13,6 +14,7 @@ import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
+import RestaurantLivreurLayout from './layout/RestaurantLivreurLayout'
 
 function App() {
   return (
@@ -30,21 +32,15 @@ function App() {
             <Layout>
               <ClientPage />
             </Layout>
-          } />
-          
-          <Route path="/client" element={
-            
-            <Layout>
-              <ClientPage />
-            </Layout>
-          } />
-          
+          } />         
           <Route path="/restaurant" element={
-            <ProtectedRoute>
-              <Layout>
+            <ProtectedRoute requiredRole="restaurant">
+              <RestaurantLivreurLayout>
                 <RestaurantPage />
-              </Layout>
+              </RestaurantLivreurLayout>
             </ProtectedRoute>
+  
+            
           } />
           
           <Route path="/livreur" element={
@@ -55,13 +51,22 @@ function App() {
             </ProtectedRoute>
           } />
           
+          {/* Admin Routes with AdminLayout */}
           <Route path="/admin" element={
             <ProtectedRoute requiredRole="admin">
-              <Layout>
-                <AdminPage />
-              </Layout>
+              <AdminLayout />
             </ProtectedRoute>
-          } />
+          }>
+            {/* Nested admin routes */}
+            <Route index element={<AdminPage />} />
+            <Route path="dashboard" element={<AdminPage />} />
+            <Route path="users" element={<div>Users Management Page</div>} />
+            <Route path="restaurants" element={<div>Restaurants Management Page</div>} />
+            <Route path="orders" element={<div>Orders Management Page</div>} />
+            <Route path="delivery" element={<div>Delivery Management Page</div>} />
+            <Route path="analytics" element={<div>Analytics Page</div>} />
+            <Route path="settings" element={<div>Settings Page</div>} />
+          </Route>
         </Routes>
       </Router>
     </AuthProvider>
