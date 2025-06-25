@@ -26,10 +26,18 @@
     "nodemon": "^2.0.22"
   },
   "dependencies": {
-    "dotenv": "^16.0.3",
-    "axios": "^1.4.0"
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "axios": "^1.4.0",
+    "dotenv": "^16.0.3"
   },
-  "keywords": ["microservices", "food-delivery", "api-gateway", "jwt"],
+  "keywords": [
+    "microservices",
+    "food-delivery",
+    "api-gateway",
+    "jwt"
+  ],
   "author": "",
   "license": "ISC"
 }
