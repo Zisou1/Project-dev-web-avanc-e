@@ -5,7 +5,7 @@ const Restaurant = require('../models/Restaurant');
  */
 const createRestaurant = async (req, res) => {
   try {
-    const { name, user_id, kitchen_type } = req.body;
+    const { name, user_id, kitchen_type } = req.body ?? {};
 
     console.log('📥 Creating restaurant:', name);
 

@@ -6,7 +6,7 @@ const errorHandler = require('./middleware/errorHandler');
 const { initializeDatabase } = require('../../shared/database');
 
 const app = express();
-const PORT = process.env.AUTH_SERVICE_PORT || 3005;
+const PORT = process.env.AUTH_SERVICE_PORT || 3001;
 
 // Initialize database connection asynchronously
 initializeDatabase().then(() => {

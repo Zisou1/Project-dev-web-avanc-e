@@ -1,4 +1,6 @@
 const Menu = require('../models/Menu.js');
+const Item = require('../models/Item.js');
+
 
 /**
  * Create a new menu (with image)
@@ -62,7 +64,12 @@ const createMenu = async (req, res) => {
  */
 const getAllMenus = async (req, res) => {
   try {
-    const menus = await Menu.findAll();
+    const menus = await Menu.findAll({
+      include: {
+        model: Item,
+        through: { attributes: [] }, 
+      }
+    });
     res.json({ menus });
   } catch (error) {
     console.error('❌ Fetch Menus Error:', error);
