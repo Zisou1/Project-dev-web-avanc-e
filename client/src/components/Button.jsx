@@ -1,9 +1,11 @@
 import React from 'react';
 
-const Button = ({ loading, children }) => (
+const Button = ({ loading, children, onClick, type = 'submit', ...rest }) => (
   <button
-    type="submit"
+    type={type}
     disabled={loading}
+    onClick={onClick}
+    {...rest}
     className="w-full bg-[#ff4d30] text-white py-3 rounded-md font-bold hover:bg-[#e8432b] transition disabled:opacity-50 disabled:cursor-not-allowed"
   >
     {loading ? (
