@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import logimg from '../../assets/loginimg.png';
 import rest from '../../assets/rest.png';
+import livr from '../../assets/livr.png';
 import Logo from '../../components/logo';
 import Input from '../../components/input';
 import PasswordInput from '../../components/PasswordInput';
@@ -149,13 +151,13 @@ const RegisterPage = () => {
             <img src={rest} alt="restaurant" className="w-56 h-70 animate-fade-in object-contain" />
           )}
           {role === 'delivery' && (
-            <img src="/delivery-illustration.png" alt="livreur" className="w-56 h-56 animate-fade-in object-contain" />
+            <img src={livr} alt="livreur" className="w-56 h-56 animate-fade-in object-contain" />
           )}
           {role === 'customer' && (
-            <img src="/client-illustration.png" alt="client" className="w-56 h-56 animate-fade-in object-contain" />
+            <img src={logimg} alt="client" className="w-56 h-56 animate-fade-in object-contain" />
           )}
           {!role && (
-            <img src="/yumzo-logo-big.png" alt="yumzo" className="w-56 h-56 animate-fade-in object-contain" />
+            <img src={logimg} alt="yumzo" className="w-56 h-56 animate-fade-in object-contain" />
           )}
         </div>
         {/* Right Side - Form */}

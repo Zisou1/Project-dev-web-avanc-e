@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import UserProfile from '../components/UserProfile';
 import logo from '../assets/yumzo.png'; // Adjust path as needed
 
-const Layout = ({ children, title = "Food Delivery App" }) => {
+const Layout = ({ children }) => {
   const { isAuthenticated } = useAuth();
 
   return (
