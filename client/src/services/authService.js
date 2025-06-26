@@ -143,4 +143,14 @@ export const authService = {
       throw error;
     }
   },
+
+  // Update user profile
+  async updateUser(data) {
+    try {
+      const response = await api.put('/users/profile', data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };

@@ -2,7 +2,9 @@ import React from 'react'
 
 function LivreurPage() {
   return (
-    <div>livreurPage</div>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+      <div>livreurPage</div>
+    </div>
   )
 }
 

@@ -13,6 +13,7 @@ import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
+import Profillivreur from './pages/livreur/profillivreur'
 
 function App() {
   return (
@@ -59,6 +60,14 @@ function App() {
             <ProtectedRoute requiredRole="admin">
               <Layout>
                 <AdminPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/livreur/profile" element={
+            <ProtectedRoute requiredRole="delivery">
+              <Layout>
+                <Profillivreur />
               </Layout>
             </ProtectedRoute>
           } />
