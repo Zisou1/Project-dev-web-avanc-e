@@ -7,7 +7,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
 import RestaurantPage from './pages/restaurant/restaurantPage'
-import ClientPage from './pages/client/clientPage'
+import ClientPage from './pages/client/ClientPage'
+import RestaurantInClient from './pages/client/RestaurantInClient';
 import LivreurPage from './pages/livreur/livreurPage'
 import AdminPage from './pages/admin/adminPage'
 import LoginPage from './pages/auth/LoginPage'
@@ -15,6 +16,7 @@ import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import RestaurantLivreurLayout from './layout/RestaurantLivreurLayout'
+
 
 function App() {
   return (
@@ -32,14 +34,20 @@ function App() {
             <Layout>
               <ClientPage />
             </Layout>
-          } />         
+          } />
+          
+          <Route path="/restaurantinclient" element={
+            <Layout>
+              <RestaurantInClient />
+            </Layout>
+          } />
+                   
           <Route path="/restaurant" element={
             <ProtectedRoute requiredRole="restaurant">
               <RestaurantLivreurLayout>
                 <RestaurantPage />
               </RestaurantLivreurLayout>
             </ProtectedRoute>
-  
             
           } />
           
@@ -50,6 +58,7 @@ function App() {
               </Layout>
             </ProtectedRoute>
           } />
+          
           
           {/* Admin Routes with AdminLayout */}
           <Route path="/admin" element={
