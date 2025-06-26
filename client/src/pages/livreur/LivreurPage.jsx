@@ -1,9 +1,33 @@
 import React from "react";
 import SearchBar from "../../components/SearchBar";
-import DeliveryTable from "../../components/DataTable"; // ✅ updated import
+import DeliveryTable from "../../components/DataTable"; 
+import FilterButton from "../../components/FilterButton";
 
 const LivreurPage = () => {
-  const deliveries = []; // Replace with real data later
+  // Example data for testing
+  const deliveries = [
+    {
+      id: 'CMD001',
+      pickup: '123 Rue de Paris',
+      address: '456 Avenue de Lyon',
+      price: '8€',
+      status: 'En attente',
+    },
+    {
+      id: 'CMD002',
+      pickup: '789 Boulevard Saint-Germain',
+      address: '321 Rue Victor Hugo',
+      price: '10€',
+      status: 'En cours',
+    },
+    {
+      id: 'CMD003',
+      pickup: '12 Place Bellecour',
+      address: '34 Rue Nationale',
+      price: '7€',
+      status: 'Livrée',
+    },
+  ];
 
   const handleAccept = (delivery) => {
     console.log("Livraison acceptée:", delivery);
@@ -16,8 +40,19 @@ const LivreurPage = () => {
         Livraisons disponibles
       </h1>
 
-      {/* Search */}
-      <div className="flex justify-center mb-8">
+      {/* Search and Filter */}
+      <div className="flex justify-center mb-8 gap-4 flex-wrap">
+        <FilterButton
+          fields={[
+            { key: 'id', label: 'ID Commande', type: 'text', placeholder: 'Rechercher par ID' },
+            { key: 'status', label: 'Statut', type: 'select', options: [
+              { value: 'En attente', label: 'En attente' },
+              { value: 'En cours', label: 'En cours' },
+              { value: 'Livrée', label: 'Livrée' },
+            ] },
+          ]}
+          onApply={console.log}
+        />
         <div className="w-full max-w-3xl">
           <SearchBar />
         </div>
