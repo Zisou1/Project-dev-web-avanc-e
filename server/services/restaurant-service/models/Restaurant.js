@@ -32,6 +32,32 @@ const Restaurant = sequelize.define('Restaurant', {
       notEmpty: true,
       len: [2, 100]
     }
+  },
+  imageUrl: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+    }
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  timeStart: {
+    type: DataTypes.TIME,
+    allowNull: true
+  },
+  timeEnd: {
+    type: DataTypes.TIME,
+    allowNull: true
+  },
+  address: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [0, 255]
+    }
   }
 },
 {

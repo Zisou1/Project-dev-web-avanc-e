@@ -47,6 +47,10 @@ const Item = sequelize.define('Item', {
     validate: {
       notEmpty: true,
     }
+  },
+    description: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 },
 {

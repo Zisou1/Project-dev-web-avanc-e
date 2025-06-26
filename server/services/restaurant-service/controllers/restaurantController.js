@@ -7,9 +7,17 @@ const Menu = require('../models/Menu.js');
  */
 const createRestaurant = async (req, res) => {
   try {
-    const { name, user_id, kitchen_type } = req.body ?? {};
+    const { name, user_id, kitchen_type, description, timeStart, timeEnd, address} = req.body ?? {};
+    const image = req.file;
 
     console.log('📥 Creating restaurant:', name);
+
+    if (!image) {
+      return res.status(400).json({
+        error: 'Image Required',
+        message: 'Please upload an image for the menu'
+      });
+    }
 
     // Check if a restaurant with this name already exists
     const existing = await Restaurant.findOne({ where: { name } });
@@ -20,7 +28,18 @@ const createRestaurant = async (req, res) => {
       });
     }
 
-    const restaurant = await Restaurant.create({ name, user_id, kitchen_type });
+        const imagePath = `/uploads/menus/${image.filename}`;
+
+    const restaurant = await Restaurant.create({
+       name,
+        user_id,
+        kitchen_type,
+        imageUrl: imagePath,
+        description,
+        timeStart, 
+        timeEnd, 
+        address
+        });
 
     res.status(201).json({
       message: 'Restaurant created successfully',

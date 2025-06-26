@@ -5,7 +5,7 @@ const Item = require('../models/Item.js');
  */
 const createItem = async (req, res) => {
   try {
-    const { restaurant_id, name, price, status } = req.body ?? {};
+    const { restaurant_id, name, price, status, description } = req.body ?? {};
     const image = req.file ;
 
     console.log('📥 Creating item:', name);
@@ -33,7 +33,8 @@ const createItem = async (req, res) => {
       restaurant_id,
       price,
       status,
-      imageUrl: imagePath
+      imageUrl: imagePath,
+      description
     });
 
     res.status(201).json({
@@ -44,6 +45,7 @@ const createItem = async (req, res) => {
         restaurant_id: item.restaurant_id,
         price: item.price,
         status: item.status,
+        description: item.description,
         imageUrl: `${req.protocol}://${req.get('host')}${imagePath}`
       }
     });

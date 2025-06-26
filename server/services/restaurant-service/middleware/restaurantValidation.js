@@ -3,8 +3,8 @@ const Joi = require('joi');
 /**
  * Validate Restaurant creation
  */
-const     validateRestaurant = (req, res, next) => {
-  const schema = Joi.object({
+const validateRestaurant = (req, res, next) => {
+ const schema = Joi.object({
     user_id: Joi.number().integer().required().messages({
       'number.base': 'User ID must be a number',
       'any.required': 'User ID is required'
@@ -20,10 +20,32 @@ const     validateRestaurant = (req, res, next) => {
       'string.min': 'Kitchen type must be at least 2 characters long',
       'string.max': 'Kitchen type must not exceed 100 characters',
       'any.required': 'Kitchen type is required'
+    }),
+    description: Joi.string().allow('').required().messages({
+      'string.base': 'Description must be a string'
+    }),
+    timeStart: Joi.string()
+      .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
+      .required()
+      .messages({
+        'string.pattern.base': 'timeStart must be in HH:MM format'
+      }),
+    timeEnd: Joi.string()
+      .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
+      .required()
+      .messages({
+        'string.pattern.base': 'timeEnd must be in HH:MM format'
+      }),
+    address: Joi.string().max(255).required().messages({
+      'string.max': 'Address must not exceed 255 characters'
     })
   });
 
   const { error, value } = schema.validate(req.body);
+  // Check if image file is attached
+  if (!req.file) {
+    return res.status(400).json({ error: 'Image file is required' });
+  }
   if (error) {
     return res.status(400).json({
       error: 'Validation Error',
@@ -95,6 +117,9 @@ const validateItem = (req, res, next) => {
     status: Joi.boolean().required().messages({
       'boolean.base': 'Status must be a boolean',
       'any.required': 'Status is required'
+    }),
+    description: Joi.string().allow('').required().messages({
+      'string.base': 'Description must be a string'
     }),
 
   });
