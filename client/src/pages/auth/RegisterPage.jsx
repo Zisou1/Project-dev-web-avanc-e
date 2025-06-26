@@ -32,13 +32,13 @@ const RegisterPage = () => {
   const [role, setRole] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    name: '', // This will be used as the restaurant name if role is restaurant
+    name: '', // Owner name (user)
+    restaurantName: '', // Restaurant name (for restaurant role)
     email: '',
     password: '',
     confirmPassword: '',
     phone: '',
     role: '',
-    ownerName: '', // Owner name for restaurant
     cuisineType: '' // Cuisine type for restaurant
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -126,18 +126,16 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Submitting form with data:', formData);
     if (!validateForm()) {
-      console.log('Validation failed:', validationErrors);
       return;
     }
     try {
-      const { name, email, password, phone, role } = formData;
+      const { name, restaurantName, email, password, phone, role } = formData;
       const registrationData = { name, email, password, phone, role };
       if (role === 'restaurant') {
-        registrationData.kitchen_type = formData.cuisineType; // send as kitchen_type
+        registrationData.kitchen_type = formData.cuisineType;
+        registrationData.restaurantName = restaurantName;
       }
-      console.log('Calling register with:', registrationData);
       await register(registrationData);
     } catch (err) {
       console.error('Registration failed:', err);
@@ -187,20 +185,19 @@ const RegisterPage = () => {
           ) : (
             <form className="space-y-4 animate-slide-in" onSubmit={handleSubmit}>
               <ErrorMessage error={error} />
-              {/* Restaurant Owner Name input, only for restaurant role */}
               {role === 'restaurant' && (
                 <div>
                   <Input
-                    id="ownerName"
-                    name="ownerName"
+                    id="restaurantName"
+                    name="restaurantName"
                     type="text"
                     autoComplete="off"
                     required
-                    value={formData.ownerName}
+                    value={formData.restaurantName}
                     onChange={handleChange}
-                    placeholder="Nom du responsable du restaurant"
+                    placeholder="Nom du restaurant"
                   />
-                  {validationErrors.ownerName && <div className="text-red-500 text-xs">{validationErrors.ownerName}</div>}
+                  {validationErrors.restaurantName && <div className="text-red-500 text-xs">{validationErrors.restaurantName}</div>}
                 </div>
               )}
               <div>
@@ -212,7 +209,7 @@ const RegisterPage = () => {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder={role === 'restaurant' ? 'Nom du restaurant' : role === 'delivery' ? 'livreur Name' : 'client Name'}
+                  placeholder={role === 'restaurant' ? 'Nom du propriétaire' : role === 'delivery' ? 'livreur Name' : 'client Name'}
                 />
                 {validationErrors.name && <div className="text-red-500 text-xs">{validationErrors.name}</div>}
               </div>
