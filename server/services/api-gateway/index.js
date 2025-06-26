@@ -108,8 +108,13 @@ const proxyRequest = async (req, res, targetUrl, pathRewrite = {}) => {
       const regex = new RegExp(pattern);
       targetPath = targetPath.replace(regex, replacement);
     }
-    
-    const fullUrl = `${targetUrl}${targetPath}`;
+    // Ensure targetPath starts with a single slash
+    if (!targetPath.startsWith('/')) {
+      targetPath = '/' + targetPath;
+    }
+    // Remove trailing slash from targetUrl if present
+    const normalizedTargetUrl = targetUrl.endsWith('/') ? targetUrl.slice(0, -1) : targetUrl;
+    const fullUrl = `${normalizedTargetUrl}${targetPath}`;
     console.log(`📍 Target URL: ${fullUrl}`);
     
     // Prepare headers (exclude problematic headers)
@@ -243,7 +248,7 @@ const createProtectedRoute = (path, serviceKey) => {
 
 // Register protected routes
 createProtectedRoute('/api/users/*', 'user');
-createProtectedRoute('/api/restaurants/*', 'restaurant');
+//createProtectedRoute('/api/restaurants/*', 'restaurant');
 createProtectedRoute('/api/orders/*', 'order');
 createProtectedRoute('/api/payments/*', 'payment');
 createProtectedRoute('/api/delivery/*', 'delivery');

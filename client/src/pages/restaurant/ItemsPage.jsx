@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import Button from "../../components/Button";
 import SearchBar from "../../components/SearchBar";
 import DataTable from "../../components/DataTable";
-import { itemService } from "../../services/itemService";
 import ErrorMessage from "../../components/ErrorMessage";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -23,15 +22,17 @@ export default function ItemsPage() {
 
   useEffect(() => {
     if (user && user.role === 'restaurant') {
-      fetchArticles(user.id);
+      fetchArticles();
     }
   }, [user]);
 
-  const fetchArticles = async (restaurantId) => {
+  const fetchArticles = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await itemService.getAll(restaurantId);
+      // Direct axios request to /api/restaurants/item/getAll
+      const response = await window.axios.get('http://localhost:3000/api/restaurants/item/getAll');
+      const data = response.data;
       if (!data.items || !Array.isArray(data.items)) {
         throw new Error("Aucun article trouvé ou format de réponse invalide");
       }
