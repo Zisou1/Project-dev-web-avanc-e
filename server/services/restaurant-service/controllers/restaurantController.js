@@ -1,4 +1,6 @@
 const Restaurant = require('../models/Restaurant');
+const Menu = require('../models/Menu.js');
+
 
 /**
  * Create a new restaurant
@@ -71,7 +73,8 @@ const getRestaurantById = async (req, res) => {
     console.error('❌ Get by ID Error:', error);
     res.status(500).json({
       error: 'Fetch Failed',
-      message: 'Unable to retrieve restaurant'
+      message: 'Unable to retrieve restaurant',
+      dettails : error.message
     });
   }
 };

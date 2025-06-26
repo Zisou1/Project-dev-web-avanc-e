@@ -182,10 +182,40 @@ const deleteMenu = async (req, res) => {
   }
 };
 
+
+/**
+ * Get restaurent menu by ID
+ */
+const getRestaurentMenu = async (req, res) => {
+  try {
+    const { restaurant_id } = req.params;
+    const menu = await Menu.findAll({ where: { restaurant_id } });
+
+    if (!menu) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'Menu not found'
+      });
+    }
+
+    res.json({ menu });
+
+  } catch (error) {
+    console.error('❌ Get Menu Error:', error);
+    res.status(500).json({
+      error: 'Fetch Failed',
+      message: 'Unable to retrieve the menu',
+      details: error.message
+    });
+  }
+};
+
+
 module.exports = {
   createMenu,
   getAllMenus,
   getMenuById,
   updateMenu,
-  deleteMenu
+  deleteMenu,
+  getRestaurentMenu
 };

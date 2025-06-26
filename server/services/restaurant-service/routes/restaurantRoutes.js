@@ -29,6 +29,7 @@ router.delete('/delete/:id', restaurantController.deleteRestaurant);
 router.post('/menu/creat', upload.single('image'), validateMenu, menuController.createMenu);
 router.get('/menu/getAll', menuController.getAllMenus);
 router.get('/menu/getMenu/:id', menuController.getMenuById);
+router.get('/menu/getRestaurentMenu/:restaurant_id', menuController.getRestaurentMenu);
 router.put('/menu/update/:id', validateMenuUpdate, upload.single('image'), menuController.updateMenu);
 router.delete('/menu/delete/:id', menuController.deleteMenu);
 //item routes
