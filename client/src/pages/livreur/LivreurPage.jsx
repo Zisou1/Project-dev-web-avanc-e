@@ -1,12 +1,17 @@
 import React from "react";
 import SearchBar from "../../components/SearchBar";
-import DeliveryCard from "../../components/DeliveryCard";
+import DeliveryTable from "../../components/DataTable"; // ✅ updated import
 
 const LivreurPage = () => {
-  const deliveries = []; // Fetch or inject dynamic data later
+  const deliveries = []; // Replace with real data later
+
+  const handleAccept = (delivery) => {
+    console.log("Livraison acceptée:", delivery);
+    // Logic to accept the delivery (e.g., API call)
+  };
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow p-10 mt-8">
+    <div className="w-full max-w-6xl mx-auto bg-white rounded-2xl shadow p-10 mt-8">
       <h1 className="text-2xl font-bold mb-6 text-left">
         Livraisons disponibles
       </h1>
@@ -18,18 +23,8 @@ const LivreurPage = () => {
         </div>
       </div>
 
-      {/* List of Deliveries */}
-      <div className="space-y-8">
-        {deliveries.length === 0 ? (
-          <div className="text-center text-gray-500 text-lg">
-            Aucune livraison disponible.
-          </div>
-        ) : (
-          deliveries.map((delivery) => (
-            <DeliveryCard key={delivery.id} delivery={delivery} /> 
-          ))
-        )}
-      </div>
+      {/* Table of Deliveries */}
+      <DeliveryTable deliveries={deliveries} onAccept={handleAccept} />
     </div>
   );
 };
