@@ -240,15 +240,14 @@ const createProtectedRoute = (path, serviceKey) => {
       });
     }
     
-    await proxyRequest(req, res, service.url, {
-      [`^${path.replace('*', '')}`]: ''
-    });
+    // Don't rewrite the path - pass it as is to the service
+    await proxyRequest(req, res, service.url, {});
   });
 };
 
 // Register protected routes
 createProtectedRoute('/api/users/*', 'user');
-//createProtectedRoute('/api/restaurants/*', 'restaurant');
+createProtectedRoute('/api/restaurants/*', 'restaurant');
 createProtectedRoute('/api/orders/*', 'order');
 createProtectedRoute('/api/payments/*', 'payment');
 createProtectedRoute('/api/delivery/*', 'delivery');
