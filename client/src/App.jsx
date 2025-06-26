@@ -14,6 +14,7 @@ import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
+import LivreurHistorique from './pages/livreur/LivreurHistorique'
 
 function App() {
   return (
@@ -60,7 +61,7 @@ function App() {
             <Route path="dashboard" element={<LivreurPage />} />
             <Route path="orders" element={<div>Available Orders Page</div>} />
             <Route path="deliveries" element={<div>My Deliveries Page</div>} />
-            <Route path="earnings" element={<div>Earnings Page</div>} />
+            <Route path="historique" element={<LivreurHistorique />} />
             <Route path="profile" element={<div>Livreur Profile Page</div>} />
             <Route path="settings" element={<div>Livreur Settings Page</div>} />
           </Route>

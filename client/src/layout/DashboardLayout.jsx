@@ -235,10 +235,10 @@ const DashboardLayout = () => {
               active: location.pathname.startsWith('/livreur/deliveries')
             },
             {
-              name: 'Gains',
+              name: 'historique des livraison',
               icon: faDollarSign,
-              path: '/livreur/earnings',
-              active: location.pathname.startsWith('/livreur/earnings')
+              path: '/livreur/historique',
+              active: location.pathname.startsWith('/livreur/historique')
             },
             {
               name: 'Profil',
@@ -282,7 +282,7 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 font-sans">
+    <div className="flex flex-col bg-gray-50 font-sans">
       {/* Barre de navigation */}
       <nav className="flex justify-between items-center px-4 h-16 bg-white border-b border-gray-200 shadow-sm z-50 relative">
         <div className="flex items-center gap-4">
@@ -398,10 +398,10 @@ const DashboardLayout = () => {
         </aside>
 
         {/* Contenu principal */}
-        <main className={`flex-1 transition-all duration-300 ease-in-out min-h-[calc(100vh-4rem)] ${
+        <main className={`flex-1 transition-all duration-300 ease-in-out ${
           sidebarOpen && !isMobile ? 'ml-64' : 'ml-0'
         }`}>
-          <div className="p-8 max-w-full h-full">
+          <div className="p-8 max-w-full">
             <Outlet />
           </div>
         </main>
