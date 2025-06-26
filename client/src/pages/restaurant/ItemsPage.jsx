@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Button from "../../components/Button";
 import SearchBar from "../../components/SearchBar";
 import DataTable from "../../components/DataTable";
+import { itemService } from "../../services/itemService";
 import ErrorMessage from "../../components/ErrorMessage";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -22,17 +23,15 @@ export default function ItemsPage() {
 
   useEffect(() => {
     if (user && user.role === 'restaurant') {
-      fetchArticles();
+      fetchArticles(user.id);
     }
   }, [user]);
 
-  const fetchArticles = async () => {
+  const fetchArticles = async (restaurantId) => {
     setLoading(true);
     setError(null);
     try {
-      // Direct axios request to /api/restaurants/item/getAll
-      const response = await window.axios.get('http://localhost:3000/api/restaurants/item/getAll');
-      const data = response.data;
+      const data = await itemService.getAll(restaurantId);
       if (!data.items || !Array.isArray(data.items)) {
         throw new Error("Aucun article trouvé ou format de réponse invalide");
       }
@@ -115,40 +114,18 @@ export default function ItemsPage() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showFilter]);
 
-  // Responsive card view for mobile
-  const ArticleCard = ({ article, onDelete, onEdit }) => (
-    <div className="bg-[#f8f8f8] border-2 border-blue-400 rounded-2xl shadow-md p-4 mb-6 flex flex-col gap-4 w-full">
-      <div className="flex flex-col gap-1">
-        <div className="flex gap-2"><span className="font-bold">ID Article :</span> <span>{article.id}</span></div>
-        <div className="font-bold">Nom de l'article : <span className="font-normal">{article.name}</span></div>
-        <div className="font-bold">Description : <span className="font-normal">{article.description}</span></div>
-        <div className="font-bold">Prix :<span className="font-normal">{article.price} DA</span></div>
-      </div>
-      <div className="flex flex-col xs:flex-row gap-3 mt-2 w-full">
-        <Button onClick={() => onDelete(article.id)} className="bg-[#ff5c5c] hover:bg-[#ff7e7e] text-white font-bold flex-1 flex items-center justify-center gap-2 text-base shadow-md">
-          <span className="material-icons">delete</span> Supprimer
-        </Button>
-        <Button onClick={() => onEdit && onEdit(article.id)} className="bg-[#ff5c5c] hover:bg-[#ff7e7e] text-white font-bold flex-1 flex items-center justify-center gap-2 text-base shadow-md">
-          <span className="material-icons">edit</span> Modifier
-        </Button>
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-white py-10 px-2 sm:px-8 relative z-10">
       <div className="max-w-[95vw] xl:max-w-[1400px] mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-6">
           <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-0">mes articles</h2>
-          <Link to="/restaurant/items/add" className="w-full sm:w-auto">
-            <Button className="bg-[#ff5c5c] hover:bg-[#ff7e7e] text-white font-bold px-8 sm:px-14 py-4 sm:py-6 rounded-2xl shadow-md transition text-lg sm:text-2xl w-full">
-              + Ajouter articles
-            </Button>
-          </Link>
+          <Button className="bg-[#ff5c5c] hover:bg-[#ff7e7e] text-white font-bold px-14 py-6 rounded-2xl shadow-md transition text-2xl w-full sm:w-auto">
+            Ajouter articles
+          </Button>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 w-full relative">
+        <div className="flex items-center gap-4 mb-8 w-full relative">
           <FilterButton fields={filterFields} onApply={setFilters} />
-          <div className="flex-1 w-full">
+          <div className="flex-1">
             <SearchBar query={searchTerm} setQuery={setSearchTerm} placeholder="search" />
           </div>
         </div>
@@ -159,21 +136,7 @@ export default function ItemsPage() {
           </div>
         )}
         {error && <ErrorMessage error={error} />}
-        {/* Responsive: show cards on mobile, table on desktop */}
-        <div className="block sm:hidden">
-          {filteredArticles.length === 0 && !loading ? (
-            <div className="bg-[#f8f8f8] border-2 border-blue-400 rounded-2xl shadow-md p-4 mb-6 flex flex-col gap-4 w-full min-h-[120px] justify-center items-center">
-              <span className="text-gray-400 text-lg">Aucun article</span>
-            </div>
-          ) : (
-            filteredArticles.map(article => (
-              <ArticleCard key={article.id} article={article} onDelete={handleDelete} onEdit={() => {}} />
-            ))
-          )}
-        </div>
-        <div className="hidden sm:block">
-          <DataTable columns={columns} data={filteredArticles} actions={tableActions} />
-        </div>
+        <DataTable columns={columns} data={filteredArticles} actions={tableActions} />
       </div>
       {deleteId && (
         <DeleteConfirmPage id={deleteId} onClose={() => setDeleteId(null)} onDeleted={handleConfirmDelete} />
