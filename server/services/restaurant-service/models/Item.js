@@ -38,7 +38,6 @@ const Restaurant = sequelize.define('Item', {
     allowNull: false,
     validate: {
       notEmpty: true,
-      len: [2, 100]
     }
   },
   imageUrl: {

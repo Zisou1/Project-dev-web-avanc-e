@@ -16,6 +16,8 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import RestaurantLivreurLayout from './layout/RestaurantLivreurLayout'
 import ItemsPage from './pages/restaurant/ItemsPage'
+import AddItemPage from './pages/restaurant/AddItemPage'
+import EditItemPage from './pages/restaurant/EditItemPage'
 
 function App() {
   return (
@@ -48,6 +50,16 @@ function App() {
 
                 <ItemsPage />
 
+            </ProtectedRoute>
+          } />
+          <Route path="/restaurant/items/add" element={
+            <ProtectedRoute requiredRole="restaurant">
+                <AddItemPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/restaurant/items/edit/:id" element={
+            <ProtectedRoute requiredRole="restaurant">
+                <EditItemPage />
             </ProtectedRoute>
           } />
           

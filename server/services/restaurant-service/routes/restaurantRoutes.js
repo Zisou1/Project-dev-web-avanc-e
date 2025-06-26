@@ -6,6 +6,7 @@ const menuItemController = require('../controllers/menuItemController');
 const itemController = require('../controllers/itemController');
 
 const upload = require('../middleware/upload'); 
+
 const {
   validateRestaurant,
   validateMenu,
@@ -32,7 +33,7 @@ router.get('/menu/getMenu/:id', menuController.getMenuById);
 router.put('/menu/update/:id', validateMenuUpdate, upload.single('image'), menuController.updateMenu);
 router.delete('/menu/delete/:id', menuController.deleteMenu);
 //item routes
-router.post('/item/creat', upload.single('image'), validateItem, itemController.createItem);
+router.post('/item/creat', validateItem, itemController.createItem);
 router.get('/item/getAll', itemController.getAllItems);
 router.get('/item/getMenu/:id', itemController.getItemById);
 router.put('/item/update/:id', validateItemUpdate, upload.single('image'), itemController.updateItem);
@@ -48,4 +49,4 @@ router.delete('/menuItem/delete/:id', menuItemController.removeItemFromMenu);
 
 
 
-module.exports = router; 
+module.exports = router;
