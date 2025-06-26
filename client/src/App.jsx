@@ -15,6 +15,7 @@ import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import RestaurantLivreurLayout from './layout/RestaurantLivreurLayout'
+import ItemsPage from './pages/restaurant/ItemsPage'
 
 function App() {
   return (
@@ -41,6 +42,13 @@ function App() {
             </ProtectedRoute>
   
             
+          } />
+          <Route path="/restaurant/items" element={
+            <ProtectedRoute requiredRole="restaurant">
+
+                <ItemsPage />
+
+            </ProtectedRoute>
           } />
           
           <Route path="/livreur" element={
