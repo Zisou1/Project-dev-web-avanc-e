@@ -59,15 +59,15 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="w-[80%] max-w-4xl flex rounded-xl shadow-md overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-white p-4">
+      <div className="w-full max-w-4xl flex flex-col lg:flex-row rounded-xl shadow-md overflow-hidden">
         {/* Left side with image and red background */}
-        <div className="w-1/2 bg-[#ff4d30] p-8 flex flex-col items-center justify-center">
-          <img src={logimg} alt="Food" className="w-60" />
+        <div className="w-full lg:w-1/2 bg-[#ff4d30] p-6 lg:p-8 flex flex-col items-center justify-center min-h-[200px] lg:min-h-auto">
+          <img src={logimg} alt="Food" className="w-40 sm:w-48 lg:w-60" />
         </div>
 
         {/* Right side with login form */}
-        <div className="w-1/2 bg-[#fff6ef] p-10 flex flex-col justify-center">
+        <div className="w-full lg:w-1/2 bg-[#fff6ef] p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
           <Logo />
           <form className="space-y-4" onSubmit={handleSubmit}>
             <ErrorMessage error={error} />
