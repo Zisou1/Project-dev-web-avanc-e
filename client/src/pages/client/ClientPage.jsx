@@ -18,7 +18,7 @@ const ClientPage = () => {
       setIsLoading(true);
       try {
         const response = await axios.get('http://localhost:3000/api/restaurants/getAll', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token') || ''}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}` }
         });
         const data = response.data;
         console.log('Initial API Response:', data);

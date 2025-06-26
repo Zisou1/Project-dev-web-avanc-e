@@ -235,9 +235,7 @@ const createProtectedRoute = (path, serviceKey) => {
       });
     }
     
-    await proxyRequest(req, res, service.url, {
-      [`^${path.replace('*', '')}`]: ''
-    });
+    await proxyRequest(req, res, service.url, {});
   });
 };
 
