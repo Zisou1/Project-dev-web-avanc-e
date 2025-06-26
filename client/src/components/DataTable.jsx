@@ -19,7 +19,7 @@ const DeliveryTable = ({ deliveries, onAccept }) => {
             <div className="font-semibold">ID commande : <span className="font-normal">{delivery.id}</span></div>
             <div className="font-semibold">Adresse de récupération : <span className="font-normal">{delivery.pickup}</span></div>
             <div className="font-semibold">Adresse de livraison : <span className="font-normal">{delivery.address}</span></div>
-            <div className="font-semibold">prime : <span className="font-normal">{delivery.price}</span></div>
+            <div className="font-semibold">prime : <span className="font-normal">{delivery.price.replace('€', ' DA')}</span></div>
             <div className="font-semibold">Statut de la commande : <span className="font-normal">{delivery.status}</span></div>
             <button
               className="mt-4 w-full bg-[#FF4D4F] text-white py-3 px-8 rounded shadow hover:bg-[#e04345] transition font-semibold text-lg"
@@ -58,7 +58,7 @@ const DeliveryTable = ({ deliveries, onAccept }) => {
                   <td className="px-4 py-4 border-b text-center align-middle font-normal text-lg">{delivery.id}</td>
                   <td className="px-4 py-4 border-b text-center align-middle font-normal text-lg">{delivery.pickup}</td>
                   <td className="px-4 py-4 border-b text-center align-middle font-normal text-lg">{delivery.address}</td>
-                  <td className="px-4 py-4 border-b text-center align-middle font-bold text-lg">{delivery.price}</td>
+                  <td className="px-4 py-4 border-b text-center align-middle font-bold text-lg">{delivery.price.replace('€', ' DA')}</td>
                 </tr>
                 <tr>
                   <td colSpan={columns.length - 1} className="py-4">
