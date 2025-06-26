@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const UserProfile = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
       await logout();
+      // Use replace: true to clear navigation history and state
+      navigate('/login', { replace: true, state: null });
     } catch (error) {
       console.error('Logout error:', error);
     }

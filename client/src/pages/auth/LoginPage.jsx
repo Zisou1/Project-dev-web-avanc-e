@@ -16,17 +16,61 @@ const LoginPage = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   
-  const { login, loading, error, clearError, isAuthenticated } = useAuth();
+  const { login, loading, error, clearError, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Helper function to get role-based redirect path
+  const getRoleBasedPath = (userRole) => {
+    switch (userRole) {
+      case 'admin':
+        return '/admin';
+      case 'restaurant':
+        return '/restaurant';
+      case 'delivery':
+        return '/livreur';
+      case 'client':
+      case 'user':
+      default:
+        return '/';
+    }
+  };
+
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      const from = location.state?.from?.pathname || '/';
-      navigate(from, { replace: true });
+    if (isAuthenticated && user) {
+      const from = location.state?.from?.pathname;
+      
+      // Check if the 'from' path matches user's role, otherwise use role-based path
+      const userRoleBasedPath = getRoleBasedPath(user.role);
+      let redirectPath = userRoleBasedPath; // Default to role-based path
+      
+      // Only use 'from' path if it matches the user's role access
+      if (from) {
+        const isValidFromPath = checkPathMatchesRole(from, user.role);
+        if (isValidFromPath) {
+          redirectPath = from;
+        }
+      }
+      
+      navigate(redirectPath, { replace: true });
     }
-  }, [isAuthenticated, navigate, location]);
+  }, [isAuthenticated, navigate, location, user]);
+
+  // Helper function to check if a path matches the user's role
+  const checkPathMatchesRole = (path, userRole) => {
+    const rolePaths = {
+      'admin': ['/admin'],
+      'restaurant': ['/restaurant'],
+      'delivery': ['/livreur'],
+      'client': ['/'],
+      'user': ['/'],
+      'customer': ['/']
+    };
+    
+    const allowedPaths = rolePaths[userRole] || ['/'];
+    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,15 +89,17 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('Login form submitted with:', { email: formData.email, password: '***' });
-    console.log('Current error state:', error);
-    
     try {
-      await login(formData.email, formData.password);
-      console.log('Login successful');
+      const loginResponse = await login(formData.email, formData.password);
+      
+      // Always use role-based path for redirect after login to avoid stale redirects
+      const userRole = loginResponse.user?.role;
+      const redirectPath = getRoleBasedPath(userRole);
+      
+      navigate(redirectPath, { replace: true });
+      
     } catch (err) {
       console.error('Login failed in component:', err);
-      console.log('Error state after login attempt:', error);
       // Error is handled by AuthContext
     }
   };

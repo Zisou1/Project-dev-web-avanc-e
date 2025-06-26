@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import Button from '../components/Button'
 
 const UnauthorizedPage = () => {
   const navigate = useNavigate()
@@ -13,14 +14,14 @@ const UnauthorizedPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         {/* Animated Icon */}
         <div className="mb-8 animate-bounce">
-          <div className="mx-auto w-24 h-24 bg-cyan-100 rounded-full flex items-center justify-center">
+          <div className="mx-auto w-24 h-24 bg-red-100 rounded-full flex items-center justify-center">
             <svg
               className="w-12 h-12"
-              style={{ color: '#00AABB' }}
+              style={{ color: '#FF4D4F' }}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -37,7 +38,7 @@ const UnauthorizedPage = () => {
         </div>
 
         {/* Error Code */}
-        <h1 className="text-6xl font-bold mb-4 animate-pulse" style={{ color: '#00AABB' }}>
+        <h1 className="text-6xl font-bold mb-4 animate-pulse" style={{ color: '#FF4D4F' }}>
           401
         </h1>
 
@@ -54,25 +55,20 @@ const UnauthorizedPage = () => {
 
         {/* Action Buttons */}
         <div className="space-y-3">
-          <button
+          <Button
             onClick={handleGoHome}
-            className="w-full text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-            style={{ 
-              backgroundColor: '#00AABB',
-              '--tw-ring-color': '#00AABB'
-            }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#009AAA'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#00AABB'}
+            type="button"
           >
             Aller à l'Accueil
-          </button>
+          </Button>
           
-          <button
+          <Button
             onClick={handleGoBack}
-            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg transition-colors duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+            type="button"
+            variant="secondary"
           >
             Retour
-          </button>
+          </Button>
         </div>
         
       </div>

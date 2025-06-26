@@ -21,18 +21,21 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = async () => {
       try {
         const token = localStorage.getItem('accessToken');
+        
         if (token) {
           // Parse the JWT token to get user info without making API call
           try {
             const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+            
             // Check if token is not expired
             if (tokenPayload.exp * 1000 > Date.now()) {
-              setUser({
+              const userData = {
                 id: tokenPayload.id,
                 email: tokenPayload.email,
                 name: tokenPayload.name,
                 role: tokenPayload.role
-              });
+              };
+              setUser(userData);
             } else {
               // Token is expired, remove it
               localStorage.removeItem('accessToken');
@@ -48,7 +51,6 @@ export const AuthProvider = ({ children }) => {
         // Token is invalid, remove it
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        console.error('Token validation failed:', error);
       } finally {
         setLoading(false);
       }
@@ -118,6 +120,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       const refreshToken = localStorage.getItem('refreshToken');
+      
       if (refreshToken) {
         await authService.logout(refreshToken);
       }

@@ -2,7 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import Layout from './layout/layout'
-import AdminLayout from './layout/AdminLayout'
+import DashboardLayout from './layout/DashboardLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
@@ -14,7 +14,6 @@ import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
-import RestaurantLivreurLayout from './layout/RestaurantLivreurLayout'
 
 function App() {
   return (
@@ -27,34 +26,49 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           
-          {/* Protected Routes with Layout */}
+          {/* public Routes with Layout */}
           <Route path="/" element={
             <Layout>
               <ClientPage />
             </Layout>
           } />         
+          
+          {/* Restaurant Routes with DashboardLayout */}
           <Route path="/restaurant" element={
             <ProtectedRoute requiredRole="restaurant">
-              <RestaurantLivreurLayout>
-                <RestaurantPage />
-              </RestaurantLivreurLayout>
+              <DashboardLayout />
             </ProtectedRoute>
-  
-            
-          } />
+          }>
+            {/* Nested restaurant routes */}
+            <Route index element={<RestaurantPage />} />
+            <Route path="dashboard" element={<RestaurantPage />} />
+            <Route path="menu" element={<div>Menu Management Page</div>} />
+            <Route path="orders" element={<div>Restaurant Orders Page</div>} />
+            <Route path="analytics" element={<div>Restaurant Analytics Page</div>} />
+            <Route path="profile" element={<div>Restaurant Profile Page</div>} />
+            <Route path="settings" element={<div>Restaurant Settings Page</div>} />
+          </Route>
           
+          {/* Livreur Routes with DashboardLayout */}
           <Route path="/livreur" element={
-            <ProtectedRoute>
-              <Layout>
-                <LivreurPage />
-              </Layout>
+            <ProtectedRoute requiredRole="delivery">
+              <DashboardLayout />
             </ProtectedRoute>
-          } />
+          }>
+            {/* Nested livreur routes */}
+            <Route index element={<LivreurPage />} />
+            <Route path="dashboard" element={<LivreurPage />} />
+            <Route path="orders" element={<div>Available Orders Page</div>} />
+            <Route path="deliveries" element={<div>My Deliveries Page</div>} />
+            <Route path="earnings" element={<div>Earnings Page</div>} />
+            <Route path="profile" element={<div>Livreur Profile Page</div>} />
+            <Route path="settings" element={<div>Livreur Settings Page</div>} />
+          </Route>
           
-          {/* Admin Routes with AdminLayout */}
+          {/* Admin Routes with DashboardLayout */}
           <Route path="/admin" element={
             <ProtectedRoute requiredRole="admin">
-              <AdminLayout />
+              <DashboardLayout />
             </ProtectedRoute>
           }>
             {/* Nested admin routes */}
