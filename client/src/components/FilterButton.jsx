@@ -59,7 +59,7 @@ const FilterButton = ({ fields, onApply, initial = {} }) => {
             <FontAwesomeIcon icon={faFilter} className="text-xl text-[#ff5c5c]" /> Filtres
           </h3>
           <div className="flex flex-col gap-4">
-            {fields.map((field) => (
+            {fields.filter(field => field.key !== 'status').map((field) => (
               <div key={field.key}>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">{field.label}</label>
                 {field.type === 'text' && (

@@ -44,7 +44,7 @@ const LivreurPage = () => {
       <div className="flex justify-center mb-8 gap-4 flex-wrap">
         <FilterButton
           fields={[
-            { key: 'id', label: 'ID Commande', type: 'text', placeholder: 'Rechercher par ID' },
+            { key: 'pickup', label: 'Adresse de récupération', type: 'text', placeholder: 'Rechercher par adresse' },
             { key: 'status', label: 'Statut', type: 'select', options: [
               { value: 'En attente', label: 'En attente' },
               { value: 'En cours', label: 'En cours' },

@@ -7,7 +7,6 @@ const DeliveryTable = ({ deliveries, onAccept }) => {
     { label: "RÉCUPÉRATION", key: "pickup" },
     { label: "LIVRAISON", key: "address" },
     { label: "PRIME", key: "price" },
-    { label: "STATUT", key: "status" },
     { label: "Action", key: "action" },
   ];
 
@@ -45,7 +44,7 @@ const DeliveryTable = ({ deliveries, onAccept }) => {
         <thead>
           <tr>
             {columns.slice(0, -1).map((col) => (
-              <th key={col.key} className="px-4 py-2 border-b font-semibold text-gray-700 bg-gray-100">
+              <th key={col.key} className="px-4 py-2 border-b font-semibold text-gray-700 bg-gray-100 text-center">
                 {col.label}
               </th>
             ))}
@@ -56,11 +55,10 @@ const DeliveryTable = ({ deliveries, onAccept }) => {
             deliveries.map((delivery) => (
               <React.Fragment key={delivery.id}>
                 <tr className="hover:bg-gray-50">
-                  <td className="px-4 py-2 border-b">{delivery.id}</td>
-                  <td className="px-4 py-2 border-b">{delivery.pickup}</td>
-                  <td className="px-4 py-2 border-b">{delivery.address}</td>
-                  <td className="px-4 py-2 border-b font-bold">{delivery.price}</td>
-                  <td className="px-4 py-2 border-b">{delivery.status}</td>
+                  <td className="px-4 py-4 border-b text-center align-middle font-normal text-lg">{delivery.id}</td>
+                  <td className="px-4 py-4 border-b text-center align-middle font-normal text-lg">{delivery.pickup}</td>
+                  <td className="px-4 py-4 border-b text-center align-middle font-normal text-lg">{delivery.address}</td>
+                  <td className="px-4 py-4 border-b text-center align-middle font-bold text-lg">{delivery.price}</td>
                 </tr>
                 <tr>
                   <td colSpan={columns.length - 1} className="py-4">
