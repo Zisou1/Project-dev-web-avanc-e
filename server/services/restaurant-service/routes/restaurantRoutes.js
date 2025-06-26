@@ -20,22 +20,22 @@ const {
 
 // Define routes
 //restaurant routes
-router.post('/creat', validateRestaurant, restaurantController.createRestaurant);
+router.post('/create', validateRestaurant, restaurantController.createRestaurant);
 router.get('/getAll', restaurantController.getAllRestaurants);
 router.get('/getRestaurent/:id', restaurantController.getRestaurantById);
 router.put('/update/:id', validateRestaurantUpdate, restaurantController.updateRestaurant);
 router.delete('/delete/:id', restaurantController.deleteRestaurant);
 //menu routes
-router.post('/menu/creat', upload.single('image'), validateMenu, menuController.createMenu);
+router.post('/menu/create', upload.single('image'), validateMenu, menuController.createMenu);
 router.get('/menu/getAll', menuController.getAllMenus);
 router.get('/menu/getMenu/:id', menuController.getMenuById);
 router.get('/menu/getRestaurentMenu/:restaurant_id', menuController.getRestaurentMenu);
 router.put('/menu/update/:id', validateMenuUpdate, upload.single('image'), menuController.updateMenu);
 router.delete('/menu/delete/:id', menuController.deleteMenu);
 //item routes
-router.post('/item/creat', upload.single('image'), validateItem, itemController.createItem);
+router.post('/item/create', upload.single('image'), validateItem, itemController.createItem);
 router.get('/item/getAll', itemController.getAllItems);
-router.get('/item/getMenu/:id', itemController.getItemById);
+router.get('/item/getItem/:id', itemController.getItemById);
 router.put('/item/update/:id', validateItemUpdate, upload.single('image'), itemController.updateItem);
 router.delete('/item/delete/:id', itemController.deleteItem);
 //menuItem routes

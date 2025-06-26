@@ -3,7 +3,7 @@ const Joi = require('joi');
 /**
  * Validate Restaurant creation
  */
-const validateRestaurant = (req, res, next) => {
+const     validateRestaurant = (req, res, next) => {
   const schema = Joi.object({
     user_id: Joi.number().integer().required().messages({
       'number.base': 'User ID must be a number',
@@ -58,9 +58,7 @@ const validateMenu = (req, res, next) => {
       'boolean.base': 'Status must be a boolean',
       'any.required': 'Status is required'
     }),
-    imageUrl: Joi.string().required().messages({
-      'any.required': 'Image URL is required'
-    })
+
   });
 
   const { error, value } = schema.validate(req.body);
@@ -98,9 +96,7 @@ const validateItem = (req, res, next) => {
       'boolean.base': 'Status must be a boolean',
       'any.required': 'Status is required'
     }),
-    image: Joi.string().required().messages({
-      'any.required': 'Image URL is required'
-    })
+
   });
 
   const { error, value } = schema.validate(req.body);

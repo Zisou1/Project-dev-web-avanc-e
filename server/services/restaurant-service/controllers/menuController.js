@@ -7,7 +7,7 @@ const Item = require('../models/Item.js');
  */
 const createMenu = async (req, res) => {
   try {
-    const { restaurant_id, name, price, status } = req.body;
+    const { restaurant_id, name, price, status } = req.body ?? {};
     const image = req.file;
 
     console.log('📥 Creating menu:', name);
