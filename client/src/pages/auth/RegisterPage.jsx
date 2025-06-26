@@ -143,47 +143,53 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="w-full max-w-4xl min-h-[700px] bg-white rounded-3xl shadow-2xl flex overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-white px-2 sm:px-0">
+      <div
+        className="w-full max-w-4xl h-full md:min-h-[700px] max-h-screen flex-1 bg-white rounded-3xl shadow-2xl flex flex-col md:flex-row overflow-hidden"
+        style={{ maxHeight: '100dvh' }}
+      >
         {/* Left Side - Illustration */}
-        <div className="w-1/2 flex flex-col items-center justify-center bg-[#ff4d30] p-6">
+        <div className="w-full md:w-1/2 flex flex-col items-center justify-center bg-[#ff4d30] p-4 md:p-6 py-6 md:py-6 min-h-[180px] md:min-h-0">
           {role === 'restaurant' && (
-            <img src={rest} alt="restaurant" className="w-56 h-70 animate-fade-in object-contain" />
+            <img src={rest} alt="restaurant" className="w-28 h-28 md:w-56 md:h-70 animate-fade-in object-contain" />
           )}
           {role === 'delivery' && (
-            <img src={livr} alt="livreur" className="w-56 h-56 animate-fade-in object-contain" />
+            <img src={livr} alt="livreur" className="w-28 h-28 md:w-56 md:h-56 animate-fade-in object-contain" />
           )}
           {role === 'customer' && (
-            <img src={logimg} alt="client" className="w-56 h-56 animate-fade-in object-contain" />
+            <img src={logimg} alt="client" className="w-28 h-28 md:w-56 md:h-56 animate-fade-in object-contain" />
           )}
           {!role && (
-            <img src={logimg} alt="yumzo" className="w-56 h-56 animate-fade-in object-contain" />
+            <img src={logimg} alt="yumzo" className="w-28 h-28 md:w-56 md:h-56 animate-fade-in object-contain" />
           )}
         </div>
         {/* Right Side - Form */}
-        <div className={`w-1/2 flex flex-col justify-center px-8 py-8 bg-[#ffe0db] transition-all duration-500 overflow-y-auto ${animating ? 'opacity-0 translate-x-10' : 'opacity-100 translate-x-0'}`}>
-          <div className="flex flex-col items-center mb-6">
+        <div
+          className={`w-full md:w-1/2 flex flex-col justify-center px-2 py-4 md:px-8 md:py-8 bg-[#ffe0db] transition-all duration-500 overflow-y-auto max-h-screen ${animating ? 'opacity-0 translate-x-10' : 'opacity-100 translate-x-0'}`}
+          style={{ maxHeight: '100dvh' }}
+        >
+          <div className="flex flex-col items-center mb-4 md:mb-6">
             <Logo />
           </div>
           {!showForm ? (
-            <div className="flex flex-col gap-6 animate-fade-in">
-              <h2 className="text-xl font-semibold text-center mb-2">Choisissez votre type de compte</h2>
-              <div className="flex justify-center gap-6">
+            <div className="flex flex-col gap-4 md:gap-6 animate-fade-in">
+              <h2 className="text-base md:text-xl font-semibold text-center mb-2">Choisissez votre type de compte</h2>
+              <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-6">
                 {Object.entries(roleData).map(([key, { label, color, icon }]) => (
                   <button
                     key={key}
                     type="button"
                     onClick={() => handleRoleSelect(key)}
-                    className={`flex flex-col items-center px-6 py-4 rounded-2xl shadow-md text-lg font-semibold transition transform hover:scale-105 hover:shadow-xl focus:outline-none ${color}`}
+                    className={`flex flex-col items-center px-3 py-2 md:px-6 md:py-4 rounded-2xl shadow-md text-sm md:text-lg font-semibold transition transform hover:scale-105 hover:shadow-xl focus:outline-none ${color}`}
                   >
-                    <span className="text-4xl mb-2">{icon}</span>
+                    <span className="text-2xl md:text-4xl mb-2">{icon}</span>
                     {label}
                   </button>
                 ))}
               </div>
             </div>
           ) : (
-            <form className="space-y-4 animate-slide-in" onSubmit={handleSubmit}>
+            <form className="space-y-2 md:space-y-4 animate-slide-in" onSubmit={handleSubmit}>
               <ErrorMessage error={error} />
               {role === 'restaurant' && (
                 <div>
@@ -282,9 +288,9 @@ const RegisterPage = () => {
                   {validationErrors.cuisineType && <div className="text-red-500 text-xs">{validationErrors.cuisineType}</div>}
                 </div>
               )}
-              <Button loading={loading} type="submit" className="rounded-full text-lg shadow-md bg-[#ff4d30] hover:bg-[#ff7043] transition-all duration-300">suivant</Button>
-              <button type="button" className="w-full mt-2 text-sm text-gray-500 hover:text-gray-700" onClick={handleBack}>Retour</button>
-              <p className="mt-4 text-center text-sm text-black">
+              <Button loading={loading} type="submit" className="rounded-full text-sm md:text-lg shadow-md bg-[#ff4d30] hover:bg-[#ff7043] transition-all duration-300">suivant</Button>
+              <button type="button" className="w-full mt-2 text-xs md:text-sm text-gray-500 hover:text-gray-700" onClick={handleBack}>Retour</button>
+              <p className="mt-4 text-center text-xs md:text-sm text-black">
                 Vous avez déja un compte ?{' '}
                 <Link to="/Login" className="text-[#ff4d30] font-medium hover:text-[#ff7043]">Sign In</Link>
               </p>
@@ -292,12 +298,16 @@ const RegisterPage = () => {
           )}
         </div>
       </div>
-      {/* Animations */}
+      {/* Animations & Responsive Tweaks */}
       <style>{`
         .animate-fade-in { animation: fadeIn 0.5s; }
         .animate-slide-in { animation: slideIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) {
+          /* Remove min-height for card on mobile */
+          .min-h-\[700px\] { min-height: 0 !important; }
+        }
       `}</style>
     </div>
   );
