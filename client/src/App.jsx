@@ -15,6 +15,7 @@ import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import RestaurantLivreurLayout from './layout/RestaurantLivreurLayout'
+import SuiviCommandePage from './pages/livreur/SuiviCommandePage'
 
 function App() {
   return (
@@ -47,6 +48,14 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <LivreurPage />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/livreur/suivi" element={
+            <ProtectedRoute requiredRole="delivery">
+              <Layout>
+                <SuiviCommandePage />
               </Layout>
             </ProtectedRoute>
           } />
