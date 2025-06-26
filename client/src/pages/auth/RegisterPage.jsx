@@ -1,20 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import logimg from '../../assets/loginimg.png';
+import rest from '../../assets/rest.png';
+import livr from '../../assets/livr.png';
+import Logo from '../../components/Logo';
+import Input from '../../components/input';
+import PasswordInput from '../../components/PasswordInput';
+import Button from '../../components/Button';
+import ErrorMessage from '../../components/ErrorMessage';
+
+const roleData = {
+  customer: {
+    label: 'Client',
+    color: 'bg-blue-100',
+    icon: '👤',
+  },
+  delivery: {
+    label: 'Livreur',
+    color: 'bg-green-100',
+    icon: '🚚',
+  },
+  restaurant: {
+    label: 'Restaureur',
+    color: 'bg-orange-100',
+    icon: '🏠',
+  },
+};
 
 const RegisterPage = () => {
+  const [role, setRole] = useState('');
+  const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    name: '', // This will be used as the restaurant name if role is restaurant
     email: '',
     password: '',
     confirmPassword: '',
     phone: '',
-    role: 'customer'
+    role: '',
+    ownerName: '', // Owner name for restaurant
+    cuisineType: '' // Cuisine type for restaurant
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
-  
+  const [animating, setAnimating] = useState(false);
+
   const { register, loading, error, clearError, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -25,25 +56,35 @@ const RegisterPage = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  const handleRoleSelect = (selectedRole) => {
+    setAnimating(true);
+    setTimeout(() => {
+      setRole(selectedRole);
+      setFormData((prev) => ({ ...prev, role: selectedRole }));
+      setShowForm(true);
+      setAnimating(false);
+    }, 400); // Animation duration
+  };
+
+  const handleBack = () => {
+    setAnimating(true);
+    setTimeout(() => {
+      setShowForm(false);
+      setRole('');
+      setAnimating(false);
+    }, 400);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
     // Clear errors when user starts typing
     if (error) {
       clearError();
     }
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
+    setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear validation error for this field
     if (validationErrors[name]) {
-      setValidationErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+      setValidationErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -75,7 +116,7 @@ const RegisterPage = () => {
     }
 
     // Phone validation (optional)
-    if (formData.phone && !/^[\+]?[1-9][\d]{0,15}$/.test(formData.phone)) {
+    if (formData.phone && !/^\+?[1-9][\d]{0,15}$/.test(formData.phone)) {
       errors.phone = 'Please enter a valid phone number';
     }
 
@@ -85,257 +126,182 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    console.log('Submitting form with data:', formData);
     if (!validateForm()) {
+      console.log('Validation failed:', validationErrors);
       return;
     }
-
     try {
-      const { confirmPassword, ...registrationData } = formData;
+      const { name, email, password, phone, role } = formData;
+      const registrationData = { name, email, password, phone, role };
+      if (role === 'restaurant') {
+        registrationData.kitchen_type = formData.cuisineType; // send as kitchen_type
+      }
+      console.log('Calling register with:', registrationData);
       await register(registrationData);
-      // Navigation will be handled by useEffect above
     } catch (err) {
-      // Error is handled by AuthContext
       console.error('Registration failed:', err);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div>
-          <div className="mx-auto h-12 w-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">FD</span>
-          </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link
-              to="/login"
-              className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
-            >
-              sign in to your existing account
-            </Link>
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="w-full max-w-4xl min-h-[700px] bg-white rounded-3xl shadow-2xl flex overflow-hidden">
+        {/* Left Side - Illustration */}
+        <div className="w-1/2 flex flex-col items-center justify-center bg-[#ff4d30] p-6">
+          {role === 'restaurant' && (
+            <img src={rest} alt="restaurant" className="w-56 h-70 animate-fade-in object-contain" />
+          )}
+          {role === 'delivery' && (
+            <img src={livr} alt="livreur" className="w-56 h-56 animate-fade-in object-contain" />
+          )}
+          {role === 'customer' && (
+            <img src={logimg} alt="client" className="w-56 h-56 animate-fade-in object-contain" />
+          )}
+          {!role && (
+            <img src={logimg} alt="yumzo" className="w-56 h-56 animate-fade-in object-contain" />
+          )}
         </div>
-
-        {/* Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-md">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm">{error}</p>
-                </div>
+        {/* Right Side - Form */}
+        <div className={`w-1/2 flex flex-col justify-center px-8 py-8 bg-[#ffe0db] transition-all duration-500 overflow-y-auto ${animating ? 'opacity-0 translate-x-10' : 'opacity-100 translate-x-0'}`}>
+          <div className="flex flex-col items-center mb-6">
+            <Logo />
+          </div>
+          {!showForm ? (
+            <div className="flex flex-col gap-6 animate-fade-in">
+              <h2 className="text-xl font-semibold text-center mb-2">Choisissez votre type de compte</h2>
+              <div className="flex justify-center gap-6">
+                {Object.entries(roleData).map(([key, { label, color, icon }]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => handleRoleSelect(key)}
+                    className={`flex flex-col items-center px-6 py-4 rounded-2xl shadow-md text-lg font-semibold transition transform hover:scale-105 hover:shadow-xl focus:outline-none ${color}`}
+                  >
+                    <span className="text-4xl mb-2">{icon}</span>
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
-          )}
-
-          <div className="space-y-4">
-            {/* Name */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                  validationErrors.name ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="Enter your full name"
-              />
-              {validationErrors.name && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.name}</p>
+          ) : (
+            <form className="space-y-4 animate-slide-in" onSubmit={handleSubmit}>
+              <ErrorMessage error={error} />
+              {/* Restaurant Owner Name input, only for restaurant role */}
+              {role === 'restaurant' && (
+                <div>
+                  <Input
+                    id="ownerName"
+                    name="ownerName"
+                    type="text"
+                    autoComplete="off"
+                    required
+                    value={formData.ownerName}
+                    onChange={handleChange}
+                    placeholder="Nom du responsable du restaurant"
+                  />
+                  {validationErrors.ownerName && <div className="text-red-500 text-xs">{validationErrors.ownerName}</div>}
+                </div>
               )}
-            </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                  validationErrors.email ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="Enter your email"
-              />
-              {validationErrors.email && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
-              )}
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Phone Number (Optional)
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                autoComplete="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                  validationErrors.phone ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="Enter your phone number"
-              />
-              {validationErrors.phone && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.phone}</p>
-              )}
-            </div>
-
-            {/* Role */}
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-                Account Type
-              </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              >
-                <option value="customer">Customer</option>
-                <option value="restaurant">Restaurant Owner</option>
-                <option value="delivery">Delivery Driver</option>
-              </select>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <input
+              <div>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder={role === 'restaurant' ? 'Nom du restaurant' : role === 'delivery' ? 'livreur Name' : 'client Name'}
+                />
+                {validationErrors.name && <div className="text-red-500 text-xs">{validationErrors.name}</div>}
+              </div>
+              <div>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder={role === 'restaurant' ? 'restaurant Email' : role === 'delivery' ? 'livreur Email' : 'client Email'}
+                />
+                {validationErrors.email && <div className="text-red-500 text-xs">{validationErrors.email}</div>}
+              </div>
+              <div>
+                <PasswordInput
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
                   value={formData.password}
                   onChange={handleChange}
-                  className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${
-                    validationErrors.password ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                  placeholder="Enter your password"
+                  showPassword={showPassword}
+                  setShowPassword={setShowPassword}
                 />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  <svg
-                    className="h-5 w-5 text-gray-400 hover:text-gray-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    {showPassword ? (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L12 12m-2.122-2.122l4.242 4.242M12 12l2.122 2.122m-2.122-2.122l2.122 2.122" />
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    )}
-                  </svg>
-                </button>
+                {validationErrors.password && <div className="text-red-500 text-xs">{validationErrors.password}</div>}
               </div>
-              {validationErrors.password && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <div className="mt-1 relative">
-                <input
+              <div>
+                <PasswordInput
                   id="confirmPassword"
                   name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${
-                    validationErrors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                  placeholder="Confirm your password"
+                  showPassword={showConfirmPassword}
+                  setShowPassword={setShowConfirmPassword}
                 />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  <svg
-                    className="h-5 w-5 text-gray-400 hover:text-gray-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    {showConfirmPassword ? (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L12 12m-2.122-2.122l4.242 4.242M12 12l2.122 2.122m-2.122-2.122l2.122 2.122" />
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    )}
-                  </svg>
-                </button>
+                {validationErrors.confirmPassword && <div className="text-red-500 text-xs">{validationErrors.confirmPassword}</div>}
               </div>
-              {validationErrors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.confirmPassword}</p>
+              <div>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="Numéro de téléphone"
+                />
+                {validationErrors.phone && <div className="text-red-500 text-xs">{validationErrors.phone}</div>}
+              </div>
+              {/* Extra field for restaurant */}
+              {role === 'restaurant' && (
+                <div>
+                  <select
+                    id="cuisineType"
+                    name="cuisineType"
+                    className="w-full px-4 py-3 rounded-md border border-[#ffccb3] bg-[#fae9e3] text-[#c94e38] focus:outline-none focus:ring-2 focus:ring-[#ff4d30]"
+                    value={formData.cuisineType || ''}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="" disabled>Type de cuisine</option>
+                    <option value="italian">Italienne</option>
+                    <option value="asian">Asiatique</option>
+                    <option value="maroc">Marocaine</option>
+                    <option value="burger">Burger</option>
+                    <option value="pizza">Pizza</option>
+                    <option value="autre">Autre</option>
+                  </select>
+                  {validationErrors.cuisineType && <div className="text-red-500 text-xs">{validationErrors.cuisineType}</div>}
+                </div>
               )}
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Creating account...
-                </>
-              ) : (
-                'Create account'
-              )}
-            </button>
-          </div>
-        </form>
+              <Button loading={loading} type="submit" className="rounded-full text-lg shadow-md bg-[#ff4d30] hover:bg-[#ff7043] transition-all duration-300">suivant</Button>
+              <button type="button" className="w-full mt-2 text-sm text-gray-500 hover:text-gray-700" onClick={handleBack}>Retour</button>
+              <p className="mt-4 text-center text-sm text-black">
+                Vous avez déja un compte ?{' '}
+                <Link to="/Login" className="text-[#ff4d30] font-medium hover:text-[#ff7043]">Sign In</Link>
+              </p>
+            </form>
+          )}
+        </div>
       </div>
+      {/* Animations */}
+      <style>{`
+        .animate-fade-in { animation: fadeIn 0.5s; }
+        .animate-slide-in { animation: slideIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
     </div>
   );
 };
