@@ -7,7 +7,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
 import RestaurantPage from './pages/restaurant/restaurantPage'
-import ClientPage from './pages/client/clientPage'
+import ClientPage from './pages/client/ClientPage'
+import SuivreCommande from './pages/client/SuivreCommande';
 import LivreurPage from './pages/livreur/livreurPage'
 import AdminPage from './pages/admin/adminPage'
 import LoginPage from './pages/auth/LoginPage'
@@ -32,15 +33,20 @@ function App() {
             <Layout>
               <ClientPage />
             </Layout>
-          } />         
+          } /> 
+
+          <Route path="/suivrecommande" element={
+            <Layout>
+              <SuivreCommande />
+            </Layout>
+          } />    
+
           <Route path="/restaurant" element={
             <ProtectedRoute requiredRole="restaurant">
               <RestaurantLivreurLayout>
                 <RestaurantPage />
               </RestaurantLivreurLayout>
             </ProtectedRoute>
-  
-            
           } />
           
           <Route path="/livreur" element={
