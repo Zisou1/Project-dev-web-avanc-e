@@ -7,7 +7,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
 import RestaurantPage from './pages/restaurant/restaurantPage'
-import ClientPage from './pages/client/clientPage'
+import ClientPage from './pages/client/ClientPage'
+import ClientProfilePage from './pages/client/ClientProfilePage'
 import LivreurPage from './pages/livreur/livreurPage'
 import AdminPage from './pages/admin/adminPage'
 import LoginPage from './pages/auth/LoginPage'
@@ -49,6 +50,12 @@ function App() {
                 <LivreurPage />
               </Layout>
             </ProtectedRoute>
+          } />
+          
+          <Route path="/client/profile" element={
+            <Layout>
+              <ClientProfilePage />
+            </Layout>
           } />
           
           {/* Admin Routes with AdminLayout */}
