@@ -18,6 +18,7 @@ import AccueilLivreur from './pages/livreur/AccueilLivreur'
 import ItemsPage from './pages/restaurant/ItemsPage'
 import AddItemPage from './pages/restaurant/AddItemPage'
 import EditItemPage from './pages/restaurant/EditItemPage'
+import Profillivreur from './pages/livreur/profillivreur'
 
 function App() {
   return (
@@ -68,7 +69,7 @@ function App() {
             <Route path="orders" element={<div>Available Orders Page</div>} />
             <Route path="deliveries" element={<div>My Deliveries Page</div>} />
             <Route path="earnings" element={<div>Earnings Page</div>} />
-            <Route path="profile" element={<div>Livreur Profile Page</div>} />
+            <Route path="profile" element={<Profillivreur />} />
             <Route path="settings" element={<div>Livreur Settings Page</div>} />
           </Route>
           
