@@ -5,8 +5,13 @@ import FilterButton from '../../components/FilterButton';
 import RestaurantCard from '../../components/RestaurantCard';
 import debounce from 'lodash/debounce';
 
+const ALL_CATEGORIES = [
+  'courses', 'halal', 'pizzas', 'fast food', 'sushis', 'desserts',
+  'burger', 'cuisine saine', 'asiatique', 'thailandaise',
+  'ailes de poulet', 'indienne', 'poke (poisson)'
+];
+
 const ClientPage = () => {
-  const [categories, setCategories] = useState([]);
   const [restaurants, setRestaurants] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,16 +26,12 @@ const ClientPage = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}` }
         });
         const data = response.data;
-        console.log('Initial API Response:', data);
-        setCategories(data.categories || []);
-        setRestaurants(data.restaurants || []);
-        setInitialRestaurants(data.restaurants || []);
+        const allRestaurants = data.restaurants || [];
+
+        setRestaurants(allRestaurants);
+        setInitialRestaurants(allRestaurants);
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
-        setCategories([
-          'Courses', 'Halal', 'Pizzas', 'Fast food', 'Sushis', 'Desserts', 'Burgers',
-          'Cuisine saine', 'Asiatique', 'Thailandaise', 'Ailes de poulet', 'Indienne', 'Poke (poisson)'
-        ]);
         setRestaurants([]);
         setInitialRestaurants([]);
       } finally {
@@ -45,7 +46,7 @@ const ClientPage = () => {
       setIsLoading(true);
       try {
         const filtered = initialRestaurants.filter((rest) =>
-          (!selectedCategory || rest.kitchen_type === selectedCategory) &&
+          (!selectedCategory || rest.kitchen_type?.toLowerCase() === selectedCategory.toLowerCase()) &&
           (!searchTerm || rest.name.toLowerCase().includes(searchTerm.toLowerCase()))
         );
         setRestaurants(filtered);
@@ -85,48 +86,47 @@ const ClientPage = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Main Content */}
-      <div className=""> {/* Removed px, py, container, bg-white */}
-        {/* Search Bar */}
-        <div className="w-full max-w-2xl mx-auto my-6">
-          <SearchBar
-            className="w-full bg-white rounded-full shadow-lg p-3 flex items-center border border-gray-200 focus-within:ring-2 focus-within:ring-orange-400"
-            onChange={handleSearchChange}
-          />
-        </div>
+      {/* Search Bar */}
+      <div className="w-full max-w-2xl mx-auto my-6">
+        <SearchBar
+          className="w-full bg-white rounded-full shadow-lg p-3 flex items-center border border-gray-200 focus-within:ring-2 focus-within:ring-orange-400"
+          onChange={handleSearchChange}
+        />
+      </div>
 
-        {/* Filter Buttons */}
-        <div className="mb-6 px-4">
-          <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
-            {categories.map((category) => (
-              <FilterButton
-                key={category}
-                category={{ label: category, emoji: getEmoji(category) }}
-                isSelected={selectedCategory === category}
-                onClick={handleFilterClick}
-                className="flex-shrink-0 bg-white rounded-full px-4 py-2 shadow-md hover:bg-orange-300 transition-all duration-200 text-gray-700"
+      {/* Filter Buttons */}
+      <div className="mb-6 px-4">
+        <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+          {ALL_CATEGORIES.map((category) => (
+            <FilterButton
+              key={category}
+              category={{ label: category, emoji: getEmoji(category) }}
+              isSelected={selectedCategory === category}
+              onClick={handleFilterClick}
+              className="flex-shrink-0 bg-white rounded-full px-4 py-2 shadow-md hover:bg-orange-300 transition-all duration-200 text-gray-700"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Restaurants Section */}
+      <div className="px-4">
+        <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">Top Restaurants</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {restaurants.length === 0 ? (
+            <div className="col-span-full text-center text-gray-500">
+              Aucun restaurant disponible, veuillez essayer ultérieurement!
+            </div>
+          ) : (
+            restaurants.map((restaurant) => (
+              <RestaurantCard
+                key={restaurant.id}
+                restaurant={restaurant}
+                className="bg-white rounded-lg overflow-hidden shadow-md hover:bg-orange-300 transition-all duration-300 cursor-pointer"
+                onClick={() => handleCardClick(restaurant.id)}
               />
-            ))}
-          </div>
-        </div>
-
-        {/* Restaurants Section */}
-        <div className="px-4">
-          <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">Top Restaurants</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {restaurants.length === 0 ? (
-              <div className="col-span-full text-center text-gray-500">Aucun restaurant disponible, veuillez essayer ultérieurement!</div>
-            ) : (
-              restaurants.map((restaurant) => (
-                <RestaurantCard
-                  key={restaurant.id}
-                  restaurant={restaurant}
-                  className="bg-white rounded-lg overflow-hidden shadow-md hover:bg-orange-300 transition-all duration-300 cursor-pointer"
-                  onClick={() => handleCardClick(restaurant.id)}
-                />
-              ))
-            )}
-          </div>
+            ))
+          )}
         </div>
       </div>
     </div>
@@ -135,21 +135,21 @@ const ClientPage = () => {
 
 const getEmoji = (category) => {
   const emojiMap = {
-    'Courses': '🛒',
-    'Halal': '🦐',
-    'Pizzas': '🍕',
-    'Fast food': '🍟',
-    'Sushis': '🍣',
-    'Desserts': '🍪',
-    'Burgers': '🍔',
-    'Cuisine saine': '🥗',
-    'Asiatique': '🍜',
-    'Thailandaise': '🌶️',
-    'Ailes de poulet': '🍗',
-    'Indienne': '🍛',
-    'Poke (poisson)': '🥙',
+    'courses': '🛒',
+    'halal': '🕌',
+    'pizzas': '🍕',
+    'fast food': '🍟',
+    'sushis': '🍣',
+    'desserts': '🍰',
+    'burger': '🍔',
+    'cuisine saine': '🥗',
+    'asiatique': '🍜',
+    'thailandaise': '🌶️',
+    'ailes de poulet': '🍗',
+    'indienne': '🍛',
+    'poke (poisson)': '🥙',
   };
-  return emojiMap[category] || '🍽️';
+  return emojiMap[category.toLowerCase()] || '🍽️';
 };
 
 export default ClientPage;
