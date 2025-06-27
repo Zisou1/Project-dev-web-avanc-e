@@ -8,10 +8,11 @@
     "dev:gateway": "cd services/api-gateway && npm run dev",
     "dev:auth": "cd services/auth-service && npm run dev",
     "start": "concurrently \"npm run start:gateway\" \"npm run start:auth\"",
-    "start:gateway": "cd services/api-gateway && npm start",
+    "start:gateway": "cd services/api-gateway && npm start", 
     "start:auth": "cd services/auth-service && npm start",
-    "install:all": "npm run install:gateway && npm run install:auth && npm run install:shared",
+    "install:all": "npm run install:gateway && npm run install:auth && npm run install:shared && npm run install:delivery",
     "install:gateway": "cd services/api-gateway && npm install",
+    "install:services": "cd server/services/delivery-service && npm install",
     "install:auth": "cd services/auth-service && npm install",
     "install:shared": "cd shared && npm install",
     "test": "node ../scripts/test-auth.js"
@@ -19,7 +20,14 @@
   "devDependencies": {
     "concurrently": "^8.0.1"
   },
-  "keywords": ["microservices", "backend", "api"],
+  "keywords": [
+    "microservices",
+    "backend",
+    "api"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "all": "^0.0.0"
+  }
 }
