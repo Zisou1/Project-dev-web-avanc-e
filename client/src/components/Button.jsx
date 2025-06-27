@@ -1,16 +1,19 @@
 import React from 'react';
 
-const Button = ({ loading, children, onClick, type = 'submit', variant = 'primary', ...rest }) => {
+const Button = ({ loading, children, onClick, type = 'submit', variant = 'primary', className = '', ...rest }) => {
   const getButtonClasses = () => {
     const baseClasses = "w-full py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none";
     
-    switch (variant) {
-      case 'secondary':
-        return `${baseClasses} bg-gray-100 hover:bg-gray-200 text-gray-700 focus:ring-gray-500`;
-      case 'primary':
-      default:
-        return `${baseClasses} bg-[#FF4D4F] hover:bg-[#E63946] text-white focus:ring-[#FF4D4F]`;
+    const variantClasses = variant === 'secondary' 
+      ? "bg-gray-100 hover:bg-gray-200 text-gray-700 focus:ring-gray-500"
+      : "bg-[#FF4D4F] hover:bg-[#E63946] text-white focus:ring-[#FF4D4F]";
+    
+    // If custom className is provided, use it instead of default classes
+    if (className) {
+      return className;
     }
+    
+    return `${baseClasses} ${variantClasses}`;
   };
 
   return (

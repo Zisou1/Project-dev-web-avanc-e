@@ -6,7 +6,7 @@ const SearchBar = ({ query, setQuery, placeholder = "Search..." }) => {
   const handleClear = () => setQuery("");
 
   return (
-    <div className="flex items-center w-full max-w-4xl bg-white border rounded-full px-5 py-2 shadow-md">
+    <div className="flex items-center w-full  bg-white border rounded-full px-5 py-2 shadow-md">
       {/* Search Icon */}
       <FontAwesomeIcon
         icon={faMagnifyingGlass}
