@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PasswordInput = ({ id, name, value, onChange, showPassword, setShowPassword }) => (
+const PasswordInput = ({ id, name, value, onChange, showPassword, setShowPassword, placeholder = "Mot de passe" }) => (
   <div className="relative">
     <input
       id={id}
@@ -11,7 +11,7 @@ const PasswordInput = ({ id, name, value, onChange, showPassword, setShowPasswor
       value={value}
       onChange={onChange}
       className="w-full px-4 py-3 rounded-md border border-[#ffccb3] bg-[#fae9e3] placeholder:text-[#c94e38] focus:outline-none focus:ring-2 focus:ring-[#ff4d30]"
-      placeholder="Mot de passe"
+      placeholder={placeholder}
     />
     <button
       type="button"

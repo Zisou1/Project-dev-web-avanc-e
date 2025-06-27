@@ -139,10 +139,69 @@ const deleteRestaurant = async (req, res) => {
   }
 };
 
+/**
+ * Create or get restaurant for a user (used by auth service)
+ */
+const createOrGetRestaurantForUser = async (req, res) => {
+  try {
+    const { user_id, name, kitchen_type } = req.body ?? {};
+
+    console.log('🔍 Checking for existing restaurant for user:', user_id);
+
+    // Check if restaurant already exists for this user
+    const existingRestaurant = await Restaurant.findOne({ where: { user_id } });
+    if (existingRestaurant) {
+      console.log('✅ Restaurant already exists for user');
+      return res.status(200).json({
+        message: 'Restaurant already exists for this user',
+        restaurant: existingRestaurant
+      });
+    }
+
+    console.log('📥 Creating new restaurant for user:', user_id);
+
+    // Check if a restaurant with this name already exists (if name is provided)
+    if (name) {
+      const existing = await Restaurant.findOne({ where: { name } });
+      if (existing) {
+        // If name conflicts, append user ID to make it unique
+        const uniqueName = `${name} (${user_id})`;
+        console.log(`⚠️ Restaurant name "${name}" exists, using "${uniqueName}"`);
+        
+        const restaurant = await Restaurant.create({ 
+          name: uniqueName, 
+          user_id, 
+          kitchen_type 
+        });
+
+        return res.status(201).json({
+          message: 'Restaurant created successfully with unique name',
+          restaurant
+        });
+      }
+    }
+
+    const restaurant = await Restaurant.create({ name, user_id, kitchen_type });
+
+    res.status(201).json({
+      message: 'Restaurant created successfully',
+      restaurant
+    });
+
+  } catch (error) {
+    console.error('❌ Create/Get Restaurant Error:', error);
+    res.status(500).json({
+      error: 'Operation Failed',
+      message: 'An error occurred while creating/getting the restaurant'
+    });
+  }
+};
+
 module.exports = {
   createRestaurant,
   getAllRestaurants,
   getRestaurantById,
   updateRestaurant,
-  deleteRestaurant
+  deleteRestaurant,
+  createOrGetRestaurantForUser
 };

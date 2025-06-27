@@ -35,5 +35,16 @@ export const restaurantService = {
       },
     });
     return response.data;
-  }
+  },
+
+  // Create restaurant for user (if not exists)
+  async createForUser(userData) {
+    const response = await api.post('/restaurants/createForUser', userData, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+    return response.data;
+  },
 };

@@ -46,7 +46,23 @@ export const itemService = {
         return restaurant.id;
       } else {
         console.log('❌ No restaurant found for user_id:', userId);
-        return null;
+        
+        // Try to create a restaurant for this user
+        console.log('🔧 Attempting to create restaurant for user...');
+        try {
+          const { restaurantService } = await import('./restaurantService');
+          const createResponse = await restaurantService.createForUser({
+            user_id: userId,
+            name: `Restaurant ${userId}`, // Default name
+            kitchen_type: 'general' // Default type
+          });
+          
+          console.log('✅ Restaurant created:', createResponse.restaurant);
+          return createResponse.restaurant.id;
+        } catch (createError) {
+          console.error('❌ Failed to create restaurant:', createError);
+          return null;
+        }
       }
     } catch (error) {
       console.error('Error fetching restaurant by user ID:', error);

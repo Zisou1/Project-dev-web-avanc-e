@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 const User = require('../models/User');
 
 /**
@@ -34,7 +35,7 @@ const generateTokens = (user) => {
 const register = async (req, res) => {
   try {
     console.log('🔄 Registration request received:', req.body);
-    const { name, email, password, role = 'customer', phone } = req.body;
+    const { name, email, password, role = 'customer', phone, kitchen_type, restaurantName } = req.body;
 
     console.log('🔍 Checking if user exists...');
     // Check if user already exists
@@ -70,6 +71,40 @@ const register = async (req, res) => {
 
     // Save refresh token to user
     await user.update({ refreshToken });
+
+    // If user is a restaurant, create restaurant record
+    if (role === 'restaurant' && kitchen_type) {
+      try {
+        console.log('🏭 Creating restaurant record...');
+        const restaurantServiceUrl = process.env.RESTAURANT_SERVICE_URL || 'http://localhost:3005';
+        
+        const restaurantData = {
+          user_id: user.id,
+          name: restaurantName || name, // Use restaurantName if provided, otherwise user name
+          kitchen_type: kitchen_type
+        };
+
+        console.log('📤 Sending restaurant data:', restaurantData);
+        
+        const restaurantResponse = await axios.post(
+          `${restaurantServiceUrl}/api/restaurants/createForUser`,
+          restaurantData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            timeout: 5000 // 5 second timeout
+          }
+        );
+
+        console.log('✅ Restaurant created successfully:', restaurantResponse.data);
+      } catch (restaurantError) {
+        console.error('❌ Failed to create restaurant record:', restaurantError.message);
+        // We don't fail the user registration if restaurant creation fails
+        // This prevents data inconsistency
+        console.log('⚠️ User created but restaurant creation failed. Restaurant can be created manually later.');
+      }
+    }
 
     res.status(201).json({
       message: 'User registered successfully',

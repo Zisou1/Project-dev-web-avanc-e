@@ -39,7 +39,24 @@ const validateRegister = (req, res, next) => {
     role: Joi.string()
       .valid('customer', 'restaurant', 'delivery', 'admin')
       .optional()
-      .default('customer')
+      .default('customer'),
+    // Restaurant-specific fields (optional, only used when role is 'restaurant')
+    kitchen_type: Joi.string()
+      .min(2)
+      .max(100)
+      .optional()
+      .messages({
+        'string.min': 'Kitchen type must be at least 2 characters long',
+        'string.max': 'Kitchen type must not exceed 100 characters'
+      }),
+    restaurantName: Joi.string()
+      .min(2)
+      .max(100)
+      .optional()
+      .messages({
+        'string.min': 'Restaurant name must be at least 2 characters long',
+        'string.max': 'Restaurant name must not exceed 100 characters'
+      })
   });
 
   const { error, value } = schema.validate(req.body);

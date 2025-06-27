@@ -22,6 +22,7 @@ const {
 // Define routes
 //restaurant routes
 router.post('/creat', validateRestaurant, restaurantController.createRestaurant);
+router.post('/createForUser', validateRestaurant, restaurantController.createOrGetRestaurantForUser);
 router.get('/getAll', restaurantController.getAllRestaurants);
 router.get('/getRestaurent/:id', restaurantController.getRestaurantById);
 router.put('/update/:id', validateRestaurantUpdate, restaurantController.updateRestaurant);
