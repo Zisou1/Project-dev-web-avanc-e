@@ -175,10 +175,12 @@ const getOrderById = async (req, res) => {
 /**
  * Update order by ID
  */
+
 const updateOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, total_price } = req.body;
+    const {deliveryUser_id} = req.body;
 
     console.log(`🔧 Updating order with ID: ${id}`);
 
@@ -192,11 +194,42 @@ const updateOrder = async (req, res) => {
       });
     }
 
-    // Update fields if provided
+    // Update fields
     if (status !== undefined) order.status = status;
     if (total_price !== undefined) order.total_price = total_price;
 
     await order.save();
+
+    // If status is 'waiting for pickup', create a delivery
+    if (status === 'waiting for pickup' && deliveryUser_id) {
+      console.log(order.id);
+      try {
+        await axios.post(
+          'http://localhost:3006/api/delivery/create',
+          {
+            user_id: deliveryUser_id ,
+            order_id: order.id,
+            status: true
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          }
+        );
+
+        console.log('📦 Delivery created for order:', order.id);
+      } catch (deliveryErr) {
+        console.error('❌ Failed to create delivery:', deliveryErr.response.data);
+        return res.status(500).json({
+          error: 'Delivery Creation Failed',
+          message: 'Order updated, but delivery creation failed',
+          detail: deliveryErr.response.data
+        });
+      }
+    }
+    
 
     res.json({
       message: 'Order updated successfully',
@@ -212,6 +245,7 @@ const updateOrder = async (req, res) => {
     });
   }
 };
+
 
 /**
  * Delete order by ID (soft delete)
@@ -243,10 +277,149 @@ const deleteOrder = async (req, res) => {
   }
 };
 
+const getOrderByRestaurant = async (req, res) => {
+  try {
+    const { restaurant_id } = req.params;
+    const orders = await Order.findAll({ where: { restaurant_id } });
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'No orders found for this restaurant'
+      });
+    }
+
+    const enrichedOrders = await Promise.all(
+      orders.map(async (order) => {
+        try {
+          // 1. Get item IDs for this order
+          const orderItems = await OrderItem.findAll({
+            where: { order_id: order.id }
+          });
+          const itemIds = orderItems.map((oi) => oi.item_id);
+
+
+          
+
+          // 2. Fetch items from restaurant service
+          let items = [];
+          if (itemIds.length > 0) {
+            const itemRes = await axios.get('http://localhost:3005/api/restaurants/item/byIds', {
+              params: { ids: itemIds.join(',') }
+            });
+            items = itemRes.data.items;
+          }
+
+          // 3. Get user info
+          const userRes = await axios.get(`http://localhost:3001/api/auth/user/getUser/${order.user_id}`);
+          const user = userRes.data.user;
+
+          return {
+            ...order.toJSON(),
+            items,
+            user
+          };
+        } catch (err) {
+          console.error(`❌ Failed to enrich order ID ${order.id}:`, err.message);
+          return {
+            ...order.toJSON(),
+            items: [],
+            user: null
+          };
+        }
+      })
+    );
+
+    res.json({ orders: enrichedOrders });
+
+  } catch (error) {
+    console.error('❌ Get Orders by Restaurant Error:', error.message);
+    res.status(500).json({
+      error: 'Fetch Failed',
+      message: 'Unable to retrieve orders',
+      details: error.message
+    });
+  }
+};
+
+
+
+
+const getOrderByUser = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    const orders = await Order.findAll({ where: { user_id } });
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'No orders found for this user'
+      });
+    }
+
+    const enrichedOrders = await Promise.all(
+      orders.map(async (order) => {
+        try {
+          // 1. Get item IDs for this order
+          const orderItems = await OrderItem.findAll({
+            where: { order_id: order.id }
+          });
+          const itemIds = orderItems.map((oi) => oi.item_id);
+
+          // 2. Fetch items from restaurant service
+          let items = [];
+          if (itemIds.length > 0) {
+            const itemRes = await axios.get('http://localhost:3005/api/restaurants/item/byIds', {
+              params: { ids: itemIds.join(',') }
+            });
+            items = itemRes.data.items;
+          }
+
+          // 3. Get restaurant info
+          const restaurantRes = await axios.get(
+            `http://localhost:3005/api/restaurants/getRestaurent/${order.restaurant_id}`
+          );
+          const restaurant = restaurantRes.data.restaurant;
+
+          
+
+          return {
+            ...order.toJSON(),
+            restaurant,
+            items,
+          };
+        } catch (err) {
+          console.error(`❌ Failed to enrich order ID ${order.id}:`, err.message);
+          return {
+            ...order.toJSON(),
+            restaurant: null,
+            items: [],
+            user: null
+          };
+        }
+      })
+    );
+
+    res.json({ orders: enrichedOrders });
+
+  } catch (error) {
+    console.error('❌ Get Orders by User Error:', error.message);
+    res.status(500).json({
+      error: 'Fetch Failed',
+      message: 'Unable to retrieve orders for this user',
+      details: error.message
+    });
+  }
+};
+
+
 module.exports = {
   createOrder,
   getAllOrders,
   getOrderById,
   updateOrder,
-  deleteOrder
+  deleteOrder,
+  getOrderByRestaurant,
+  getOrderByUser
 };

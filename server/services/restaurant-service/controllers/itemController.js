@@ -223,11 +223,35 @@ const getItemsByIds = async (req, res) => {
   }
 };
 
+const getRestaurentItem = async (req, res) => {
+    try {
+    const { restaurant_id } = req.params;
+    const item = await Item.findAll({ where: { restaurant_id } });
+
+    if (!item) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'Menu not found'
+      });
+    }
+
+    res.json({ item });
+
+  } catch (error) {
+    console.error('❌ Get Menu Error:', error);
+    res.status(500).json({
+      error: 'Fetch Failed',
+      message: 'Unable to retrieve the menu',
+      details: error.message
+    });
+  }
+};
 module.exports = {
   createItem,
   getAllItems,
   getItemById,
   updateItem,
   deleteItem,
-  getItemsByIds
+  getItemsByIds,
+  getRestaurentItem
 };

@@ -4,7 +4,23 @@ const Delivery = require('../models/Delivery');
 // ✅ Create Delivery
 const createDelivery = async (req, res) => {
   try {
-    const delivery = await Delivery.create(req.body);
+    const { user_id, order_id, status} = req.body;
+
+    // Cheack the if delivery already exist
+    const findDelivery = await Delivery.findOne({ where: { order_id } } );
+
+    if (findDelivery) {
+      return res.status(409).json({
+        error: 'Alredy exist',
+        message: 'Delivery for this order already exist'
+      });
+    }
+
+    const delivery = await Delivery.create({
+      user_id,
+      order_id,
+      status
+    });
 
     res.status(201).json({
       message: 'Delivery created successfully',
