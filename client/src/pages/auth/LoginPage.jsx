@@ -69,7 +69,25 @@ const LoginPage = () => {
     };
     
     const allowedPaths = rolePaths[userRole] || ['/'];
-    return allowedPaths.some(allowedPath => path.startsWith(allowedPath));
+    
+    // Special handling for root path to avoid conflicts
+    if (path === '/') {
+      return ['client', 'user', 'customer'].includes(userRole);
+    }
+    
+    // For specific role paths, ensure exact match or proper prefix
+    if (path.startsWith('/admin')) {
+      return userRole === 'admin';
+    }
+    if (path.startsWith('/restaurant')) {
+      return userRole === 'restaurant';
+    }
+    if (path.startsWith('/livreur')) {
+      return userRole === 'delivery';
+    }
+    
+    // For any other paths, only allow if user role is client/user/customer
+    return ['client', 'user', 'customer'].includes(userRole);
   };
 
   const handleChange = (e) => {
