@@ -2,19 +2,41 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure upload directory exists
-const uploadDir = 'uploads/menus';
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+// Ensure upload directories exist
+const uploadDirMenus = 'uploads/menus';
+const uploadDirItems = 'uploads/items';
+if (!fs.existsSync(uploadDirMenus)) {
+  fs.mkdirSync(uploadDirMenus, { recursive: true });
+}
+if (!fs.existsSync(uploadDirItems)) {
+  fs.mkdirSync(uploadDirItems, { recursive: true });
 }
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
+    // Determine upload directory based on the route
+    let uploadDir;
+    if (req.originalUrl.includes('/item/')) {
+      uploadDir = uploadDirItems;
+    } else if (req.originalUrl.includes('/menu/')) {
+      uploadDir = uploadDirMenus;
+    } else {
+      uploadDir = uploadDirMenus; // default fallback
+    }
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    const filename = `menu-${Date.now()}${ext}`;
+    // Determine filename prefix based on the route
+    let prefix;
+    if (req.originalUrl.includes('/item/')) {
+      prefix = 'item';
+    } else if (req.originalUrl.includes('/menu/')) {
+      prefix = 'menu';
+    } else {
+      prefix = 'upload'; // default fallback
+    }
+    const filename = `${prefix}-${Date.now()}${ext}`;
     cb(null, filename);
   }
 });

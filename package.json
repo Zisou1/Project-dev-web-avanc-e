@@ -27,9 +27,13 @@
     "nodemon": "^2.0.22"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "axios": "^1.4.0",
     "dotenv": "^16.0.3",
-    "multer": "^2.0.1"
+    "multer": "^2.0.1",
+    "react-icons": "^5.5.0"
   },
   "keywords": [
     "microservices",
