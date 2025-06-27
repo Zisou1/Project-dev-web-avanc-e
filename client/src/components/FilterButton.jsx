@@ -48,7 +48,7 @@ const FilterButton = ({ fields, onApply, initial = {} }) => {
         aria-label="Afficher les filtres"
         type="button"
       >
-        <FontAwesomeIcon icon={faFilter} className={`text-4xl text-black transition-transform duration-300 ${show ? 'rotate-90 scale-110' : ''}`} />
+        <FontAwesomeIcon icon={faFilter} className={`text-4xl text-[#ff5c5c] transition-transform duration-300 ${show ? 'rotate-90 scale-110' : ''}`} />
       </button>
       {show && (
         <div

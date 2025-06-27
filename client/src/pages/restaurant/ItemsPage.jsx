@@ -182,27 +182,34 @@ export default function ItemsPage() {
   }, [showFilter]);
 
   return (
-    <div className="min-h-screen bg-white py-4 px-0.5 sm:px-2 relative z-10 text-[0.92rem]">
-      <div className="max-w-[95vw] xl:max-w-[900px] mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-          <h2 className="text-xl font-extrabold text-gray-900 tracking-tight mb-0">mes articles</h2>
+    <div className="min-h-screen bg-white py-8 px-2 sm:px-4 relative z-10 text-[0.97rem]">
+      <div className="max-w-[98vw] xl:max-w-[950px] mx-auto bg-white rounded-2xl shadow-2xl p-6 sm:p-10 border border-[#ffe3e3]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+          <h2 className="text-2xl font-extrabold text-[#ff5c5c] tracking-tight mb-0 flex items-center gap-2">
+            <span className="inline-block bg-[#ffedea] rounded-full px-3 py-1 text-[#ff5c5c] text-base font-semibold shadow-sm">Mes articles</span>
+          </h2>
           <Button 
-            className="bg-[#ff5c5c] hover:bg-[#ff7e7e] text-white font-bold px-6 py-2 rounded-lg shadow-md transition text-base w-full sm:w-auto"
+            className="bg-[#ff5c5c] hover:bg-[#ff7e7e] text-white font-bold px-7 py-2.5 rounded-full shadow-lg transition text-base w-full sm:w-auto border-2 border-[#ffb3a7] focus:ring-2 focus:ring-[#ffb3a7] focus:outline-none"
             onClick={() => navigate('/restaurant/items/add')}
           >
-            Ajouter articles
+            + Ajouter un article
           </Button>
         </div>
-        <div className="flex items-center gap-1 mb-4 w-full relative">
-          <FilterButton fields={filterFields} onApply={setFilters} />
+        <div className="flex items-center gap-2 mb-5 w-full relative">
+          <FilterButton 
+            fields={filterFields} 
+            onApply={setFilters} 
+            iconColor="#ff5c5c" 
+            buttonClassName="bg-[#ff5c5c] hover:bg-[#ff7e7e] text-white font-bold px-4 py-2 rounded-full shadow transition border-2 border-[#ffb3a7] focus:ring-2 focus:ring-[#ffb3a7] focus:outline-none"
+          />
           <div className="flex-1">
-            <SearchBar query={searchTerm} setQuery={setSearchTerm} placeholder="search" />
+            <SearchBar query={searchTerm} setQuery={setSearchTerm} placeholder="Rechercher..." />
           </div>
         </div>
-        <hr className="border-gray-300 mb-1" />
+        <hr className="border-[#ffd6d6] mb-2" />
         {loading && (
-          <div className="text-center py-4 text-gray-700 text-sm z-10">
-            Chargement...
+          <div className="text-center py-6 text-[#ff5c5c] text-lg font-semibold animate-pulse z-10">
+            Chargement des articles...
           </div>
         )}
         {error && <ErrorMessage error={error} />}
@@ -211,7 +218,32 @@ export default function ItemsPage() {
             columns={columns} 
             data={filteredArticles} 
             actions={tableActions} 
+            className="rounded-xl overflow-hidden shadow border border-[#ffe3e3] bg-white"
+            rowClassName="hover:bg-[#fff0f0] transition cursor-pointer"
+            headerClassName="bg-[#ffedea] text-[#ff5c5c] text-base font-bold"
           />
+        </div>
+        {/* Mobile table fallback */}
+        <div className="sm:hidden mt-4">
+          {filteredArticles.length === 0 && !loading ? (
+            <div className="text-center text-gray-500 py-6">Aucun article trouvé.</div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {filteredArticles.map(article => (
+                <div key={article.id} className="bg-white rounded-xl shadow border border-[#ffe3e3] p-4 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <div className="font-bold text-[#ff5c5c] text-lg truncate max-w-[60vw]">{article.name}</div>
+                    {tableActions(article)}
+                  </div>
+                  <div className="text-gray-700 text-sm line-clamp-2">{article.description}</div>
+                  <div className="flex items-center gap-4 mt-1">
+                    <span className="bg-[#ffedea] text-[#ff5c5c] px-3 py-1 rounded-full text-xs font-semibold">Prix: {article.price} DA</span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${article.status ? 'bg-[#eaffea] text-[#2ecc40]' : 'bg-[#ffeaea] text-[#ff5c5c]'}`}>{article.status ? 'En stock' : 'Indisponible'}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       {deleteId && (

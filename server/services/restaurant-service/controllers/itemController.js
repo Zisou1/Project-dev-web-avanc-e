@@ -64,7 +64,15 @@ const createItem = async (req, res) => {
 const getAllItems = async (req, res) => {
   try {
     const items = await Item.findAll();
-    res.json({ items });
+    // Add full imageUrl to each item
+    const itemsWithFullUrl = items.map(item => {
+      let imageUrl = item.imageUrl;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+      }
+      return { ...item.toJSON(), imageUrl };
+    });
+    res.json({ items: itemsWithFullUrl });
   } catch (error) {
     console.error('❌ Fetch items Error:', error);
     res.status(500).json({
@@ -89,7 +97,12 @@ const getItemById = async (req, res) => {
       });
     }
 
-    res.json({ item });
+    let imageUrl = item.imageUrl;
+    if (imageUrl && !imageUrl.startsWith('http')) {
+      imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+    }
+
+    res.json({ item: { ...item.toJSON(), imageUrl } });
 
   } catch (error) {
     console.error('❌ Get item Error:', error);
@@ -106,9 +119,8 @@ const getItemById = async (req, res) => {
 const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const {  restaurant_id, name, price, status, imageUrl } = req.body;
-
-
+    const { restaurant_id, name, price, status, description } = req.body;
+    const image = req.file;
 
     const item = await Item.findByPk(id);
     if (!item) {
@@ -120,11 +132,18 @@ const updateItem = async (req, res) => {
 
     // Optional update image
     let imagePath = item.imageUrl;
-    if (imageUrl) {
+    if (image) {
       imagePath = `/uploads/items/${image.filename}`;
     }
 
-    await item.update({restaurant_id, name, price, status, imageUrl: imagePath });
+    await item.update({
+      restaurant_id,
+      name,
+      price,
+      status,
+      imageUrl: imagePath,
+      description
+    });
 
     res.json({
       message: 'item updated successfully',
@@ -134,7 +153,8 @@ const updateItem = async (req, res) => {
         restaurant_id: item.restaurant_id,
         price: item.price,
         status: item.status,
-        imageUrl: `${req.protocol}://${req.get('host')}${imagePath}`
+        imageUrl: `${req.protocol}://${req.get('host')}${imagePath}`,
+        description: item.description
       }
     });
 
