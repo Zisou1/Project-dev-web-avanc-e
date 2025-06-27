@@ -191,6 +191,12 @@ const DashboardLayout = () => {
               active: location.pathname.startsWith('/restaurant/menu')
             },
             {
+              name: 'Gestion Items',
+              icon: faBox, // changed from faUtensils to faBox for items
+              path: '/restaurant/Items',
+              active: location.pathname.startsWith('/restaurant/Items')
+            },
+            {
               name: 'Commandes',
               icon: faClipboardList,
               path: '/restaurant/orders',

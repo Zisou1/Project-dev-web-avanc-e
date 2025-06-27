@@ -42,6 +42,7 @@ function App() {
             {/* Nested restaurant routes */}
             <Route index element={<RestaurantPage />} />
             <Route path="dashboard" element={<RestaurantPage />} />
+            <Route path="Items" element={<div>Items Management Page</div>} />
             <Route path="menu" element={<div>Menu Management Page</div>} />
             <Route path="orders" element={<div>Restaurant Orders Page</div>} />
             <Route path="analytics" element={<div>Restaurant Analytics Page</div>} />
