@@ -7,7 +7,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
 import RestaurantPage from './pages/restaurant/restaurantPage'
-import ClientPage from './pages/client/clientPage'
+import ClientPage from './pages/client/ClientPage'
+import HistoriqueClient from './pages/client/HistoriqueClient'
 import LivreurPage from './pages/livreur/livreurPage'
 import AdminPage from './pages/admin/adminPage'
 import LoginPage from './pages/auth/LoginPage'
@@ -31,7 +32,13 @@ function App() {
             <Layout>
               <ClientPage />
             </Layout>
-          } />         
+          } />
+                  
+          <Route path="/historique-client" element={
+            <Layout>
+              <HistoriqueClient />
+            </Layout>
+          } />
           
           {/* Restaurant Routes with DashboardLayout */}
           <Route path="/restaurant" element={
