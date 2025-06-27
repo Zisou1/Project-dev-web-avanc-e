@@ -18,14 +18,6 @@ const LivreurInfoCard = ({ livreur }) => {
           <span className="text-gray-600">Téléphone:</span>
           <span className="font-semibold text-blue-600">{livreur.phone}</span>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-gray-600">Zone:</span>
-          <span className="font-semibold text-gray-800">{livreur.zone}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-gray-600">Statut:</span>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${livreur.status === 'En ligne' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{livreur.status}</span>
-        </div>
       </div>
     </div>
   );

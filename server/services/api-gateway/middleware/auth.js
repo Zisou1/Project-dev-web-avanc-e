@@ -48,13 +48,15 @@ const authenticateToken = (req, res, next) => {
       req.headers['x-user-email'] = decoded.email;
       req.headers['x-user-role'] = decoded.role;
       req.headers['x-user-name'] = decoded.name;
+      req.headers['x-user-phone'] = decoded.phone;
       
       // Optional: Add decoded user to req object for logging
       req.user = {
         id: decoded.id || decoded.userId,
         email: decoded.email,
         role: decoded.role,
-        name: decoded.name
+        name: decoded.name,
+        phone: decoded.phone
       };
 
       console.log(`🔐 Authenticated user: ${decoded.email} (${decoded.role})`);
@@ -107,6 +109,7 @@ const optionalAuth = (req, res, next) => {
       req.headers['x-user-email'] = decoded.email;
       req.headers['x-user-role'] = decoded.role;
       req.headers['x-user-name'] = decoded.name;
+      req.headers['x-user-phone'] = decoded.phone;
       req.user = decoded;
     }
     next();

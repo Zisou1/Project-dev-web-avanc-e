@@ -1,6 +1,6 @@
 import React from 'react';
 import ProfileFormInput from "./ProfileFormInput";
-import ProfileButtons from "./ProfileButtons";
+import Button from "./Button";
 
 const LivreurForm = ({ form, editing, onChange, onSave, status, error, onCancel, onDelete }) => (
   <form className="w-full max-w-md space-y-6" onSubmit={onSave}>
@@ -12,7 +12,18 @@ const LivreurForm = ({ form, editing, onChange, onSave, status, error, onCancel,
     {status && <div className="text-green-600 text-center">{status}</div>}
     {error && <div className="text-red-600 text-center">{error}</div>}
     
-    <ProfileButtons editing={editing} onCancel={onCancel} onDelete={onDelete} />
+    <div className="flex justify-center gap-4 mt-8">
+      <div className="w-32">
+        <Button type="submit" variant="primary">
+          Enregistrer
+        </Button>
+      </div>
+      <div className="w-32">
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          Annuler
+        </Button>
+      </div>
+    </div>
   </form>
 );
 

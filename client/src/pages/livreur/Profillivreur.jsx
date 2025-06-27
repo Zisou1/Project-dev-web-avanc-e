@@ -4,7 +4,7 @@ import { authService } from '../../services/authService';
 import DeleteAnimation from "../../components/DeleteAnimation";
 import LivreurInfoCard from "../../components/LivreurInfoCard";
 import LivreurForm from "../../components/LivreurForm";
-import ProfileButtons from "../../components/ProfileButtons";
+import Button from "../../components/Button";
 
 const Profillivreur = () => {
   const { user, setUser } = useAuth();
@@ -114,7 +114,18 @@ const Profillivreur = () => {
             <div className="w-full mb-6">
               <LivreurInfoCard livreur={user} />
             </div>
-            <ProfileButtons editing={editing} onEdit={handleEdit} onDelete={handleDelete} />
+            <div className="flex justify-center gap-4 mt-8">
+              <div className="w-32">
+                <Button type="button" variant="primary" onClick={handleEdit}>
+                  Modifier
+                </Button>
+              </div>
+              <div className="w-40">
+                <Button type="button" variant="secondary" onClick={handleDelete}>
+                  Supprimer compte
+                </Button>
+              </div>
+            </div>
           </>
         )}
         {editing && (

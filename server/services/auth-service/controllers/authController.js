@@ -11,7 +11,8 @@ const generateTokens = (user) => {
     id: user.id,
     email: user.email,
     role: user.role,
-    name: user.name
+    name: user.name,
+    phone: user.phone
   };
 
   const accessToken = jwt.sign(

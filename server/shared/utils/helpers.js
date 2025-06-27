@@ -50,7 +50,8 @@ const getUserFromHeaders = (req) => {
     id: req.headers['x-user-id'],
     email: req.headers['x-user-email'],
     role: req.headers['x-user-role'],
-    name: req.headers['x-user-name']
+    name: req.headers['x-user-name'],
+    phone: req.headers['x-user-phone']
   };
 };
 

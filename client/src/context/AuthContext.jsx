@@ -33,7 +33,8 @@ export const AuthProvider = ({ children }) => {
                 id: tokenPayload.id,
                 email: tokenPayload.email,
                 name: tokenPayload.name,
-                role: tokenPayload.role
+                role: tokenPayload.role,
+                phone: tokenPayload.phone
               };
               setUser(userData);
             } else {

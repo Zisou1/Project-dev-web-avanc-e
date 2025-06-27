@@ -1,37 +1,33 @@
+import React from 'react';
+import Button from './Button';
+
 const ProfileButtons = ({ editing, onEdit, onCancel, onDelete }) => (
-  <div className="flex justify-center gap-8 mt-8">
+  <div className="flex justify-center gap-4 mt-8">
     {editing ? (
       <>
-        <button
-          type="submit"
-          className="bg-[#FF5C39] text-white px-10 py-3 rounded-full shadow-md text-lg font-semibold hover:bg-[#ff3c1a] transition"
-        >
-          Enregistrer
-        </button>
-        <button
-          type="button"
-          className="bg-[#FF5C39] text-white px-10 py-3 rounded-full shadow-md text-lg font-semibold hover:bg-[#ff3c1a] transition"
-          onClick={onCancel}
-        >
-          Annuler
-        </button>
+        <div className="w-32">
+          <Button type="submit" variant="primary">
+            Enregistrer
+          </Button>
+        </div>
+        <div className="w-32">
+          <Button type="button" variant="secondary" onClick={onCancel}>
+            Annuler
+          </Button>
+        </div>
       </>
     ) : (
       <>
-        <button
-          type="button"
-          className="bg-[#FF5C39] text-white px-10 py-3 rounded-full shadow-md text-lg font-semibold hover:bg-[#ff3c1a] transition"
-          onClick={onEdit}
-        >
-          Modifier
-        </button>
-        <button
-          type="button"
-          className="bg-red-600 text-white px-8 py-2 rounded-full shadow-md text-base font-semibold hover:bg-red-700 transition"
-          onClick={onDelete}
-        >
-          Supprimer mon compte
-        </button>
+        <div className="w-32">
+          <Button type="button" variant="primary" onClick={onEdit}>
+            Modifier
+          </Button>
+        </div>
+        <div className="w-40">
+          <Button type="button" variant="secondary" onClick={onDelete}>
+            Supprimer compte
+          </Button>
+        </div>
       </>
     )}
   </div>

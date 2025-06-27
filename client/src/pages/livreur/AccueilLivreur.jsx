@@ -11,9 +11,7 @@ const AccueilLivreur = () => {
     commandesTerminer: 5,
     revenusJour: '7800 DA',
     rating: 4.8,
-    totalDeliveries: 1247,
-    zone: 'Centre-ville',
-    status: 'En ligne'
+    totalDeliveries: 1247
   };
 
   const recentOrders = [
@@ -48,11 +46,6 @@ const AccueilLivreur = () => {
           <div className="lg:col-span-1 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-800">Profil Livreur</h2>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                livreur.status === 'En ligne' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
-                {livreur.status}
-              </span>
             </div>
             <div className="space-y-3">
               <div className="flex items-center">
@@ -62,10 +55,6 @@ const AccueilLivreur = () => {
               <div className="flex items-center">
                 <span className="text-gray-600 w-24">Téléphone:</span>
                 <span className="font-semibold text-blue-600">{livreur.phone}</span>
-              </div>
-              <div className="flex items-center">
-                <span className="text-gray-600 w-24">Zone:</span>
-                <span className="font-semibold text-gray-800">{livreur.zone}</span>
               </div>
               <div className="flex items-center">
                 <span className="text-gray-600 w-24">Note:</span>
