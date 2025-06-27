@@ -55,13 +55,9 @@ export default function AddItemPage() {
       data.append("price", parseInt(form.price, 10));
       data.append("status", form.status ? "true" : "false");
       data.append("image", form.image); // always append image, required by backend
-      // Attach restaurant_id from user in localStorage if available
-      try {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user?.id) {
-          data.append('restaurant_id', user.id);
-        }
-      } catch (e) {}
+      if (form.description) {
+        data.append("description", form.description);
+      }
       // Debug: log FormData keys and values
       for (let pair of data.entries()) {
         console.log(pair[0]+ ':', pair[1]);

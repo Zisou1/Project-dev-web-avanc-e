@@ -26,9 +26,8 @@ export const itemService = {
         data.append('restaurant_id', user.id);
       }
     } catch (e) {}
-    const response = await api.post('/restaurants/item/creat', data, {
+    const response = await api.post('/restaurants/item/create', data, {
       headers: {
-        'Content-Type': 'multipart/form-data',
         'Accept': 'application/json',
       },
     });
@@ -50,7 +49,6 @@ export const itemService = {
     } catch (e) {}
     const response = await api.put(`/restaurants/item/update/${id}`, data, {
       headers: {
-        'Content-Type': 'multipart/form-data',
         'Accept': 'application/json',
       },
     });

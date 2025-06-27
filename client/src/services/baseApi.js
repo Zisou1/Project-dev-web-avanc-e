@@ -5,7 +5,6 @@ const API_BASE_URL = 'http://localhost:3000';
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api`,
   headers: {
-    'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
 });
@@ -16,6 +15,16 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Set Content-Type based on request data
+    if (config.data instanceof FormData) {
+      // Let axios set the multipart/form-data Content-Type automatically
+      delete config.headers['Content-Type'];
+    } else if (config.data && typeof config.data === 'object') {
+      // Set JSON Content-Type for object data
+      config.headers['Content-Type'] = 'application/json';
+    }
+    
     return config;
   },
   (error) => Promise.reject(error)

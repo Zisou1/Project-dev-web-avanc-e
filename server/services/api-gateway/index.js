@@ -48,9 +48,26 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Body parsing middleware - but skip for multipart/form-data
+app.use((req, res, next) => {
+  const contentType = req.get('Content-Type') || '';
+  if (contentType.includes('multipart/form-data')) {
+    // Skip body parsing for multipart requests to preserve the stream
+    console.log('🔍 [GATEWAY] Skipping body parsing for multipart request');
+    return next();
+  }
+  // Apply body parsing for other requests
+  express.json({ limit: '10mb' })(req, res, next);
+});
+
+app.use((req, res, next) => {
+  const contentType = req.get('Content-Type') || '';
+  if (contentType.includes('multipart/form-data')) {
+    // Skip body parsing for multipart requests
+    return next();
+  }
+  express.urlencoded({ extended: true, limit: '10mb' })(req, res, next);
+});
 
 // Logging middleware
 app.use(logger);
@@ -138,9 +155,19 @@ const proxyRequest = async (req, res, targetUrl, pathRewrite = {}) => {
       maxRedirects: 0, // Disable redirects in proxy
     };
     
-    // Only add data for requests that can have a body
-    if (['post', 'put', 'patch'].includes(req.method.toLowerCase()) && req.body) {
-      axiosConfig.data = req.body;
+    // Handle request body/data
+    const contentType = req.get('Content-Type') || '';
+    if (['post', 'put', 'patch'].includes(req.method.toLowerCase())) {
+      if (contentType.includes('multipart/form-data')) {
+        // For multipart requests, stream the raw request
+        console.log('🔍 [GATEWAY] Streaming multipart data');
+        axiosConfig.data = req;
+        axiosConfig.maxBodyLength = Infinity;
+        axiosConfig.maxContentLength = Infinity;
+      } else if (req.body) {
+        // For other requests, use the parsed body
+        axiosConfig.data = req.body;
+      }
     }
     
     const response = await axios(axiosConfig);

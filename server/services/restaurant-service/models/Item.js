@@ -30,7 +30,8 @@ const Restaurant = sequelize.define('Item', {
     allowNull: false, 
     validate: {
       notEmpty: true,
-      len: [2, 100]
+      min: 0,
+      max: 999999
     }
   },
   status: {
@@ -46,6 +47,10 @@ const Restaurant = sequelize.define('Item', {
     validate: {
       notEmpty: true,
     }
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   }
 },
 {

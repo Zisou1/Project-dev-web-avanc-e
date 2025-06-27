@@ -81,8 +81,12 @@ const validateMenu = (req, res, next) => {
  */
 const validateItem = (req, res, next) => {
   const schema = Joi.object({
-    restaurant_id: Joi.number().integer().required().messages({
+    restaurant_id: Joi.alternatives().try(
+      Joi.number().integer(),
+      Joi.string().pattern(/^\d+$/).custom((value) => parseInt(value, 10))
+    ).required().messages({
       'number.base': 'Restaurant ID must be a number',
+      'string.pattern.base': 'Restaurant ID must be a valid number string',
       'any.required': 'Restaurant ID is required'
     }),
     name: Joi.string().min(2).max(100).required().messages({
@@ -90,20 +94,27 @@ const validateItem = (req, res, next) => {
       'string.max': 'Name must not exceed 100 characters',
       'any.required': 'Name is required'
     }),
-    price: Joi.number().required().messages({
+    price: Joi.alternatives().try(
+      Joi.number(),
+      Joi.string().pattern(/^\d+(\.\d+)?$/).custom((value) => parseFloat(value))
+    ).required().messages({
       'number.base': 'Price must be a number',
+      'string.pattern.base': 'Price must be a valid number string',
       'any.required': 'Price is required'
     }),
-    status: Joi.boolean().required().messages({
-      'boolean.base': 'Status must be a boolean',
-      'any.required': 'Status is required'
+    status: Joi.alternatives().try(
+      Joi.boolean(),
+      Joi.string().valid('true', 'false').custom((value) => value === 'true')
+    ).required().messages({
+      'any.required': 'Status is required',
+      'alternatives.match': 'Status must be a boolean or "true"/"false" string'
     }),
-    image: Joi.string().required().messages({
-      'any.required': 'Image URL is required'
+    description: Joi.string().optional().allow('').messages({
+      'string.base': 'Description must be a string'
     })
   });
 
-  const { error, value } = schema.validate(req.body);
+  const { error, value } = schema.validate(req.body, { allowUnknown: true });
   if (error) {
     return res.status(400).json({
       error: 'Validation Error',
