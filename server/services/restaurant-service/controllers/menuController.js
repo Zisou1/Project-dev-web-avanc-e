@@ -95,7 +95,21 @@ const getMenuById = async (req, res) => {
       });
     }
 
-    res.json({ menu });
+    // Always return full image URL
+    const imageUrl = menu.imageUrl && !menu.imageUrl.startsWith('http')
+      ? `${req.protocol}://${req.get('host')}${menu.imageUrl}`
+      : menu.imageUrl;
+
+    res.json({
+      menu: {
+        id: menu.id,
+        name: menu.name,
+        restaurant_id: menu.restaurant_id,
+        price: menu.price,
+        status: menu.status,
+        imageUrl
+      }
+    });
 
   } catch (error) {
     console.error('❌ Get Menu Error:', error);
@@ -112,8 +126,8 @@ const getMenuById = async (req, res) => {
 const updateMenu = async (req, res) => {
   try {
     const { id } = req.params;
-    const { restaurant_id, name, price, status, imageUrl } = req.body ?? {};
-
+    const { restaurant_id, name, price, status } = req.body ?? {};
+    const image = req.file;
 
     const menu = await Menu.findByPk(id);
     if (!menu) {
@@ -123,13 +137,13 @@ const updateMenu = async (req, res) => {
       });
     }
 
-    // Optional update image
+    // Only update image if a new one is uploaded
     let imagePath = menu.imageUrl;
-    if (imageUrl) {
+    if (image) {
       imagePath = `/uploads/menus/${image.filename}`;
     }
 
-    await menu.update({restaurant_id, name, price, status, imageUrl: imagePath });
+    await menu.update({ restaurant_id, name, price, status, imageUrl: imagePath });
 
     res.json({
       message: 'Menu updated successfully',

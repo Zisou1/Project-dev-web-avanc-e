@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import ErrorMessage from "../../components/ErrorMessage";
 import { menuService } from "../../services/menuService";
+import { FaImage, FaBoxOpen, FaDollarSign, FaSortNumericUp } from "react-icons/fa";
 
 export default function EditMenuPage() {
   const { id } = useParams();
@@ -11,6 +12,7 @@ export default function EditMenuPage() {
   const [restaurantId, setRestaurantId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [preview, setPreview] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,9 +25,15 @@ export default function EditMenuPage() {
         setForm({
           name: menu.name || "",
           price: menu.price || "",
-          status: menu.status,
+          status: typeof menu.status === 'boolean' ? menu.status : !!menu.status,
           image: null,
         });
+        // Use backend endpoint for image preview
+        if (menu.imageUrl && !menu.imageUrl.startsWith('http')) {
+          setPreview(`${window.location.origin}${menu.imageUrl}`);
+        } else {
+          setPreview(menu.imageUrl || null);
+        }
         setCurrentImageUrl(menu.imageUrl || "");
         setRestaurantId(menu.restaurant_id || "");
       } catch (err) {
@@ -41,8 +49,13 @@ export default function EditMenuPage() {
     const { name, value, type, files, checked } = e.target;
     if (type === "file") {
       setForm((prev) => ({ ...prev, image: files[0] }));
+      setPreview(files[0] ? URL.createObjectURL(files[0]) : null);
     } else if (type === "checkbox" && name === "status") {
       setForm((prev) => ({ ...prev, status: checked }));
+    } else if (name === "price") {
+      // Only allow non-negative numbers
+      const val = value.replace(/[^\d.]/g, "");
+      setForm((prev) => ({ ...prev, price: val }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -52,13 +65,19 @@ export default function EditMenuPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    // Collect all validation errors
+    const errors = [];
     if (!form.name || form.name.length < 2) {
-      setError("Le nom du menu est requis.");
-      setLoading(false);
-      return;
+      errors.push("Le nom du menu est requis et doit comporter au moins 2 caractères pour permettre une identification claire du menu.");
     }
-    if (!form.price || isNaN(form.price) || Number(form.price) < 0) {
-      setError("Le prix doit être un nombre positif.");
+    if (!form.price || isNaN(form.price)) {
+      errors.push("Le prix du menu est requis et doit être un nombre.");
+    } else if (Number(form.price) < 10) {
+      errors.push("Le prix du menu ne peut pas être inférieur à 10. Veuillez entrer un prix d'au moins 10 pour garantir la viabilité du menu.");
+    }
+    // No image required for edit
+    if (errors.length > 0) {
+      setError(errors);
       setLoading(false);
       return;
     }
@@ -72,102 +91,106 @@ export default function EditMenuPage() {
       await menuService.update(id, data);
       navigate("/restaurant/menu");
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Erreur lors de la modification du menu");
+      setError([err.response?.data?.message || err.message || "Erreur lors de la modification du menu"]);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#fff0e6] via-[#ffe3e3] to-[#fff]">
-      <div className="w-full max-w-lg mx-auto bg-white/95 rounded-3xl shadow-2xl border border-[#ffd6d6] backdrop-blur-lg overflow-hidden flex flex-col items-center" style={{ boxShadow: '0 8px 32px 0 rgba(255, 92, 66, 0.12), 0 1.5px 8px 0 rgba(255, 92, 66, 0.08)', minHeight: '650px' }}>
-        <div className="w-full flex flex-col items-center pt-8 pb-2 px-6 border-b border-[#ffe3e3] bg-gradient-to-r from-[#fff0e6] to-[#ffe3e3]">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#ff5c42] text-center tracking-tight drop-shadow-lg">Modifier le menu</h2>
+    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto mt-12 p-10 rounded-3xl shadow-2xl flex flex-col gap-10 border border-[#ffe3e3] bg-white">
+      <h2 className="text-2xl font-extrabold text-[#ff5c42] mb-2 text-center tracking-tight">Modifier le menu</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="flex flex-col gap-3">
+          <label className="font-semibold mb-1 flex items-center gap-2 text-[#ff5c42]"><FaImage className="text-[#ffb3a7] text-xl" /> Image du menu</label>
+          <label className="flex flex-col items-center justify-center border-2 border-dashed border-[#ffb3a7] rounded-xl p-6 cursor-pointer hover:border-[#ff5c42] transition group min-h-[180px]">
+            {form.image ? (
+              <img src={URL.createObjectURL(form.image)} alt="preview" className="h-28 object-contain mb-2 rounded-lg shadow" />
+            ) : preview ? (
+              <img src={preview} alt="preview" className="h-28 object-contain mb-2 rounded-lg shadow" />
+            ) : (
+              <FaImage className="text-5xl text-[#ffd6d6] mb-2 group-hover:text-[#ffb3a7] transition" />
+            )}
+            <span className="text-sm text-gray-600 mb-1">{form.image ? form.image.name : "Choisir une image"}</span>
+            <input
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={handleChange}
+              className="hidden"
+            />
+          </label>
         </div>
-        <form
-          onSubmit={handleSubmit}
-          className="w-full flex flex-col gap-5 p-6 sm:p-8 max-h-[85vh] overflow-y-auto"
-        >
-          <div className="flex flex-row gap-6 items-start">
-            <div className="flex flex-col gap-3 flex-1">
-              <label className="font-semibold text-[#ff5c42]">Nom du menu</label>
+        <div className="flex flex-col gap-6 justify-between">
+          <div className="flex flex-col gap-2">
+            <label className="font-semibold mb-1 flex items-center gap-2 text-[#ff5c42]"><FaBoxOpen className="text-[#ffb3a7] text-lg" /> Nom du menu</label>
+            <div className="relative">
+              <FaBoxOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-[#ffb3a7] text-lg" />
               <input
+                className="border border-[#ffd6d6] rounded-full px-10 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#ffb3a7] bg-[#fff7f0] placeholder:text-gray-400"
                 name="name"
+                placeholder="Nom"
                 value={form.name}
                 onChange={handleChange}
                 required
-                className="border-2 border-[#ffd6d6] rounded-xl px-4 py-2 focus:outline-none focus:border-[#ff5c42] transition text-lg bg-[#fff8f6] shadow-sm"
-                placeholder="Nom du menu"
               />
-              <label className="font-semibold text-[#ff5c42] mt-1">Prix</label>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="font-semibold mb-1 flex items-center gap-2 text-[#ff5c42]"><FaDollarSign className="text-[#ffb3a7] text-lg" /> Prix du menu</label>
+            <div className="relative">
+              <FaDollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-[#ffb3a7] text-lg" />
               <input
+                className="border border-[#ffd6d6] rounded-full px-10 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#ffb3a7] bg-[#fff7f0] placeholder:text-gray-400"
                 name="price"
                 type="number"
                 min="0"
+                step="any"
+                placeholder="Prix"
                 value={form.price}
                 onChange={handleChange}
+                onKeyDown={e => {
+                  if (e.key === "-" || e.key === "e") e.preventDefault();
+                }}
                 required
-                className="border-2 border-[#ffd6d6] rounded-xl px-4 py-2 focus:outline-none focus:border-[#ff5c42] transition text-lg bg-[#fff8f6] shadow-sm"
-                placeholder="Prix du menu"
               />
-              <div className="flex items-center gap-2 mt-1">
-                <input
-                  type="checkbox"
-                  name="status"
-                  checked={form.status}
-                  onChange={handleChange}
-                  className="accent-[#ff5c42] w-5 h-5 rounded focus:ring-2 focus:ring-[#ff5c42]"
-                  id="status-checkbox"
-                />
-                <label htmlFor="status-checkbox" className="font-semibold text-[#ff5c42] cursor-pointer select-none">Disponible</label>
-              </div>
-              <label className="font-semibold text-[#ff5c42] mt-1">Image</label>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="font-semibold mb-1 flex items-center gap-2 text-[#ff5c42]"><FaSortNumericUp className="text-[#ffb3a7] text-lg" /> Disponible</label>
+            <div className="flex items-center gap-2">
               <input
-                type="file"
-                name="image"
-                accept="image/*"
-                onChange={handleChange}
-                className="file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#ff5c42]/10 file:text-[#ff5c42] hover:file:bg-[#ff5c42]/20 transition"
+                type="checkbox"
+                name="status"
+                checked={!!form.status}
+                onChange={e => setForm(prev => ({ ...prev, status: e.target.checked }))}
+                className="h-5 w-5 text-[#ff5c42] border-[#ffd6d6] rounded focus:ring-[#ffb3a7]"
               />
-            </div>
-            <div className="flex flex-col items-center min-w-[120px]">
-              {form.image ? (
-                <img
-                  src={URL.createObjectURL(form.image)}
-                  alt="Aperçu de la nouvelle image"
-                  className="w-28 h-28 object-cover rounded-2xl border-2 border-[#ffd6d6] shadow-lg"
-                />
-              ) : currentImageUrl ? (
-                <img
-                  src={currentImageUrl.startsWith('http') ? currentImageUrl : `${window.location.origin}${currentImageUrl}`} 
-                  alt="Image actuelle du menu"
-                  className="w-28 h-28 object-cover rounded-2xl border-2 border-[#ffd6d6] shadow-lg"
-                  onError={e => { e.target.onerror = null; e.target.src = '/vite.svg'; }}
-                />
-              ) : (
-                <span className="text-gray-400 text-sm flex items-center">Aucune image</span>
-              )}
+              <span className="text-gray-700">En stock</span>
             </div>
           </div>
-          {error && <ErrorMessage error={error} />}
-          <div className="flex flex-col sm:flex-row gap-4 mt-2 justify-center">
-            <Button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="bg-gradient-to-r from-[#ffe3e3] to-[#fff0e6] text-[#ff5c42] px-8 py-2 rounded-full font-bold shadow hover:from-[#ffd6d6] hover:to-[#fff0e6] border border-[#ffd6d6] transition text-lg"
-            >
-              Retour
-            </Button>
-            <Button
-              type="submit"
-              className="bg-gradient-to-r from-[#ff5c42] to-[#ff8a65] text-white px-8 py-2 rounded-full font-bold shadow hover:from-[#ff6a5c] hover:to-[#ffb199] transition text-lg border border-[#ff5c42]"
-              disabled={loading}
-            >
-              {loading ? "Enregistrement..." : "Enregistrer"}
-            </Button>
-          </div>
-        </form>
+        </div>
       </div>
-    </div>
+      {Array.isArray(error) && error.length > 0 && (
+        <div className="mb-2">
+          <ul className="text-red-500 text-sm font-semibold list-disc pl-5">
+            {error.map((err, idx) => <li key={idx}>{err}</li>)}
+          </ul>
+        </div>
+      )}
+      {typeof error === 'string' && <ErrorMessage error={error} />}
+      <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-4">
+        <Button
+          type="button"
+          className="bg-gray-200 text-gray-800 px-8 py-2 rounded-full font-semibold shadow hover:bg-gray-300 transition"
+          onClick={() => navigate(-1)}
+        >
+          Retour
+        </Button>
+        <Button type="submit" className="bg-[#ff5c42] text-white px-16 py-3 rounded-full text-lg font-semibold shadow-md hover:bg-[#ff6a5c] transition" disabled={loading}>
+          {loading ? "Enregistrement..." : "Enregistrer"}
+        </Button>
+      </div>
+    </form>
   );
 }

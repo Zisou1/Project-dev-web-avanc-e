@@ -19,7 +19,9 @@ const DataTable = ({ columns, data, actions }) => {
             <tr key={row.id} className="border-b hover:bg-gray-100 transition">
               {columns.map((col) => (
                 <td key={col.key} className="py-3 px-6 text-base text-gray-900 max-w-xs truncate">
-                  {row[col.key]}
+                  {col.render
+                    ? col.render(row)
+                    : row[col.key]}
                 </td>
               ))}
               {actions && (

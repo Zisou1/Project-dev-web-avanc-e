@@ -71,7 +71,20 @@ export default function MenuPage() {
     { key: "id", label: "ID Menu" },
     { key: "name", label: "Nom du menu" },
     { key: "price", label: "Prix" },
-    { key: "status", label: "Disponible" },
+    {
+      key: "status",
+      label: "Disponible",
+      render: (row) => {
+        let value = row.status;
+        if (typeof value === "string") value = value.trim().toLowerCase();
+        const isAvailable = value === true || value === 1 || value === "1" || value === "true";
+        return (
+          <span className={isAvailable ? "text-green-600 font-semibold" : "text-red-500 font-semibold"}>
+            {isAvailable ? "Oui" : "Non"}
+          </span>
+        );
+      },
+    },
   ];
 
   // Actions dropdown for each menu row
@@ -143,6 +156,7 @@ export default function MenuPage() {
     />
   );
 
+  // Fix: ensure DataTable gets a key for actions
   return (
     <div className="min-h-screen py-4 px-2 sm:px-6 lg:px-8 relative text-[0.92rem]">
       <div className="w-full">
@@ -173,10 +187,23 @@ export default function MenuPage() {
             columns={columns} 
             data={filteredMenus} 
             actions={tableActions} 
+            keyField="id"
           />
         </div>
       </div>
       {/* ConfirmationModal can be added here if you have one */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="bg-white rounded-xl shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
+            <h3 className="text-lg font-bold mb-4 text-[#ff5c42]">Confirmer la suppression</h3>
+            <p className="mb-6 text-gray-700">Voulez-vous vraiment supprimer ce menu ?</p>
+            <div className="flex gap-4">
+              <Button onClick={handleCloseDeleteModal} className="bg-gray-200 text-gray-800 px-6 py-2 rounded-full font-semibold shadow hover:bg-gray-300 transition">Annuler</Button>
+              <Button onClick={handleConfirmDelete} className="bg-[#ff5c42] text-white px-6 py-2 rounded-full font-semibold shadow hover:bg-[#ff6a5c] transition">Supprimer</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

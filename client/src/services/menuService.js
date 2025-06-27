@@ -35,11 +35,20 @@ export const menuService = {
     const response = await api.get(`/restaurants/menu/getMenu/${id}`);
     return response.data;
   },
-  async addItems(menuId, itemIds) {
+  async addItems(menuId, itemId) {
     const response = await api.post(`/restaurants/menuItem/add`, {
       menu_id: menuId,
-      item_ids: itemIds,
+      item_id: itemId,
     });
+    return response.data;
+  },
+  async getMenuItems(menuId) {
+    const response = await api.get(`/restaurants/menuItem/getItemMenu/${menuId}`);
+    return response.data;
+  },
+  async removeItem(menuId, itemId) {
+    // Use RESTful route: /restaurants/menuItem/delete/:menu_id/:item_id
+    const response = await api.delete(`/restaurants/menuItem/delete/${menuId}/${itemId}`);
     return response.data;
   },
 };
