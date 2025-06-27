@@ -6,4 +6,11 @@ function RestaurantPage() {
   )
 }
 
+function MenuPage() {
+  return (
+    <div>MenuPage</div>
+  )
+}
+
 export default RestaurantPage
+export { MenuPage }

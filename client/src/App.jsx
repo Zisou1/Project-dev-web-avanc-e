@@ -17,6 +17,10 @@ import UnauthorizedPage from './pages/UnauthorizedPage'
 import ItemsPage from './pages/restaurant/ItemsPage'
 import AddItemPage from './pages/restaurant/AddItemPage'
 import EditItemPage from './pages/restaurant/EditItemPage'
+import MenuPage from './pages/restaurant/MenuPage'
+import AddMenuPage from './pages/restaurant/AddMenuPage'
+import EditMenuPage from './pages/restaurant/EditMenuPage'
+import AddItemsToMenuPage from './pages/restaurant/AddItemsToMenuPage'
 
 function App() {
   return (
@@ -45,7 +49,10 @@ function App() {
             {/* Nested restaurant routes */}
             <Route index element={<RestaurantPage />} />
             <Route path="dashboard" element={<RestaurantPage />} />
-            <Route path="menu" element={<div>Menu Management Page</div>} />
+            <Route path="menu" element={<MenuPage />} />
+            <Route path="menu/add" element={<AddMenuPage />} />
+            <Route path="menu/edit/:id" element={<EditMenuPage />} />
+            <Route path="menu/:id/add-items" element={<AddItemsToMenuPage />} />
             <Route path="items" element={<ItemsPage />} />
             <Route path="items/add" element={<AddItemPage />} />
             <Route path="items/edit/:id" element={<EditItemPage />} />
