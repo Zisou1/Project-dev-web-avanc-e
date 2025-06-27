@@ -7,6 +7,8 @@ import { menuService } from "../../services/menuService";
 export default function EditMenuPage() {
   const { id } = useParams();
   const [form, setForm] = useState({ name: "", price: "", status: true, image: null });
+  const [currentImageUrl, setCurrentImageUrl] = useState("");
+  const [restaurantId, setRestaurantId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -24,6 +26,8 @@ export default function EditMenuPage() {
           status: menu.status,
           image: null,
         });
+        setCurrentImageUrl(menu.imageUrl || "");
+        setRestaurantId(menu.restaurant_id || "");
       } catch (err) {
         setError(err.response?.data?.message || err.message || "Erreur lors du chargement du menu");
       } finally {
@@ -64,6 +68,7 @@ export default function EditMenuPage() {
       data.append("price", form.price);
       data.append("status", form.status ? "true" : "false");
       if (form.image) data.append("image", form.image);
+      if (restaurantId) data.append("restaurant_id", restaurantId);
       await menuService.update(id, data);
       navigate("/restaurant/menu");
     } catch (err) {
@@ -74,23 +79,95 @@ export default function EditMenuPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto mt-12 p-10 bg-white rounded-3xl shadow-2xl flex flex-col gap-10 border border-[#ffe3e3]">
-      <h2 className="text-2xl font-extrabold text-[#ff5c42] mb-2 text-center tracking-tight">Modifier le menu</h2>
-      <div className="flex flex-col gap-4">
-        <label>Nom du menu</label>
-        <input name="name" value={form.name} onChange={handleChange} required className="border rounded px-3 py-2" />
-        <label>Prix</label>
-        <input name="price" type="number" min="0" value={form.price} onChange={handleChange} required className="border rounded px-3 py-2" />
-        <label>Disponible</label>
-        <input type="checkbox" name="status" checked={form.status} onChange={handleChange} />
-        <label>Image</label>
-        <input type="file" name="image" accept="image/*" onChange={handleChange} />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#fff0e6] via-[#ffe3e3] to-[#fff]">
+      <div className="w-full max-w-lg mx-auto bg-white/95 rounded-3xl shadow-2xl border border-[#ffd6d6] backdrop-blur-lg overflow-hidden flex flex-col items-center" style={{ boxShadow: '0 8px 32px 0 rgba(255, 92, 66, 0.12), 0 1.5px 8px 0 rgba(255, 92, 66, 0.08)', minHeight: '650px' }}>
+        <div className="w-full flex flex-col items-center pt-8 pb-2 px-6 border-b border-[#ffe3e3] bg-gradient-to-r from-[#fff0e6] to-[#ffe3e3]">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#ff5c42] text-center tracking-tight drop-shadow-lg">Modifier le menu</h2>
+        </div>
+        <form
+          onSubmit={handleSubmit}
+          className="w-full flex flex-col gap-5 p-6 sm:p-8 max-h-[85vh] overflow-y-auto"
+        >
+          <div className="flex flex-row gap-6 items-start">
+            <div className="flex flex-col gap-3 flex-1">
+              <label className="font-semibold text-[#ff5c42]">Nom du menu</label>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                required
+                className="border-2 border-[#ffd6d6] rounded-xl px-4 py-2 focus:outline-none focus:border-[#ff5c42] transition text-lg bg-[#fff8f6] shadow-sm"
+                placeholder="Nom du menu"
+              />
+              <label className="font-semibold text-[#ff5c42] mt-1">Prix</label>
+              <input
+                name="price"
+                type="number"
+                min="0"
+                value={form.price}
+                onChange={handleChange}
+                required
+                className="border-2 border-[#ffd6d6] rounded-xl px-4 py-2 focus:outline-none focus:border-[#ff5c42] transition text-lg bg-[#fff8f6] shadow-sm"
+                placeholder="Prix du menu"
+              />
+              <div className="flex items-center gap-2 mt-1">
+                <input
+                  type="checkbox"
+                  name="status"
+                  checked={form.status}
+                  onChange={handleChange}
+                  className="accent-[#ff5c42] w-5 h-5 rounded focus:ring-2 focus:ring-[#ff5c42]"
+                  id="status-checkbox"
+                />
+                <label htmlFor="status-checkbox" className="font-semibold text-[#ff5c42] cursor-pointer select-none">Disponible</label>
+              </div>
+              <label className="font-semibold text-[#ff5c42] mt-1">Image</label>
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={handleChange}
+                className="file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#ff5c42]/10 file:text-[#ff5c42] hover:file:bg-[#ff5c42]/20 transition"
+              />
+            </div>
+            <div className="flex flex-col items-center min-w-[120px]">
+              {form.image ? (
+                <img
+                  src={URL.createObjectURL(form.image)}
+                  alt="Aperçu de la nouvelle image"
+                  className="w-28 h-28 object-cover rounded-2xl border-2 border-[#ffd6d6] shadow-lg"
+                />
+              ) : currentImageUrl ? (
+                <img
+                  src={currentImageUrl.startsWith('http') ? currentImageUrl : `${window.location.origin}${currentImageUrl}`} 
+                  alt="Image actuelle du menu"
+                  className="w-28 h-28 object-cover rounded-2xl border-2 border-[#ffd6d6] shadow-lg"
+                  onError={e => { e.target.onerror = null; e.target.src = '/vite.svg'; }}
+                />
+              ) : (
+                <span className="text-gray-400 text-sm flex items-center">Aucune image</span>
+              )}
+            </div>
+          </div>
+          {error && <ErrorMessage error={error} />}
+          <div className="flex flex-col sm:flex-row gap-4 mt-2 justify-center">
+            <Button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="bg-gradient-to-r from-[#ffe3e3] to-[#fff0e6] text-[#ff5c42] px-8 py-2 rounded-full font-bold shadow hover:from-[#ffd6d6] hover:to-[#fff0e6] border border-[#ffd6d6] transition text-lg"
+            >
+              Retour
+            </Button>
+            <Button
+              type="submit"
+              className="bg-gradient-to-r from-[#ff5c42] to-[#ff8a65] text-white px-8 py-2 rounded-full font-bold shadow hover:from-[#ff6a5c] hover:to-[#ffb199] transition text-lg border border-[#ff5c42]"
+              disabled={loading}
+            >
+              {loading ? "Enregistrement..." : "Enregistrer"}
+            </Button>
+          </div>
+        </form>
       </div>
-      {error && <ErrorMessage error={error} />}
-      <div className="flex gap-4 mt-4">
-        <Button type="button" onClick={() => navigate(-1)} className="bg-gray-200 text-gray-800 px-8 py-2 rounded-full font-semibold shadow hover:bg-gray-300 transition">Retour</Button>
-        <Button type="submit" className="bg-[#ff5c42] text-white px-8 py-2 rounded-full font-semibold shadow hover:bg-[#ff6a5c] transition" disabled={loading}>{loading ? "Enregistrement..." : "Enregistrer"}</Button>
-      </div>
-    </form>
+    </div>
   );
 }

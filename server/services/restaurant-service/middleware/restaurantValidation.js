@@ -57,10 +57,8 @@ const validateMenu = (req, res, next) => {
     status: Joi.boolean().required().messages({
       'boolean.base': 'Status must be a boolean',
       'any.required': 'Status is required'
-    }),
-    imageUrl: Joi.string().required().messages({
-      'any.required': 'Image URL is required'
     })
+    // Remove imageUrl validation here, as it is set in the controller after upload
   });
 
   const { error, value } = schema.validate(req.body);
@@ -238,10 +236,8 @@ const validateMenuUpdate = (req, res, next) => {
     status: Joi.boolean().required().messages({
       'boolean.base': 'Status must be a boolean',
       'any.required': 'Status is required'
-    }),
-    imageUrl: Joi.string().required().messages({
-      'any.required': 'Image URL is required'
     })
+    // Remove imageUrl validation here, as it is set in the controller after upload
   });
 
   const paramResult = paramSchema.validate(req.params);

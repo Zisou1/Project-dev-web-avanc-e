@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import ErrorMessage from "../../components/ErrorMessage";
 import { menuService } from "../../services/menuService";
+import { itemService } from "../../services/itemService";
 
 export default function AddMenuPage() {
   const [form, setForm] = useState({ name: "", price: "", status: true, image: null });
@@ -46,6 +47,22 @@ export default function AddMenuPage() {
       data.append("price", form.price);
       data.append("status", form.status ? "true" : "false");
       data.append("image", form.image);
+      // Get restaurant_id from itemService logic
+      const user = itemService.getUserFromToken();
+      if (user?.id) {
+        const restaurantId = await itemService.getRestaurantIdByUserId(user.id);
+        if (restaurantId) {
+          data.append("restaurant_id", restaurantId);
+        } else {
+          setError("Aucun restaurant trouvé pour cet utilisateur.");
+          setLoading(false);
+          return;
+        }
+      } else {
+        setError("Utilisateur non authentifié.");
+        setLoading(false);
+        return;
+      }
       await menuService.create(data);
       navigate("/restaurant/menu");
     } catch (err) {
