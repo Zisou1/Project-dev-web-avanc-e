@@ -50,6 +50,14 @@ const services = [
     cwd: path.join(__dirname, '../client'), // Adjust path as needed
     color: '\x1b[35m', // Magenta
     port: process.env.FRONTEND_PORT || 3002
+  },
+  {
+    name: 'Delivery Service',
+    command: 'npm',
+    args: ['run', 'dev'],
+    cwd: path.join(__dirname, '../server/services/delivery-service'), // Adjust path as needed
+    color: '\x1b[34m', 
+    port: process.env.DELIVERY_SERVICE_PORT || 3006
   }
 ];
 
