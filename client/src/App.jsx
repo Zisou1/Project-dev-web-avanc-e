@@ -7,13 +7,14 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
 import RestaurantPage from './pages/restaurant/restaurantPage'
-import ClientPage from './pages/client/clientPage'
+import ClientPage from './pages/client/ClientPage'
 import LivreurPage from './pages/livreur/livreurPage'
 import AdminPage from './pages/admin/adminPage'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
+import PanierClient from './pages/client/PanierClient'
 
 function App() {
   return (
@@ -32,6 +33,12 @@ function App() {
               <ClientPage />
             </Layout>
           } />         
+          
+          <Route path="/panier" element={
+            <Layout>
+              <PanierClient />
+            </Layout>
+          } />
           
           {/* Restaurant Routes with DashboardLayout */}
           <Route path="/restaurant" element={
