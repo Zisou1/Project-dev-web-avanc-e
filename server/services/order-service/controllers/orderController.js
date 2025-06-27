@@ -58,9 +58,7 @@ const createOrder = async (req, res) => {
  */
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.findAll({
-      include: [User, Restaurant, Item]
-    });
+    const orders = await Order.findAll({});
     res.json({ orders });
   } catch (error) {
     console.error('❌ Fetch Error:', error);
@@ -77,9 +75,7 @@ const getAllOrders = async (req, res) => {
 const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
-    const order = await Order.findByPk(id, {
-      include: [User, Restaurant, Item]
-    });
+    const order = await Order.findByPk(id);
 
     if (!order) {
       return res.status(404).json({
@@ -108,7 +104,11 @@ const updateOrder = async (req, res) => {
     const { id } = req.params;
     const { status, total_price } = req.body;
 
+    console.log(`🔧 Updating order with ID: ${id}`);
+
+    // Find the order
     const order = await Order.findByPk(id);
+
     if (!order) {
       return res.status(404).json({
         error: 'Not Found',
@@ -116,7 +116,11 @@ const updateOrder = async (req, res) => {
       });
     }
 
-    await order.update({ status, total_price });
+    // Update fields if provided
+    if (status !== undefined) order.status = status;
+    if (total_price !== undefined) order.total_price = total_price;
+
+    await order.save();
 
     res.json({
       message: 'Order updated successfully',
@@ -124,10 +128,11 @@ const updateOrder = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Update Error:', error);
+    console.error('❌ Update Order Error:', error);
     res.status(500).json({
       error: 'Update Failed',
-      message: 'An error occurred while updating'
+      message: 'An error occurred while updating the order',
+      detail: error.message
     });
   }
 };
