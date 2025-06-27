@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 // Pages
 import RestaurantPage from './pages/restaurant/restaurantPage'
 import ClientPage from './pages/client/ClientPage'
+import RestaurantInClient from './pages/client/RestaurantInClient'
 import LivreurPage from './pages/livreur/livreurPage'
 import AdminPage from './pages/admin/adminPage'
 import LoginPage from './pages/auth/LoginPage'
@@ -29,6 +30,12 @@ function App() {
           <Route path="/" element={
             <Layout>
               <ClientPage />
+            </Layout>
+          } />
+
+          <Route path="/restaurantinclient/:id" element={
+            <Layout>
+              <RestaurantInClient />
             </Layout>
           } />
           

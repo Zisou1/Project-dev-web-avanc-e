@@ -4,6 +4,7 @@ import SearchBar from '../../components/SearchBar';
 import FilterButton from '../../components/FilterButton';
 import RestaurantCard from '../../components/RestaurantCard';
 import debounce from 'lodash/debounce';
+import { useNavigate } from 'react-router-dom';
 
 const ALL_CATEGORIES = [
   'courses', 'halal', 'pizzas', 'fast food', 'sushis', 'desserts',
@@ -17,6 +18,7 @@ const ClientPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [initialRestaurants, setInitialRestaurants] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,7 +71,7 @@ const ClientPage = () => {
   };
 
   const handleCardClick = (restaurantId) => {
-    console.log(`Navigating to order page for restaurant ID: ${restaurantId}`);
+    navigate(`/restaurantinclient/${restaurantId}`);
   };
 
   const handleSearchChange = (e) => {
