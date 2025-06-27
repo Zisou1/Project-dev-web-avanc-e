@@ -64,7 +64,15 @@ const createItem = async (req, res) => {
 const getAllItems = async (req, res) => {
   try {
     const items = await Item.findAll();
-    res.json({ items });
+    // Always return full image URL for each item
+    const itemsWithFullUrl = (items || []).map(item => {
+      let imageUrl = item.imageUrl;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+      }
+      return { ...item.toJSON(), imageUrl };
+    });
+    res.json({ items: itemsWithFullUrl });
   } catch (error) {
     console.error('❌ Fetch items Error:', error);
     res.status(500).json({

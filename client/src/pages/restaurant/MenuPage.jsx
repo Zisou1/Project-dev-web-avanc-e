@@ -16,6 +16,8 @@ export default function MenuPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
   const filterRef = useRef();
   const navigate = useNavigate();
 
@@ -66,9 +68,24 @@ export default function MenuPage() {
     return matchesSearch && matchesName;
   });
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredMenus.length / itemsPerPage);
+  const paginatedMenus = filteredMenus.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   // Table columns config
   const columns = [
     { key: "id", label: "ID Menu" },
+    {
+      key: "imageUrl",
+      label: "Image",
+      render: (row) =>
+        row.imageUrl ? (
+          <img src={row.imageUrl} alt={row.name} className="h-14 w-14 object-cover rounded-xl border border-[#ffd6d6] bg-white mx-auto" style={{boxShadow:'0 2px 8px #ffe3e3'}} />
+        ) : (
+          <div className="h-14 w-14 flex items-center justify-center rounded-xl bg-[#fff7f0] text-2xl text-[#ffd6d6] mx-auto">🍽️</div>
+        ),
+      style: { minWidth: 70, maxWidth: 80, textAlign: 'center' },
+    },
     { key: "name", label: "Nom du menu" },
     { key: "price", label: "Prix" },
     {
@@ -158,38 +175,47 @@ export default function MenuPage() {
 
   // Fix: ensure DataTable gets a key for actions
   return (
-    <div className="min-h-screen py-4 px-2 sm:px-6 lg:px-8 relative text-[0.92rem]">
-      <div className="w-full">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-          <h2 className="text-xl font-extrabold text-gray-900 tracking-tight mb-0">Mes menus</h2>
+    <div className="min-h-screen py-4 px-2 sm:px-6 lg:px-8 relative text-[0.92rem] ">
+      <div className="w-full max-w-6xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
+          <h2 className="text-3xl font-extrabold text-[#ff5c42] tracking-tight mb-0 drop-shadow-lg">🍽️ Mes menus</h2>
           <Button 
-            className="bg-[#ff5c5c] hover:bg-[#ff7e7e] text-white font-bold px-6 py-2 rounded-lg shadow-md transition text-base w-full sm:w-auto"
+            className="bg-gradient-to-r from-[#ff5c5c] to-[#ff7e7e] hover:from-[#ff7e7e] hover:to-[#ff5c5c] text-white font-bold px-8 py-3 rounded-2xl shadow-lg transition text-lg w-full sm:w-auto border-2 border-[#ffb3b3]"
             onClick={() => navigate('/restaurant/menu/add')}
           >
-            Ajouter un menu
+            + Ajouter un menu
           </Button>
         </div>
-        <div className="flex items-center gap-1 mb-4 w-full relative">
+        <div className="flex flex-col sm:flex-row items-center gap-2 mb-6 w-full relative">
           <FilterButton fields={[{ key: "name", label: "Nom du menu", type: "text", placeholder: "Nom..." }]} onApply={setFilters} />
-          <div className="flex-1">
+          <div className="flex-1 w-full">
             <SearchBar query={searchTerm} setQuery={setSearchTerm} placeholder="Rechercher..." />
           </div>
         </div>
-        <hr className="border-gray-300 mb-1" />
+        <hr className="border-[#ffd6d6] mb-4" />
         {loading && (
-          <div className="text-center py-4 text-gray-700 text-sm z-10">
-            Chargement...
+          <div className="text-center py-8 text-[#ff5c42] text-lg font-semibold animate-pulse z-10">
+            Chargement des menus...
           </div>
         )}
         {error && <ErrorMessage error={error} />}
-        <div className="hidden sm:block">
+        {/* DataTable for Menus */}
+        <div className="w-full">
           <DataTable 
             columns={columns} 
-            data={filteredMenus} 
+            data={paginatedMenus} 
             actions={tableActions} 
             keyField="id"
           />
         </div>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-3 mt-10">
+            <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} className="px-4 py-2 rounded-full bg-[#ffe3e3] text-[#ff5c42] font-bold shadow border border-[#ffd6d6] disabled:opacity-50 transition">Précédent</button>
+            <span className="text-[#ff5c42] font-semibold text-lg">{currentPage} / {totalPages}</span>
+            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} className="px-4 py-2 rounded-full bg-[#ffe3e3] text-[#ff5c42] font-bold shadow border border-[#ffd6d6] disabled:opacity-50 transition">Suivant</button>
+          </div>
+        )}
       </div>
       {/* ConfirmationModal can be added here if you have one */}
       {showDeleteModal && (

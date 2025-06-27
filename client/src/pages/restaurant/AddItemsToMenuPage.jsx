@@ -83,7 +83,15 @@ export default function AddItemsToMenuPage() {
 
   // Items not in menu
   const menuItemIds = new Set(menuItems.map((item) => item.id));
+  // Use the same logic for both menuItems and itemsToAdd
+  const getItemImageUrl = (item) => {
+    // Only show the image if it exists, otherwise show nothing (no fallback logo)
+    const url = item.imageUrl || item.image || (item.image && item.image.url);
+    if (!url) return null;
+    return getImageUrl(url);
+  };
   const itemsToAdd = items.filter((item) => !menuItemIds.has(item.id));
+  // console.log('itemsToAdd', itemsToAdd); // DEBUG: See what image properties are present
 
   return (
     <form className="max-w-4xl mx-auto mt-10 p-0 bg-gradient-to-br from-[#fff7f0] to-[#ffe3e3] rounded-3xl shadow-2xl border border-[#ffd6d6] overflow-hidden">
@@ -105,7 +113,7 @@ export default function AddItemsToMenuPage() {
           <div className="flex flex-col gap-4">
             {menuItems.slice((currentPage-1)*itemsPerPage, currentPage*itemsPerPage).map(item => (
               <div key={item.id} className="flex flex-row items-center bg-white rounded-2xl p-4 shadow border border-[#ffd6d6] hover:shadow-lg transition-transform">
-                <img src={getImageUrl(item.imageUrl)} alt={item.name} className="h-16 w-16 object-cover rounded-xl shadow-md border border-[#ffd6d6] bg-white mr-5" onError={e => e.target.src='/Logo.png'} />
+                <img src={getItemImageUrl(item)} alt={item.name} className="h-16 w-16 object-cover rounded-xl shadow-md border border-[#ffd6d6] bg-white mr-5" onError={e => e.target.src='/Logo.png'} />
                 <div className="flex flex-col flex-1 min-w-0">
                   <span className="font-bold text-lg text-[#ff5c42] truncate mb-1">{item.name}</span>
                   <span className="text-gray-500 text-sm truncate">{item.description}</span>
@@ -130,7 +138,9 @@ export default function AddItemsToMenuPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {itemsToAdd.map(item => (
               <div key={item.id} className="flex flex-col items-center bg-white rounded-xl p-3 sm:p-4 shadow border border-[#ffd6d6] hover:scale-[1.01] transition-transform">
-                <img src={getImageUrl(item.imageUrl)} alt={item.name} className="h-12 w-12 sm:h-14 sm:w-14 object-cover rounded-lg shadow border border-[#ffd6d6] bg-white mb-1" onError={e => e.target.src='/Logo.png'} />
+                {getItemImageUrl(item) && (
+                  <img src={getItemImageUrl(item)} alt={item.name} className="h-12 w-12 sm:h-14 sm:w-14 object-cover rounded-lg shadow border border-[#ffd6d6] bg-white mb-1" />
+                )}
                 <div className="font-bold text-[#ff5c42] text-sm sm:text-base mb-1 truncate w-full text-center">{item.name}</div>
                 <div className="text-gray-500 text-xs mb-1 text-center line-clamp-2 min-h-[24px]">{item.description}</div>
                 <Button type="button" variant="secondary" onClick={() => handleAdd(item.id)} className="px-3 sm:px-4 py-1 text-sm bg-[#ffe3e3] text-[#ff5c42] hover:bg-[#ffd6d6] border border-[#ffd6d6] rounded-full font-bold mt-1 shadow w-full">

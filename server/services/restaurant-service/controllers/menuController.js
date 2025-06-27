@@ -70,7 +70,15 @@ const getAllMenus = async (req, res) => {
         through: { attributes: [] }, 
       }
     });
-    res.json({ menus });
+    // Always return full image URL for each menu
+    const menusWithFullUrl = (menus || []).map(menu => {
+      let imageUrl = menu.imageUrl;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+      }
+      return { ...menu.toJSON(), imageUrl };
+    });
+    res.json({ menus: menusWithFullUrl });
   } catch (error) {
     console.error('❌ Fetch Menus Error:', error);
     res.status(500).json({
