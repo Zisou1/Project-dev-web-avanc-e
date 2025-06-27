@@ -11,7 +11,8 @@
     "dev:auth": "cd server/services/auth-service && npm run dev",
     "install:all": "npm run install:client && npm run install:server",
     "install:client": "cd client && npm install",
-    "install:server": "npm run install:gateway && npm run install:auth && npm run install:shared",
+    "install:server": "npm run install:gateway && npm run install:auth && npm run install:shared && npm run install:restaurant",
+    "install:restaurant": "cd server/services/restaurant-service && npm install",
     "install:gateway": "cd server/services/api-gateway && npm install",
     "install:auth": "cd server/services/auth-service && npm install",
     "install:shared": "cd server/shared && npm install",
@@ -26,10 +27,16 @@
     "nodemon": "^2.0.22"
   },
   "dependencies": {
+    "axios": "^1.4.0",
     "dotenv": "^16.0.3",
-    "axios": "^1.4.0"
+    "multer": "^2.0.1"
   },
-  "keywords": ["microservices", "food-delivery", "api-gateway", "jwt"],
+  "keywords": [
+    "microservices",
+    "food-delivery",
+    "api-gateway",
+    "jwt"
+  ],
   "author": "",
   "license": "ISC"
 }
