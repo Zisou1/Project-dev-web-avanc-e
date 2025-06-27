@@ -7,7 +7,7 @@ import { FaImage, FaBoxOpen, FaDollarSign, FaSortNumericUp, FaAlignLeft } from "
 
 export default function EditItemPage() {
   const { id } = useParams();
-  const [form, setForm] = useState({ name: "", price: "", quantity: "", image: null, description: "" });
+  const [form, setForm] = useState({ name: "", price: "", status: false, image: null, description: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -24,11 +24,16 @@ export default function EditItemPage() {
         setForm({
           name: item.name || "",
           price: item.price || "",
-          quantity: item.quantity || item.status || "",
+          status: typeof item.status === 'boolean' ? item.status : !!item.status,
           image: null,
           description: item.description || "",
         });
-        setPreview(item.imageUrl || null);
+        // Use backend endpoint for image preview
+        if (item.image && !item.image.startsWith('http')) {
+          setPreview(`/api/item/image/${item.image}`); // <-- update this endpoint as needed
+        } else {
+          setPreview(item.image || item.imageUrl || null);
+        }
       } catch (err) {
         setError(err.response?.data?.message || err.message || "Erreur lors du chargement");
       } finally {
@@ -61,7 +66,7 @@ export default function EditItemPage() {
       const data = new FormData();
       data.append("name", form.name);
       data.append("price", form.price);
-      data.append("quantity", form.quantity);
+      data.append("status", form.status);
       data.append("description", form.description);
       if (form.image) {
         data.append("image", form.image);
@@ -76,19 +81,20 @@ export default function EditItemPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto mt-10 p-8 bg-white rounded-2xl shadow flex flex-col gap-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="flex flex-col gap-2">
-          <label className="font-semibold mb-1 flex items-center gap-2"><FaImage className="text-gray-500" /> Image de produit</label>
-          <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-blue-400 transition">
+    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto mt-12 p-10 rounded-3xl shadow-2xl flex flex-col gap-10 border border-[#ffe3e3]">
+      <h2 className="text-2xl font-extrabold text-[#ff5c42] mb-2 text-center tracking-tight">Modifier l'article</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="flex flex-col gap-3">
+          <label className="font-semibold mb-1 flex items-center gap-2 text-[#ff5c42]"><FaImage className="text-[#ffb3a7] text-xl" /> Image de produit</label>
+          <label className="flex flex-col items-center justify-center border-2 border-dashed border-[#ffb3a7] rounded-xl p-6 cursor-pointer hover:border-[#ff5c42] transition group min-h-[180px]">
             {form.image ? (
-              <img src={URL.createObjectURL(form.image)} alt="preview" className="h-24 object-contain mb-2" />
+              <img src={URL.createObjectURL(form.image)} alt="preview" className="h-28 object-contain mb-2 rounded-lg shadow" />
             ) : preview ? (
-              <img src={preview} alt="preview" className="h-24 object-contain mb-2" />
+              <img src={preview} alt="preview" className="h-28 object-contain mb-2 rounded-lg shadow" />
             ) : (
-              <FaImage className="text-4xl text-gray-300 mb-2" />
+              <FaImage className="text-5xl text-[#ffd6d6] mb-2 group-hover:text-[#ffb3a7] transition" />
             )}
-            <span className="text-sm text-gray-600 mb-1">{form.image ? form.image.name : "Upload a file"}</span>
+            <span className="text-sm text-gray-600 mb-1">{form.image ? form.image.name : "Choisir une image"}</span>
             <input
               type="file"
               name="image"
@@ -98,13 +104,13 @@ export default function EditItemPage() {
             />
           </label>
         </div>
-        <div className="flex flex-col gap-4 justify-between">
+        <div className="flex flex-col gap-6 justify-between">
           <div className="flex flex-col gap-2">
-            <label className="font-semibold mb-1 flex items-center gap-2"><FaBoxOpen className="text-gray-500" /> Nom de produit</label>
+            <label className="font-semibold mb-1 flex items-center gap-2 text-[#ff5c42]"><FaBoxOpen className="text-[#ffb3a7] text-lg" /> Nom de produit</label>
             <div className="relative">
-              <FaBoxOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <FaBoxOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-[#ffb3a7] text-lg" />
               <input
-                className="border rounded-full px-10 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-200"
+                className="border border-[#ffd6d6] rounded-full px-10 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#ffb3a7] bg-[#fff7f0] placeholder:text-gray-400"
                 name="name"
                 placeholder="Nom"
                 value={form.name}
@@ -114,13 +120,14 @@ export default function EditItemPage() {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <label className="font-semibold mb-1 flex items-center gap-2"><FaDollarSign className="text-gray-500" /> Prix de produit</label>
+            <label className="font-semibold mb-1 flex items-center gap-2 text-[#ff5c42]"><FaDollarSign className="text-[#ffb3a7] text-lg" /> Prix de produit</label>
             <div className="relative">
-              <FaDollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <FaDollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-[#ffb3a7] text-lg" />
               <input
-                className="border rounded-full px-10 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-200"
+                className="border border-[#ffd6d6] rounded-full px-10 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#ffb3a7] bg-[#fff7f0] placeholder:text-gray-400"
                 name="price"
                 type="number"
+                min="0"
                 placeholder="Prix"
                 value={form.price}
                 onChange={handleChange}
@@ -129,29 +136,27 @@ export default function EditItemPage() {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <label className="font-semibold mb-1 flex items-center gap-2"><FaSortNumericUp className="text-gray-500" /> Quantité</label>
-            <div className="relative">
-              <FaSortNumericUp className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <label className="font-semibold mb-1 flex items-center gap-2 text-[#ff5c42]"><FaSortNumericUp className="text-[#ffb3a7] text-lg" /> Disponible</label>
+            <div className="flex items-center gap-2">
               <input
-                className="border rounded-full px-10 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-200"
-                name="quantity"
-                type="number"
-                placeholder="Quantité"
-                value={form.quantity}
-                onChange={handleChange}
-                required
+                type="checkbox"
+                name="status"
+                checked={!!form.status}
+                onChange={e => setForm(prev => ({ ...prev, status: e.target.checked }))}
+                className="h-5 w-5 text-[#ff5c42] border-[#ffd6d6] rounded focus:ring-[#ffb3a7]"
               />
+              <span className="text-gray-700">En stock</span>
             </div>
           </div>
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <label className="font-semibold mb-1 flex items-center gap-2"><FaAlignLeft className="text-gray-500" /> Description de produit</label>
+        <label className="font-semibold mb-1 flex items-center gap-2 text-[#ff5c42]"><FaAlignLeft className="text-[#ffb3a7] text-lg" /> Description de produit</label>
         <div className="relative">
           <textarea
-            className="border rounded px-4 py-3 min-h-[100px] w-full focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="border border-[#ffd6d6] rounded-xl px-4 py-3 min-h-[100px] w-full focus:outline-none focus:ring-2 focus:ring-[#ffb3a7] bg-[#fff7f0] placeholder:text-gray-400"
             name="description"
-            placeholder="description ...."
+            placeholder="Description ..."
             value={form.description}
             onChange={handleChange}
           />
