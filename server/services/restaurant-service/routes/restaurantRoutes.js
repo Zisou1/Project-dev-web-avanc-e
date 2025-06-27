@@ -38,14 +38,13 @@ router.get('/item/getAll', itemController.getAllItems);
 router.get('/item/getItem/:id', itemController.getItemById);
 router.put('/item/update/:id', validateItemUpdate, upload.single('image'), itemController.updateItem);
 router.delete('/item/delete/:id', itemController.deleteItem);
+router.get('/item/byIds', itemController.getItemsByIds);
+
 //menuItem routes
 router.post('/menuItem/add', validateItemMenu, menuItemController.addItemToMenu);
 router.get('/menuItem/getItemMenu/:menu_id', menuItemController.getItemsForMenu);
 router.put('/menuItem/update/:id', validateItemMenuUpdate, menuItemController.updateItemInMenu);
 router.delete('/menuItem/delete/:id', menuItemController.removeItemFromMenu);
-
-
-
 
 
 

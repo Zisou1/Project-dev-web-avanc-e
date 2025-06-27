@@ -1,4 +1,6 @@
 const Order = require('../models/Order');
+const axios = require('axios');
+
 const OrderItem = require('../models/OrderItem');
 
 /**
@@ -6,7 +8,7 @@ const OrderItem = require('../models/OrderItem');
  */
 const createOrder = async (req, res) => {
   try {
-    const { user_id, restaurant_id, status, total_price, items } = req.body ?? {};
+    const { user_id, restaurant_id, status, total_price, items, adress } = req.body ?? {};
 
     console.log('📥 Creating order for user:', user_id);
 
@@ -31,7 +33,8 @@ const createOrder = async (req, res) => {
       restaurant_id,
       status,
       total_price,
-      timestamp: new Date()
+      timestamp: new Date(),
+      adress
     });
 
     // Insert into order_items table manually
@@ -58,17 +61,61 @@ const createOrder = async (req, res) => {
  */
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.findAll({});
-    res.json({ orders });
+    const orders = await Order.findAll();
+
+    const enrichedOrders = await Promise.all(
+      orders.map(async (order) => {
+        try {
+          // 1. Get item IDs from order_items
+          const orderItems = await OrderItem.findAll({ where: { order_id: order.id } });
+          const itemIds = orderItems.map((oi) => oi.item_id);
+
+          // 2. Get items from restaurant service (bulk)
+          let items = [];
+          if (itemIds.length > 0) {
+            const itemRes = await axios.get('http://localhost:3005/api/restaurants/item/byIds', {
+              params: { ids: itemIds.join(',') }
+            });
+            items = itemRes.data.items;
+          }
+
+          // 3. Get restaurant by ID
+          const restaurantRes = await axios.get(`http://localhost:3005/api/restaurants/getRestaurent/${order.restaurant_id}`);
+          const restaurant = restaurantRes.data.restaurant;
+
+          // 4. Get user by ID
+          const userRes = await axios.get(`http://localhost:3001/api/auth/user/getUser/${order.user_id}`);
+          const user = userRes.data.user;
+
+          return {
+            ...order.toJSON(),
+            restaurant,
+            items,
+            user
+          };
+
+        } catch (err) {
+          console.error(`❌ Failed to enrich order ID ${order.id}:`, err.message);
+          return {
+            ...order.toJSON(),
+            restaurant: null,
+            items: [],
+            user: null
+          };
+        }
+      })
+    );
+
+    res.json({ orders: enrichedOrders });
+
   } catch (error) {
-    console.error('❌ Fetch Error:', error);
+    console.error('❌ Error fetching enriched orders:', error.message);
     res.status(500).json({
       error: 'Fetch Failed',
-      message: 'Unable to retrieve orders'
+      message: 'Unable to retrieve enriched orders'
     });
   }
 };
-
 /**
  * Get order by ID
  */
@@ -84,10 +131,39 @@ const getOrderById = async (req, res) => {
       });
     }
 
-    res.json({ order });
+    // 1. Get item IDs from order_items
+    const orderItems = await OrderItem.findAll({ where: { order_id: order.id } });
+    const itemIds = orderItems.map((oi) => oi.item_id);
+
+    // 2. Get items from restaurant service
+    let items = [];
+    if (itemIds.length > 0) {
+      const itemRes = await axios.get('http://localhost:3005/api/restaurants/item/byIds', {
+        params: { ids: itemIds.join(',') }
+      });
+      items = itemRes.data.items;
+    }
+
+    // 3. Get restaurant info
+    const restaurantRes = await axios.get(`http://localhost:3005/api/restaurants/getRestaurent/${order.restaurant_id}`);
+    const restaurant = restaurantRes.data.restaurant;
+
+    // 4. Get user info
+    const userRes = await axios.get(`http://localhost:3001/api/auth/user/getUser/${order.user_id}`);
+    const user = userRes.data.user;
+
+    // ✅ Return the enriched order
+    const enrichedOrder = {
+      ...order.toJSON(),
+      restaurant,
+      items,
+      user
+    };
+
+    res.json({ order: enrichedOrder });
 
   } catch (error) {
-    console.error('❌ Get by ID Error:', error);
+    console.error('❌ Get by ID Error:', error.message);
     res.status(500).json({
       error: 'Fetch Failed',
       message: 'Unable to retrieve order',

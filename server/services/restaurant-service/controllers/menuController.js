@@ -70,7 +70,14 @@ const getAllMenus = async (req, res) => {
         through: { attributes: [] }, 
       }
     });
-    res.json({ menus });
+    const menusWithFullUrl = menus.map(menu => {
+      let imageUrl = menu.imageUrl;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+      }
+      return { ...menu.toJSON(), imageUrl };
+    });
+    res.json({ menus: menusWithFullUrl });
   } catch (error) {
     console.error('❌ Fetch Menus Error:', error);
     res.status(500).json({
@@ -95,7 +102,14 @@ const getMenuById = async (req, res) => {
       });
     }
 
-    res.json({ menu });
+
+    let imageUrl = menu.imageUrl;
+    if (imageUrl && !imageUrl.startsWith('http')) {
+      imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+    }
+
+
+    res.json({ menu: { ...menu.toJSON(), imageUrl } });
 
   } catch (error) {
     console.error('❌ Get Menu Error:', error);
@@ -129,7 +143,12 @@ const updateMenu = async (req, res) => {
       imagePath = `/uploads/menus/${image.filename}`;
     }
 
-    await menu.update({restaurant_id, name, price, status, imageUrl: imagePath });
+    await menu.update({restaurant_id, 
+      name, 
+      price, 
+      status, 
+      imageUrl: imagePath
+     });
 
     res.json({
       message: 'Menu updated successfully',

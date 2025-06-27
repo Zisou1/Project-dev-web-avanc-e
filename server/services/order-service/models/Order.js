@@ -32,6 +32,13 @@ const Order = sequelize.define('Order', {
       isFloat: true,
       min: 0
     }
+  },
+  address: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      len: [0, 255]
+    }
   }
 }, {
   tableName: 'orders',

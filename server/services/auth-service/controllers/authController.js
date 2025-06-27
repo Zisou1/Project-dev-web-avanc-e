@@ -287,6 +287,43 @@ const resetPassword = async (req, res) => {
   });
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    const user = await User.findAll();
+    res.json({ user });
+  } catch (error) {
+    console.error('❌ Fetch Error:', error);
+    res.status(500).json({
+      error: 'Fetch Failed',
+      message: 'Unable to retrieve users'
+    });
+  }
+}
+
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'Restaurant not found'
+      });
+    }
+
+    res.json({ user });
+
+  } catch (error) {
+    console.error('❌ Get by ID Error:', error);
+    res.status(500).json({
+      error: 'Fetch Failed',
+      message: 'Unable to retrieve restaurant',
+      dettails : error.message
+    });
+  }
+}
+
 module.exports = {
   register,
   login,
@@ -294,5 +331,7 @@ module.exports = {
   logout,
   verifyToken,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  getAllUsers,
+  getUserById
 };
