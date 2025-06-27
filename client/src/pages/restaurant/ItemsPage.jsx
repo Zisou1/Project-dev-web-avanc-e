@@ -195,7 +195,7 @@ export default function ItemsPage() {
   }, [showFilter]);
 
   return (
-    <div className="min-h-screen bg-white py-8 px-2 sm:px-4 relative z-10 text-[0.97rem]">
+    <div className="min-h-screen py-8 px-2 sm:px-4 relative  text-[0.97rem]">
       <div className="max-w-[98vw] xl:max-w-[950px] mx-auto bg-white rounded-2xl shadow-2xl p-6 sm:p-10 border border-[#ffe3e3]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
           <h2 className="text-2xl font-extrabold text-[#ff5c5c] tracking-tight mb-0 flex items-center gap-2">
