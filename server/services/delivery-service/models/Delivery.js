@@ -16,23 +16,22 @@ const Delivery = sequelize.define('Delivery', {
     allowNull: false
   },
   status: {
-    type: DataTypes.ENUM('pending', 'confirmed', 'preparing', 'delivering', 'completed', 'cancelled'),
+    type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: 'pending'
   },
   pickup_time: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,
     defaultValue: DataTypes.NOW
   },
   delivery_time: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,
     defaultValue: DataTypes.NOW
   },
   total_price: {
     type: DataTypes.FLOAT,
-    allowNull: false,
+    allowNull: true,
     validate: {
       isFloat: true,
       min: 0

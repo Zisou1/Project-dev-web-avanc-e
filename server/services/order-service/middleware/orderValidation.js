@@ -13,10 +13,10 @@ const validateOrder = (req, res, next) => {
       'number.base': 'Restaurant ID must be a number',
       'any.required': 'Restaurant ID is required'
     }),
-    status: Joi.string().valid('pending', 'confirmed', 'preparing', 'delivering', 'completed', 'cancelled')
+    status: Joi.string().valid('pending', 'confirmed', ' waiting for pickup','product pickedup', 'confirmed by delivery', 'confirmed by client', 'cancelled', 'completed')
       .default('pending')
       .messages({
-        'any.only': 'Status must be one of: pending, confirmed, preparing, delivering, completed, cancelled'
+        'any.only': 'Status must be one of: pending, confirmed,  waiting for pickup,product pickedup, confirmed by delivery, confirmed by client, cancelled, completed'
       }),
     total_price: Joi.number().min(0).required().messages({
       'number.base': 'Total price must be a number',
@@ -61,11 +61,10 @@ const validateOrderUpdate = (req, res, next) => {
   });
 
   const bodySchema = Joi.object({
-    status: Joi.string().valid('pending', 'confirmed', 'preparing', 'delivering', 'completed', 'cancelled')
-      .required()
+    status: Joi.string().valid('pending', 'confirmed', 'waiting for pickup','product pickedup', 'confirmed by delivery', 'confirmed by client', 'cancelled', 'completed')
+      .default('pending')
       .messages({
-        'any.required': 'Status is required',
-        'any.only': 'Status must be one of: pending, confirmed, preparing, delivering, completed, cancelled'
+        'any.only': 'Status must be one of: pending, confirmed,  waiting for pickup,product pickedup, confirmed by delivery, confirmed by client, cancelled, completed'
       }),
     total_price: Joi.number().min(0).optional().messages({
       'number.base': 'Total price must be a number',
@@ -73,7 +72,11 @@ const validateOrderUpdate = (req, res, next) => {
     }),
     address: Joi.string().max(255).optional().allow('').messages({
       'string.max': 'Address must not exceed 255 characters'
-    })
+    }),
+    deliveryUser_id: Joi.number().integer().optional().messages({
+      'number.base': 'Restaurant ID must be a number',
+      'any.required': 'Restaurant ID is required'
+    }),
   });
 
   const paramResult = paramSchema.validate(req.params);

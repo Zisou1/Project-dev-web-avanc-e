@@ -13,25 +13,11 @@ const validateDelivery = (req, res, next) => {
       'number.base': 'Order ID must be a number',
       'any.required': 'Order ID is required'
     }),
-    status: Joi.string()
-      .valid('pending', 'confirmed', 'preparing', 'delivering', 'completed', 'cancelled')
-      .required()
-      .messages({
-        'any.only': 'Invalid status',
-        'any.required': 'Status is required'
-      }),
-    pickup_time: Joi.date().required().messages({
-      'date.base': 'Pickup time must be a valid date',
-      'any.required': 'Pickup time is required'
-    }),
-    total_price: Joi.number().min(0).required().messages({
-      'number.base': 'Total price must be a number',
-      'number.min': 'Total price must be greater than or equal to 0',
-      'any.required': 'Total price is required'
-    }),
-    address: Joi.string().max(255).required().messages({
-      'string.max': 'Address must not exceed 255 characters'
-    })
+   status: Joi.boolean().required().messages({
+         'boolean.base': 'Status must be a boolean',
+         'any.required': 'Status is required'
+       }),
+    
   });
 
   const { error, value } = schema.validate(req.body);

@@ -36,6 +36,7 @@ router.delete('/menu/delete/:id', menuController.deleteMenu);
 router.post('/item/create', upload.single('image'), validateItem, itemController.createItem);
 router.get('/item/getAll', itemController.getAllItems);
 router.get('/item/getItem/:id', itemController.getItemById);
+router.get('/item/getRestaurentItem/:restaurant_id', itemController.getRestaurentItem);
 router.put('/item/update/:id', validateItemUpdate, upload.single('image'), itemController.updateItem);
 router.delete('/item/delete/:id', itemController.deleteItem);
 router.get('/item/byIds', itemController.getItemsByIds);
