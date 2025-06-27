@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
-import ProfileFormInput from "../../components/ProfileFormInput";
-import ProfileButtons from "../../components/ProfileButtons";
 import DeleteAnimation from "../../components/DeleteAnimation";
+import LivreurInfoCard from "../../components/LivreurInfoCard";
+import LivreurForm from "../../components/LivreurForm";
+import ProfileButtons from "../../components/ProfileButtons";
+
 const Profillivreur = () => {
   const { user, setUser } = useAuth();
   const [form, setForm] = useState({
@@ -68,17 +70,24 @@ const Profillivreur = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <form className="w-full max-w-md space-y-6" onSubmit={handleSave}>
-        <ProfileFormInput type="text" name="name" value={form.name} onChange={handleChange} placeholder="Nom" disabled={!editing} />
-        <ProfileFormInput type="email" name="email" value={form.email} onChange={handleChange} placeholder="Email" disabled={!editing} />
-        <ProfileFormInput type="password" name="password" value={form.password} onChange={handleChange} placeholder="Mot de passe" disabled={!editing} />
-        <ProfileFormInput type="text" name="phone" value={form.phone} onChange={handleChange} placeholder="Numéro de téléphone" disabled={!editing} />
-
-        {status && <div className="text-green-600 text-center">{status}</div>}
-        {error && <div className="text-red-600 text-center">{error}</div>}
-
-        <ProfileButtons editing={editing} onEdit={handleEdit} onCancel={handleCancel} onDelete={handleDelete} />
-      </form>
+      {!editing && (
+        <>
+          <LivreurInfoCard form={form} />
+          <ProfileButtons editing={editing} onEdit={handleEdit} onDelete={handleDelete} />
+        </>
+      )}
+      {editing && (
+        <LivreurForm 
+          form={form}
+          editing={editing}
+          onChange={handleChange}
+          onSave={handleSave}
+          status={status}
+          error={error}
+          onCancel={handleCancel}
+          onDelete={handleDelete}
+        />
+      )}
     </div>
   );
 };
