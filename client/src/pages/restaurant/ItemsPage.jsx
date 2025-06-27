@@ -5,9 +5,10 @@ import SearchBar from "../../components/SearchBar";
 import DataTable from "../../components/DataTable";
 import { itemService } from "../../services/itemService";
 import ErrorMessage from "../../components/ErrorMessage";
+import ConfirmationModal from "../../components/ConfirmationModal";
 import { useAuth } from "../../context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { faFilter, faTrash } from "@fortawesome/free-solid-svg-icons";
 import FilterButton from "../../components/FilterButton";
 
 export default function ItemsPage() {
@@ -17,6 +18,7 @@ export default function ItemsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({});
   const filterRef = useRef();
@@ -48,11 +50,15 @@ export default function ItemsPage() {
 
   const handleDelete = (id) => {
     setDeleteId(id);
+    setShowDeleteModal(true);
   };
 
   const handleConfirmDelete = async () => {
+    if (!deleteId) return;
+    
     try {
       await itemService.delete(deleteId);
+      setShowDeleteModal(false);
       setDeleteId(null);
       if (user && user.role === 'restaurant') {
         await fetchArticles(user.id);
@@ -60,7 +66,14 @@ export default function ItemsPage() {
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || "Erreur lors de la suppression";
       setError(errorMsg);
+      setShowDeleteModal(false);
+      setDeleteId(null);
     }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeleteId(null);
   };
 
   // Filter fields config for FilterButton
@@ -182,8 +195,8 @@ export default function ItemsPage() {
   }, [showFilter]);
 
   return (
-    <div className="min-h-screen bg-white py-4 px-0.5 sm:px-2 relative z-10 text-[0.92rem]">
-      <div className="max-w-[95vw] xl:max-w-[900px] mx-auto">
+    <div className="min-h-screen py-4 px-2 sm:px-6 lg:px-8 relative  text-[0.92rem]">
+      <div className="w-full">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
           <h2 className="text-xl font-extrabold text-gray-900 tracking-tight mb-0">mes articles</h2>
           <Button 
@@ -214,46 +227,19 @@ export default function ItemsPage() {
           />
         </div>
       </div>
-      {deleteId && (
-        <DeleteConfirmPage id={deleteId} onClose={() => setDeleteId(null)} onDeleted={handleConfirmDelete} />
-      )}
-    </div>
-  );
-}
-
-function DeleteConfirmPage({ id, onClose, onDeleted }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const handleDelete = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      await onDeleted();
-      onClose();
-    } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message || "Erreur lors de la suppression";
-      setError(errorMsg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-      <div className="bg-white p-4 rounded-lg shadow-xl min-w-[220px] flex flex-col gap-2 text-[0.92rem]">
-        <h3 className="text-sm font-semibold mb-1 text-center">Confirmer la suppression</h3>
-        <p className="text-center text-xs">Voulez-vous vraiment supprimer cet article ?</p>
-        {error && <ErrorMessage error={error} />}
-        <div className="flex gap-1 mt-1">
-          <Button onClick={handleDelete} className="bg-red-500 text-white flex-1 py-1 text-xs" disabled={loading}>
-            {loading ? 'Suppression...' : 'Supprimer'}
-          </Button>
-          <Button onClick={onClose} className="bg-gray-300 text-gray-800 flex-1 py-1 text-xs" disabled={loading}>
-            Annuler
-          </Button>
-        </div>
-      </div>
+      
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Confirmer la suppression"
+        message="Voulez-vous vraiment supprimer cet article ? Cette action est irréversible."
+        confirmText="Supprimer"
+        cancelText="Annuler"
+        confirmButtonClass="bg-red-500 hover:bg-red-600"
+        icon={faTrash}
+        iconColor="text-red-500"
+      />
     </div>
   );
 }

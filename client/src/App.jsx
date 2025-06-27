@@ -14,6 +14,9 @@ import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
+import ItemsPage from './pages/restaurant/ItemsPage'
+import AddItemPage from './pages/restaurant/AddItemPage'
+import EditItemPage from './pages/restaurant/EditItemPage'
 
 function App() {
   return (
@@ -43,6 +46,9 @@ function App() {
             <Route index element={<RestaurantPage />} />
             <Route path="dashboard" element={<RestaurantPage />} />
             <Route path="menu" element={<div>Menu Management Page</div>} />
+            <Route path="items" element={<ItemsPage />} />
+            <Route path="items/add" element={<AddItemPage />} />
+            <Route path="items/edit/:id" element={<EditItemPage />} />
             <Route path="orders" element={<div>Restaurant Orders Page</div>} />
             <Route path="analytics" element={<div>Restaurant Analytics Page</div>} />
             <Route path="profile" element={<div>Restaurant Profile Page</div>} />
