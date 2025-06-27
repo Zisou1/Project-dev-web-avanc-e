@@ -14,6 +14,7 @@ import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
+import AccueilLivreur from './pages/livreur/AccueilLivreur'
 import ItemsPage from './pages/restaurant/ItemsPage'
 import AddItemPage from './pages/restaurant/AddItemPage'
 import EditItemPage from './pages/restaurant/EditItemPage'
@@ -62,8 +63,8 @@ function App() {
             </ProtectedRoute>
           }>
             {/* Nested livreur routes */}
-            <Route index element={<LivreurPage />} />
-            <Route path="dashboard" element={<LivreurPage />} />
+            <Route index element={<AccueilLivreur />} />
+            <Route path="dashboard" element={<AccueilLivreur />} />
             <Route path="orders" element={<div>Available Orders Page</div>} />
             <Route path="deliveries" element={<div>My Deliveries Page</div>} />
             <Route path="earnings" element={<div>Earnings Page</div>} />
