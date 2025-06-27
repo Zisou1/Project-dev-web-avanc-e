@@ -35,31 +35,46 @@ const LivreurPage = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-white rounded-2xl shadow p-10 mt-8">
-      <h1 className="text-2xl font-bold mb-6 text-left">
-        Livraisons disponibles
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50 py-8 px-2">
+      <div className="w-full max-w-6xl mx-auto bg-white/90 rounded-2xl shadow-2xl p-8 md:p-12 mt-8">
+        <h1 className="text-3xl font-extrabold mb-8 text-center text-[#FF4D4F] drop-shadow-lg tracking-tight flex items-center justify-center gap-3">
+          <span className="inline-block align-middle">🚚</span>
+          Livraisons disponibles
+        </h1>
 
-      {/* Search and Filter */}
-      <div className="flex justify-center mb-8 gap-4 flex-wrap">
-        <FilterButton
-          fields={[
-            { key: 'pickup', label: 'Adresse de récupération', type: 'text', placeholder: 'Rechercher par adresse' },
-            { key: 'status', label: 'Statut', type: 'select', options: [
-              { value: 'En attente', label: 'En attente' },
-              { value: 'En cours', label: 'En cours' },
-              { value: 'Livrée', label: 'Livrée' },
-            ] },
-          ]}
-          onApply={console.log}
-        />
-        <div className="w-full max-w-3xl">
-          <SearchBar />
+        {/* Search and Filter */}
+        <div className="flex flex-col md:flex-row justify-center mb-10 gap-4 items-center bg-white/80 shadow-lg rounded-2xl px-4 py-4">
+          <FilterButton
+            fields={[
+              { key: 'pickup', label: 'Adresse de récupération', type: 'text', placeholder: 'Rechercher par adresse' },
+              { key: 'status', label: 'Statut', type: 'select', options: [
+                { value: 'En attente', label: 'En attente' },
+                { value: 'En cours', label: 'En cours' },
+                { value: 'Livrée', label: 'Livrée' },
+              ] },
+            ]}
+            onApply={console.log}
+          />
+          <div className="w-full max-w-3xl">
+            <SearchBar />
+          </div>
         </div>
-      </div>
 
-      {/* Table of Deliveries */}
-      <DeliveryTable deliveries={deliveries} onAccept={handleAccept} />
+        {/* Table of Deliveries */}
+        {deliveries.length > 0 ? (
+          <DeliveryTable deliveries={deliveries} onAccept={handleAccept} />
+        ) : (
+          <div className="flex flex-col items-center justify-center mt-16">
+            <div className="bg-[#FF4D4F]/10 rounded-full p-6 mb-4 shadow-lg">
+              <svg className="w-16 h-16 text-[#FF4D4F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2a4 4 0 014-4h3m4 0v6a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v4" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-700 mb-2">Aucune livraison disponible</h2>
+            <p className="text-gray-500 text-center max-w-xs">Il n'y a pas de livraisons à accepter pour le moment. Revenez plus tard !</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
