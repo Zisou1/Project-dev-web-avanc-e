@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../../shared/database/connection');
 
-const Restaurant = sequelize.define('Menu', {
+const Menu = sequelize.define('Menu', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -61,4 +61,4 @@ const Restaurant = sequelize.define('Menu', {
   ]
 });
 
-module.exports = Restaurant;
+module.exports = Menu;

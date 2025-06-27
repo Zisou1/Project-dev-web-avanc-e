@@ -7,7 +7,7 @@ const Item = require('../models/Item.js');
  */
 const createMenu = async (req, res) => {
   try {
-    const { restaurant_id, name, price, status } = req.body;
+    const { restaurant_id, name, price, status } = req.body ?? {};
     const image = req.file;
 
     console.log('📥 Creating menu:', name);
@@ -70,7 +70,14 @@ const getAllMenus = async (req, res) => {
         through: { attributes: [] }, 
       }
     });
-    res.json({ menus });
+    const menusWithFullUrl = menus.map(menu => {
+      let imageUrl = menu.imageUrl;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+      }
+      return { ...menu.toJSON(), imageUrl };
+    });
+    res.json({ menus: menusWithFullUrl });
   } catch (error) {
     console.error('❌ Fetch Menus Error:', error);
     res.status(500).json({
@@ -95,7 +102,14 @@ const getMenuById = async (req, res) => {
       });
     }
 
-    res.json({ menu });
+
+    let imageUrl = menu.imageUrl;
+    if (imageUrl && !imageUrl.startsWith('http')) {
+      imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+    }
+
+
+    res.json({ menu: { ...menu.toJSON(), imageUrl } });
 
   } catch (error) {
     console.error('❌ Get Menu Error:', error);
@@ -129,7 +143,12 @@ const updateMenu = async (req, res) => {
       imagePath = `/uploads/menus/${image.filename}`;
     }
 
-    await menu.update({restaurant_id, name, price, status, imageUrl: imagePath });
+    await menu.update({restaurant_id, 
+      name, 
+      price, 
+      status, 
+      imageUrl: imagePath
+     });
 
     res.json({
       message: 'Menu updated successfully',
@@ -182,10 +201,40 @@ const deleteMenu = async (req, res) => {
   }
 };
 
+
+/**
+ * Get restaurent menu by ID
+ */
+const getRestaurentMenu = async (req, res) => {
+  try {
+    const { restaurant_id } = req.params;
+    const menu = await Menu.findAll({ where: { restaurant_id } });
+
+    if (!menu) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'Menu not found'
+      });
+    }
+
+    res.json({ menu });
+
+  } catch (error) {
+    console.error('❌ Get Menu Error:', error);
+    res.status(500).json({
+      error: 'Fetch Failed',
+      message: 'Unable to retrieve the menu',
+      details: error.message
+    });
+  }
+};
+
+
 module.exports = {
   createMenu,
   getAllMenus,
   getMenuById,
   updateMenu,
-  deleteMenu
+  deleteMenu,
+  getRestaurentMenu
 };

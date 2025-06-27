@@ -26,6 +26,15 @@ const services = [
     color: '\x1b[33m', // Yellow
     port: process.env.AUTH_SERVICE_PORT || 3001
   },
+  ,
+  {
+    name: 'order Service',
+    command: 'npm',
+    args: ['run', 'dev'],
+    cwd: path.join(__dirname, '../server/services/order-service'),
+    color: '\x1b[32m', 
+    port: process.env.ORDER_SERVICE_PORT || 3003
+  },
   {
     name: 'Restaurant Service',
     command: 'npm',
