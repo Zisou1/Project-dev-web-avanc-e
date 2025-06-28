@@ -286,6 +286,7 @@ const RegisterPage = () => {
                 />
                 {validationErrors.email && <div className="text-red-500 text-xs">{validationErrors.email}</div>}
               </div>
+              
               <div>
                 <Input
                   id="phone"
