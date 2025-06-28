@@ -362,7 +362,7 @@ const getUserById = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
 const { id } = req.params;
-  const {username, email} = req.body;
+  const {username, email, phone} = req.body;
 
   const user = await User.findByPk(id);
   if (!user) {
@@ -371,7 +371,7 @@ const { id } = req.params;
       message: 'Restaurant not found'
     });
   }
-  await user.update({username, email});
+  await user.update({username, email, phone});
   res.json({
       message: 'User updated successfully',
       user
