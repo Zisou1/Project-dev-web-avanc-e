@@ -232,10 +232,6 @@ function RestaurantPage() {
             <span className="text-xl sm:text-2xl">📊</span>
           </div>
           <div className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">{stats.todayOrders}</div>
-          <div className="flex items-center text-sm">
-            <span className="text-green-600 font-semibold">↗ +12%</span>
-            <span className="text-gray-500 ml-1">vs hier</span>
-          </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100 hover:shadow-xl transition-shadow">
@@ -262,10 +258,6 @@ function RestaurantPage() {
             <span className="text-xl sm:text-2xl">✅</span>
           </div>
           <div className="text-2xl sm:text-3xl font-bold text-green-600 mb-2">{stats.completedOrders}</div>
-          <div className="flex items-center text-sm">
-            <span className="text-green-600 font-semibold">↗ +8%</span>
-            <span className="text-gray-500 ml-1">vs hier</span>
-          </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100 hover:shadow-xl transition-shadow">
@@ -276,10 +268,6 @@ function RestaurantPage() {
             <span className="text-xl sm:text-2xl">💰</span>
           </div>
           <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">{stats.dailyRevenue} DA</div>
-          <div className="flex items-center text-sm">
-            <span className="text-green-600 font-semibold">↗ +15%</span>
-            <span className="text-gray-500 ml-1">vs hier</span>
-          </div>
         </div>
       </div>
 
@@ -361,7 +349,7 @@ function RestaurantPage() {
       {/* Recent Orders Table - Hidden on mobile for better UX */}
       {recentOrders.length > 0 && (
         <div className="hidden lg:block bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <h3 className="text-xl font-bold text-gray-800 mb-6">Détails des commandes récentes</h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-6">5 dernières commandes</h3>
           <div className="overflow-x-auto">
             <DataTable
               columns={[
@@ -371,7 +359,7 @@ function RestaurantPage() {
                 { key: 'time', label: 'Heure' },
                 { key: 'status', label: 'Statut' }
               ]}
-              data={recentOrders.map(order => ({
+              data={recentOrders.slice(0, 5).map(order => ({
                 ...order,
                 status: getStatusText(order.status)
               }))}
