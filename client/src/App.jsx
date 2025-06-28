@@ -18,6 +18,8 @@ import AccueilLivreur from './pages/livreur/AccueilLivreur'
 import ItemsPage from './pages/restaurant/ItemsPage'
 import AddItemPage from './pages/restaurant/AddItemPage'
 import EditItemPage from './pages/restaurant/EditItemPage'
+import OrderTrackingPage from './pages/livreur/suivrelivraison'
+import Commandes from './pages/livreur/commandes'
 
 function App() {
   return (
@@ -65,8 +67,8 @@ function App() {
             {/* Nested livreur routes */}
             <Route index element={<AccueilLivreur />} />
             <Route path="dashboard" element={<AccueilLivreur />} />
-            <Route path="orders" element={<div>Available Orders Page</div>} />
-            <Route path="deliveries" element={<div>My Deliveries Page</div>} />
+            <Route path="orders" element={<Commandes />} />
+            <Route path="deliveries" element={<OrderTrackingPage />} />
             <Route path="earnings" element={<div>Earnings Page</div>} />
             <Route path="profile" element={<div>Livreur Profile Page</div>} />
             <Route path="settings" element={<div>Livreur Settings Page</div>} />
