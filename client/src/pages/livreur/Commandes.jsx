@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { orderService } from "../../services/orderService";
+import SearchBar from "../../components/SearchBar";
+import InfoCard from "../../components/InfoCard";
+import FilterButton from "../../components/FilterButton";
+import Button from "../../components/Button";
+import ErrorMessage from "../../components/ErrorMessage";
 
 export default function Commandes() {
   const [orders, setOrders] = useState([]);
@@ -7,6 +12,7 @@ export default function Commandes() {
   const [showArticles, setShowArticles] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({});
 
   useEffect(() => {
     async function fetchOrders() {
@@ -27,80 +33,221 @@ export default function Commandes() {
     fetchOrders();
   }, []);
 
-  const filtered = orders.filter(
+  // Handle accept order
+  const handleAccept = async (orderId) => {
+    try {
+      await orderService.updateOrderStatus(orderId, "waiting for pickup");
+      setOrders((prev) => prev.filter((cmd) => cmd.id !== orderId)); // Remove from list
+    } catch (err) {
+      alert("Erreur lors de l'acceptation de la commande.");
+    }
+  };
+
+  const applyFilters = (orders) => {
+    return orders.filter(cmd => {
+      if (filters.prime_min && (cmd.prime || cmd.price || 0) < parseFloat(filters.prime_min)) return false;
+      if (filters.prime_max && (cmd.prime || cmd.price || 0) > parseFloat(filters.prime_max)) return false;
+      if (filters.status && cmd.status !== filters.status) return false;
+      return true;
+    });
+  };
+
+  const filtered = applyFilters(orders.filter(
     (cmd) =>
+      (cmd.status === "confirmed") &&
       (cmd.address?.toLowerCase().includes(search.toLowerCase()) || "")
-  );
+  ));
+
+  // Check if any order is waiting for pickup
+  const hasWaitingForPickup = orders.some(cmd => cmd.status === "waiting for pickup");
+  const waitingOrderId = orders.find(cmd => cmd.status === "waiting for pickup")?.id;
+
+  // Stats for info cards
+  const availableOrders = orders.filter(cmd => cmd.status === "confirmed").length;
+  const totalValue = filtered.reduce((sum, cmd) => sum + (cmd.prime || cmd.price || 0), 0);
+  const avgValue = filtered.length > 0 ? (totalValue / filtered.length).toFixed(2) : 0;
+
+  const filterFields = [
+    {
+      key: 'prime',
+      label: 'Prime (€)',
+      type: 'range',
+      placeholderMin: 'Min €',
+      placeholderMax: 'Max €'
+    },
+    {
+      key: 'status',
+      label: 'Statut',
+      type: 'select',
+      options: [
+        { value: 'confirmed', label: 'Confirmé' },
+        { value: 'waiting for pickup', label: 'En attente de récupération' }
+      ]
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <h2 className="text-2xl font-bold mb-4">livraisons disponibles</h2>
-      <div className="flex items-center gap-3 mb-4">
-        <button className="p-2 rounded-full border border-gray-300 bg-white hover:bg-gray-100">
-          {/* Filter icon SVG */}
-          <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M3 5h18M6 8v6a2 2 0 002 2h8a2 2 0 002-2V8" />
-            <circle cx="12" cy="17" r="2" />
-          </svg>
-        </button>
-        <input
-          className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff5c5c]"
-          placeholder="search"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">🚚 Livraisons disponibles</h1>
+        <p className="text-gray-600">Découvrez les commandes prêtes à être livrées</p>
       </div>
+
+      {/* Stats Cards */}
+      <div className="flex flex-wrap gap-4 mb-6">
+        <InfoCard 
+          label="Commandes disponibles" 
+          value={availableOrders} 
+          valueClass="text-blue-600" 
+        />
+        <InfoCard 
+          label="Valeur totale" 
+          value={`${totalValue.toFixed(2)}€`} 
+          valueClass="text-green-600" 
+        />
+        <InfoCard 
+          label="Prime moyenne" 
+          value={`${avgValue}€`} 
+          valueClass="text-purple-600" 
+        />
+        {hasWaitingForPickup && (
+          <InfoCard 
+            label="En cours" 
+            value="1 commande" 
+            valueClass="text-orange-600" 
+          />
+        )}
+      </div>
+
+      {/* Search and Filter */}
+      <div className="flex items-center gap-4 mb-6">
+        <FilterButton 
+          fields={filterFields} 
+          onApply={setFilters} 
+          initial={filters}
+        />
+        <div className="flex-1">
+          <SearchBar 
+            query={search}
+            setQuery={setSearch}
+            placeholder="Rechercher par adresse..."
+          />
+        </div>
+      </div>
+
+      {/* Content */}
       {loading ? (
-        <div>Chargement...</div>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FE5336]"></div>
+          <span className="ml-3 text-lg text-gray-600">Chargement des commandes...</span>
+        </div>
       ) : error ? (
-        <div className="text-red-500">{error}</div>
+        <ErrorMessage message={error} />
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-center border-collapse">
-            <thead>
-              <tr className="border-b">
-                <th className="py-2 px-3 font-medium">ID commande</th>
-                <th className="py-2 px-3 font-medium">adresse de récupération</th>
-                <th className="py-2 px-3 font-medium">Adresse de livraison</th>
-                <th className="py-2 px-3 font-medium">prime</th>
-                <th className="py-2 px-3 font-medium">Liste des articles</th>
-              </tr>
-            </thead>
-            <tbody>
+        <>
+          {filtered.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📦</div>
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">Aucune commande disponible</h3>
+              <p className="text-gray-500">Aucune commande ne correspond à vos critères de recherche.</p>
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filtered.map(cmd => (
-                <tr key={cmd.id} className="border-b">
-                  <td className="py-4">{cmd.id}</td>
-                  <td className="py-4">{cmd.address}</td>
-                  <td className="py-4">{cmd.address}</td>
-                  <td className="py-4 font-semibold">{cmd.prime || cmd.price || "-"}</td>
-                  <td className="py-4">
-                    <button
-                      className="border border-[#ff5c5c] rounded-full px-4 py-1 text-[#222] hover:bg-[#ffedea]"
-                      onClick={() => setShowArticles(cmd.id)}
-                    >
-                      voir
-                    </button>
-                    {showArticles === cmd.id && (
-                      <div className="absolute bg-white border rounded shadow p-3 mt-2 z-50">
-                        <div className="font-semibold mb-2">Articles:</div>
-                        <ul className="text-left text-sm">
-                          {(cmd.articles || []).map((a, i) => (
-                            <li key={i}>- {a.name || a}</li>
-                          ))}
-                        </ul>
-                        <button className="mt-2 text-xs text-[#ff5c5c] underline" onClick={() => setShowArticles(null)}>Fermer</button>
+                <div key={cmd.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                  {/* Card Header */}
+                  <div className="bg-gradient-to-r from-[#FE5336] to-[#FF6B4A] p-4 text-white">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-bold text-lg">Commande #{cmd.id}</h3>
+                        <p className="text-red-100 text-sm">📍 {cmd.address}</p>
                       </div>
-                    )}
-                  </td>
-                  <td className="py-4">
-                    <button className="bg-[#ff5c5c] hover:bg-[#ff7e7e] text-white font-bold px-12 py-3 rounded-lg text-lg shadow transition">
-                      Accepter
-                    </button>
-                  </td>
-                </tr>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold">{cmd.prime || cmd.price || "-"}€</div>
+                        <div className="text-red-100 text-sm">Prime</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500">🏪 Récupération:</span>
+                        <span className="font-medium">{cmd.address}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500">🏠 Livraison:</span>
+                        <span className="font-medium">{cmd.address}</span>
+                      </div>
+                      
+                      {/* Articles Section */}
+                      <div className="border-t pt-3">
+                        <button
+                          className="flex items-center justify-between w-full text-left hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                          onClick={() => setShowArticles(showArticles === cmd.id ? null : cmd.id)}
+                        >
+                          <span className="font-medium text-gray-700">📋 Articles ({(cmd.articles || []).length})</span>
+                          <span className="text-[#FE5336]">
+                            {showArticles === cmd.id ? '▼' : '▶'}
+                          </span>
+                        </button>
+                        
+                        {showArticles === cmd.id && (
+                          <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                            <ul className="space-y-1">
+                              {(cmd.articles || []).map((a, i) => (
+                                <li key={i} className="flex items-center gap-2 text-sm">
+                                  <span className="w-2 h-2 bg-[#FE5336] rounded-full"></span>
+                                  {a.name || a}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="mt-4">
+                      <Button
+                        onClick={() => handleAccept(cmd.id)}
+                        disabled={hasWaitingForPickup}
+                        className={`w-full py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50 ${
+                          hasWaitingForPickup 
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                            : 'bg-[#FE5336] hover:bg-[#FF6B4A] text-white focus:ring-[#FE5336]'
+                        }`}
+                      >
+                        {hasWaitingForPickup ? '🔒 Une livraison en cours' : '✅ Accepter la commande'}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Status Badge */}
+                  <div className="px-4 pb-4">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                      ✅ Confirmée
+                    </span>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Warning message if delivery in progress */}
+      {hasWaitingForPickup && (
+        <div className="fixed bottom-6 right-6 bg-orange-100 border-l-4 border-orange-500 p-4 rounded-lg shadow-lg max-w-sm">
+          <div className="flex items-center">
+            <div className="text-orange-500 mr-3">⚠️</div>
+            <div>
+              <p className="font-medium text-orange-800">Livraison en cours</p>
+              <p className="text-sm text-orange-700">Terminez votre livraison actuelle avant d'en accepter une nouvelle.</p>
+            </div>
+          </div>
         </div>
       )}
     </div>
