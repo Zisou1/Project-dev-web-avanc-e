@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import logimg from '../../assets/loginimg.png';
 import rest from '../../assets/rest.png';
@@ -46,15 +46,69 @@ const RegisterPage = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [animating, setAnimating] = useState(false);
 
-  const { register, loading, error, clearError, isAuthenticated } = useAuth();
+  const { register, loading, error, clearError, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/', { replace: true });
+  // Helper function to get role-based redirect path
+  const getRoleBasedPath = (userRole) => {
+    switch (userRole) {
+      case 'admin':
+        return '/admin';
+      case 'restaurant':
+        return '/restaurant';
+      case 'delivery':
+        return '/livreur';
+      case 'client':
+      case 'user':
+      case 'customer':
+      default:
+        return '/';
     }
-  }, [isAuthenticated, navigate]);
+  };
+
+  // Helper function to check if a path matches the user's role
+  const checkPathMatchesRole = (path, userRole) => {
+    const rolePaths = {
+      'admin': ['/admin'],
+      'restaurant': ['/restaurant'],
+      'delivery': ['/livreur'],
+      'client': ['/'],
+      'user': ['/'],
+      'customer': ['/']
+    };
+
+    // Special handling for root path to avoid conflicts
+    if (path === '/') {
+      return ['client', 'user', 'customer'].includes(userRole);
+    }
+    if (path.startsWith('/admin')) {
+      return userRole === 'admin';
+    }
+    if (path.startsWith('/restaurant')) {
+      return userRole === 'restaurant';
+    }
+    if (path.startsWith('/livreur')) {
+      return userRole === 'delivery';
+    }
+    return ['client', 'user', 'customer'].includes(userRole);
+  };
+
+  // Redirect if already authenticated (after registration)
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const from = location.state?.from?.pathname;
+      const userRoleBasedPath = getRoleBasedPath(user.role);
+      let redirectPath = userRoleBasedPath;
+      if (from) {
+        const isValidFromPath = checkPathMatchesRole(from, user.role);
+        if (isValidFromPath) {
+          redirectPath = from;
+        }
+      }
+      navigate(redirectPath, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location, user]);
 
   const handleRoleSelect = (selectedRole) => {
     setAnimating(true);
@@ -290,8 +344,21 @@ const RegisterPage = () => {
                 />
                 {validationErrors.confirmPassword && <div className="text-red-500 text-xs">{validationErrors.confirmPassword}</div>}
               </div>
-              <Button loading={loading} type="submit" className="rounded-full text-sm md:text-lg shadow-md bg-[#ff4d30] hover:bg-[#ff7043] transition-all duration-300">suivant</Button>
-              <button type="button" className="w-full mt-2 text-xs md:text-sm text-gray-500 hover:text-gray-700" onClick={handleBack}>Retour</button>
+              <Button
+                loading={loading}
+                type="submit"
+                className="w-full py-3 px-4 rounded-full text-base md:text-lg font-semibold shadow-md bg-[#ff4d30] hover:bg-[#ff7043] text-white transition-all duration-300"
+              >
+                suivant
+              </Button>
+              <Button
+                type="button"
+                className="w-full mt-2 text-xs md:text-sm text-gray-500 hover:text-gray-700 bg-transparent shadow-none border-none"
+                onClick={handleBack}
+                style={{ boxShadow: 'none', background: 'transparent', color: '#6b7280' }}
+              >
+                Retour
+              </Button>
               <p className="mt-4 text-center text-xs md:text-sm text-black">
                 Vous avez déja un compte ?{' '}
                 <Link to="/Login" className="text-[#ff4d30] font-medium hover:text-[#ff7043]">Sign In</Link>
