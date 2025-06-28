@@ -8,7 +8,7 @@ import ErrorMessage from "../../components/ErrorMessage";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import { useAuth } from "../../context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import FilterButton from "../../components/FilterButton";
 
 export default function ItemsPage() {
@@ -24,21 +24,28 @@ export default function ItemsPage() {
   const filterRef = useRef();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (user && user.role === 'restaurant') {
-      fetchArticles(user.id);
-    }
-  }, [user]);
-
-  const fetchArticles = async (restaurantId) => {
+  const fetchArticles = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await itemService.getAll(restaurantId);
-      if (!data.items || !Array.isArray(data.items)) {
-        throw new Error("Aucun article trouvé ou format de réponse invalide");
+      // Get the restaurant ID for the current user
+      const restaurantId = await itemService.getRestaurantIdByUserId(user.id);
+      
+      if (!restaurantId) {
+        throw new Error("Restaurant non trouvé pour cet utilisateur");
       }
-      setArticles(data.items);
+
+      // Get items for this specific restaurant
+      const data = await itemService.getRestaurantItems(restaurantId);
+      console.log('📦 Restaurant items data:', data);
+      
+      // Handle both possible response formats
+      const items = data.items || data.item || [];
+      if (!Array.isArray(items)) {
+        throw new Error("Format de réponse invalide");
+      }
+      
+      setArticles(items);
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || "Erreur inconnue";
       setError(errorMsg);
@@ -47,6 +54,12 @@ export default function ItemsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user && user.role === 'restaurant') {
+      fetchArticles();
+    }
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = (id) => {
     setDeleteId(id);
@@ -61,7 +74,7 @@ export default function ItemsPage() {
       setShowDeleteModal(false);
       setDeleteId(null);
       if (user && user.role === 'restaurant') {
-        await fetchArticles(user.id);
+        await fetchArticles();
       }
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || "Erreur lors de la suppression";
