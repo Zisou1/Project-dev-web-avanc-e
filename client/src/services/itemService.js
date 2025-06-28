@@ -157,4 +157,15 @@ export const itemService = {
     });
     return response.data;
   },
+
+  // Get items for a specific restaurant
+  async getRestaurantItems(restaurantId) {
+    const response = await api.get(`/restaurants/item/getRestaurentItem/${restaurantId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+    return { items: response.data.item || [] }; // Backend returns { item } but we want { items }
+  },
 };
