@@ -3,6 +3,7 @@ import api from './baseApi';
 export const deliveryService = {
   // Get delivery assigned to a specific user (delivery agent)
   async getDeliveryByUser(userId) {
+    console.log('Fetching delivery for user:', userId);
     try {
       const response = await api.get(`/delivery/getDeliveryByUser/${userId}`, {
         headers: {
@@ -10,6 +11,7 @@ export const deliveryService = {
           'Accept': 'application/json',
         },
       });
+      console.log('Delivery data:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error fetching delivery by user:', error);

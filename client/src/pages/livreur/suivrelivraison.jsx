@@ -27,6 +27,7 @@ export default function OrderTrackingPage() {
   const [error, setError] = useState(null);
   const [loadingAction, setLoadingAction] = useState(false);
   const [toast, setToast] = useState("");
+  const [deliveryId, setDeliveryId] = useState(null); // Add delivery ID state
 
   // Fetch delivery and order data
   useEffect(() => {
@@ -40,15 +41,55 @@ export default function OrderTrackingPage() {
           return;
         }
 
-        // Get delivery assigned to this user
-        const deliveryData = await deliveryService.getDeliveryByUser(user.id);
-        setDelivery(deliveryData);
-        setOrder(deliveryData.order);
+        // If orderId is provided in params, use it to get the specific order
+        if (orderId) {
+          try {
+            const orderData = await orderService.getById(orderId);
+            setOrder(orderData.order || orderData);
+            
+            // Also try to get the delivery info if it exists
+            try {
+              const deliveryData = await deliveryService.getDeliveryByUser(user.id);
+              if (deliveryData.order_id === parseInt(orderId)) {
+                setDelivery(deliveryData);
+                setDeliveryId(deliveryData.id || deliveryData.delivery_id); // Capture delivery ID
+                console.log('Delivery ID captured:', deliveryData.id || deliveryData.delivery_id);
+              }
+            } catch (deliveryErr) {
+              // No delivery found for this specific order, but order exists
+              console.log('No active delivery found for this order');
+            }
+            
+          } catch (orderErr) {
+            console.error('Error fetching specific order:', orderErr);
+            setError("Commande non trouvée");
+            return;
+          }
+        } else {
+          // Get the current active delivery assigned to this user
+          try {
+            const deliveryData = await deliveryService.getDeliveryByUser(user.id);
+            
+            if (!deliveryData || !deliveryData.order) {
+              setError("Aucune livraison active assignée");
+              return;
+            }
+            
+            setDelivery(deliveryData);
+            setOrder(deliveryData.order);
+            setDeliveryId(deliveryData.id || deliveryData.delivery_id); // Capture delivery ID
+            console.log('Active delivery ID captured:', deliveryData.id || deliveryData.delivery_id);
+          } catch (deliveryErr) {
+            console.error('No active delivery found for user:', deliveryErr);
+            setError("Aucune livraison active assignée");
+            return;
+          }
+        }
 
       } catch (err) {
         console.error('Error fetching delivery data:', err);
         if (err.response?.status === 404) {
-          setError("Aucune livraison assignée");
+          setError("Aucune livraison assignée ou commande introuvable");
         } else {
           setError("Erreur lors du chargement des données de livraison");
         }
@@ -58,7 +99,7 @@ export default function OrderTrackingPage() {
     };
 
     fetchDeliveryData();
-  }, [user]);
+  }, [user, orderId]);
 
   // Status mapping
   const getStatusDisplay = (status) => {

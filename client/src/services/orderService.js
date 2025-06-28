@@ -43,11 +43,14 @@ class OrderService {
   }
 
   // Update order status using existing update endpoint
-  async updateOrderStatus(orderId, status) {
+  async updateOrderStatus(orderId, status, deliveryUserId = null) {
     try {
-      const response = await baseApi.put(`/orders/update/${orderId}`, {
-        status
-      });
+      const requestBody = { status };
+      if (deliveryUserId) {
+        requestBody.deliveryUser_id = deliveryUserId;
+      }
+      
+      const response = await baseApi.put(`/orders/update/${orderId}`, requestBody);
       return response.data;
     } catch (error) {
       console.error('Error updating order status:', error);

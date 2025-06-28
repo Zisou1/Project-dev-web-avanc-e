@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { orderService } from "../../services/orderService";
+import { deliveryService } from "../../services/deliveryService";
+import { useAuth } from "../../context/AuthContext";
 import SearchBar from "../../components/SearchBar";
 import InfoCard from "../../components/InfoCard";
 import FilterButton from "../../components/FilterButton";
@@ -13,31 +15,55 @@ export default function Commandes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({});
+  const [userHasActiveDelivery, setUserHasActiveDelivery] = useState(false);
+  const [activeDeliveryOrderId, setActiveDeliveryOrderId] = useState(null);
+  
+  const { user } = useAuth();
 
   useEffect(() => {
-    async function fetchOrders() {
+    async function fetchData() {
       setLoading(true);
       setError(null);
       try {
-        // Fetch all orders using /orders/getAll
+        // Fetch all orders
         const response = await orderService.getAllOrders();
         setOrders(response.orders || []);
         console.log('Orders set in state:', response.orders || []);
+
+        // Check if current user has an active delivery
+        if (user?.id) {
+          try {
+            const deliveryData = await deliveryService.getDeliveryByUser(user.id);
+            if (deliveryData && deliveryData.status === true) {
+              setUserHasActiveDelivery(true);
+              setActiveDeliveryOrderId(deliveryData.order_id);
+            } else {
+              setUserHasActiveDelivery(false);
+              setActiveDeliveryOrderId(null);
+            }
+          } catch (deliveryErr) {
+            // No active delivery found for this user - this is normal
+            setUserHasActiveDelivery(false);
+            setActiveDeliveryOrderId(null);
+          }
+        }
       } catch (err) {
         setError("Erreur lors du chargement des commandes.");
-        console.error("Error in fetchOrders:", err);
+        console.error("Error in fetchData:", err);
       } finally {
         setLoading(false);
       }
     }
-    fetchOrders();
-  }, []);
+    fetchData();
+  }, [user]);
 
   // Handle accept order
   const handleAccept = async (orderId) => {
     try {
-      await orderService.updateOrderStatus(orderId, "waiting for pickup");
+      await orderService.updateOrderStatus(orderId, "waiting for pickup", user.id);
       setOrders((prev) => prev.filter((cmd) => cmd.id !== orderId)); // Remove from list
+      setUserHasActiveDelivery(true);
+      setActiveDeliveryOrderId(orderId);
     } catch (err) {
       alert("Erreur lors de l'acceptation de la commande.");
     }
@@ -57,10 +83,6 @@ export default function Commandes() {
       (cmd.status === "confirmed") &&
       (cmd.address?.toLowerCase().includes(search.toLowerCase()) || "")
   ));
-
-  // Check if any order is waiting for pickup
-  const hasWaitingForPickup = orders.some(cmd => cmd.status === "waiting for pickup");
-  const waitingOrderId = orders.find(cmd => cmd.status === "waiting for pickup")?.id;
 
   // Stats for info cards
   const availableOrders = orders.filter(cmd => cmd.status === "confirmed").length;
@@ -111,7 +133,7 @@ export default function Commandes() {
           value={`${avgValue}€`} 
           valueClass="text-purple-600" 
         />
-        {hasWaitingForPickup && (
+        {userHasActiveDelivery && (
           <InfoCard 
             label="En cours" 
             value="1 commande" 
@@ -213,14 +235,14 @@ export default function Commandes() {
                     <div className="mt-4">
                       <Button
                         onClick={() => handleAccept(cmd.id)}
-                        disabled={hasWaitingForPickup}
+                        disabled={userHasActiveDelivery}
                         className={`w-full py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-50 ${
-                          hasWaitingForPickup 
+                          userHasActiveDelivery 
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                             : 'bg-[#FE5336] hover:bg-[#FF6B4A] text-white focus:ring-[#FE5336]'
                         }`}
                       >
-                        {hasWaitingForPickup ? '🔒 Une livraison en cours' : '✅ Accepter la commande'}
+                        {userHasActiveDelivery ? '🔒 Une livraison en cours' : '✅ Accepter la commande'}
                       </Button>
                     </div>
                   </div>
@@ -239,7 +261,7 @@ export default function Commandes() {
       )}
 
       {/* Warning message if delivery in progress */}
-      {hasWaitingForPickup && (
+      {userHasActiveDelivery && (
         <div className="fixed bottom-6 right-6 bg-orange-100 border-l-4 border-orange-500 p-4 rounded-lg shadow-lg max-w-sm">
           <div className="flex items-center">
             <div className="text-orange-500 mr-3">⚠️</div>

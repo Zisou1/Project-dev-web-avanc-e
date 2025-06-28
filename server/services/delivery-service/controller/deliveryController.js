@@ -199,7 +199,7 @@ const getDeliveryByUser = async (req, res) => {
       const orderRes = await axios.get(`http://localhost:3003/api/orders/getOrder/${delivery.order_id}`);
       order = orderRes.data.order;
     } catch (err) {
-      console.warn(`⚠️ Could not fetch order:`, err.message);
+      console.warn(`⚠️ Could not fetch order:`, err);
     }
 
     res.json({
