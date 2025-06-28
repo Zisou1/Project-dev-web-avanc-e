@@ -173,10 +173,54 @@ const deleteDelivery = async (req, res) => {
   }
 };
 
+const getDeliveryByUser = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const delivery = await Delivery.findOne({ where: { user_id, status: true } });
+
+    if (!delivery) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'Delivery not found'
+      });
+    }
+
+    let user = null;
+    let order = null;
+
+    try {
+      const userRes = await axios.get(`http://localhost:3001/api/auth/user/getUser/${delivery.user_id}`);
+      user = userRes.data.user;
+    } catch (err) {
+      console.warn(`⚠️ Could not fetch user:`, err.message);
+    }
+
+    try {
+      const orderRes = await axios.get(`http://localhost:3003/api/orders/getOrder/${delivery.order_id}`);
+      order = orderRes.data.order;
+    } catch (err) {
+      console.warn(`⚠️ Could not fetch order:`, err.message);
+    }
+
+    res.json({
+      ...delivery.toJSON(),
+      user,
+      order
+    });
+    } catch (error) {
+    console.error('❌ Get Delivery Error:', error);
+    res.status(500).json({
+      error: 'Fetch Failed',
+      message: error.message
+    });
+  }
+}
+
 module.exports = {
   createDelivery,
   getAllDeliveries,
   getDeliveryById,
   updateDelivery,
-  deleteDelivery
+  deleteDelivery,
+  getDeliveryByUser
 };

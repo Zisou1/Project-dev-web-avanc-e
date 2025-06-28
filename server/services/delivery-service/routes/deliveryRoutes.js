@@ -14,6 +14,9 @@ router.get('/getAll', deliveryController.getAllDeliveries);
 // Get a specific delivery by ID with full info
 router.get('/getDelivery/:id', deliveryController.getDeliveryById);
 
+// Get a specific deliverywith user ID
+router.get('/getDeliveryByUser/:user_id', deliveryController.getDeliveryByUser);
+
 // Update a delivery
 router.put('/update/:id', validateDeliveryUpdate, deliveryController.updateDelivery);
 
@@ -21,3 +24,4 @@ router.put('/update/:id', validateDeliveryUpdate, deliveryController.updateDeliv
 router.delete('/delete/:id', deliveryController.deleteDelivery);
 
 module.exports = router;
+;
