@@ -11,14 +11,17 @@ const Profillivreur = () => {
   const [form, setForm] = useState({
     name: '',
     email: '',
-    password: '',
-    phone: ''
+    phone: '',
+    oldPassword: '', // for password change verification
+    newPassword: '',
+    confirmPassword: ''
   });
   const [editing, setEditing] = useState(false);
   const [status, setStatus] = useState(null);
   const [error, setError] = useState(null);
   const [showDeleteAnim, setShowDeleteAnim] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
 
   useEffect(() => {
     // Use user from AuthContext directly, do not call API
@@ -26,8 +29,10 @@ const Profillivreur = () => {
       setForm({
         name: user.name || '',
         email: user.email || '',
-        password: '',
-        phone: user.phone || ''
+        phone: user.phone || '',
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
       });
     }
     setLoading(false);
@@ -43,39 +48,66 @@ const Profillivreur = () => {
     setForm({
       name: user?.name || '',
       email: user?.email || '',
-      password: '',
-      phone: user?.phone || ''
+      phone: user?.phone || '',
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: ''
     });
     setEditing(true);
+    setShowPasswordFields(false);
   };
   const handleCancel = () => {
     setForm({
       name: user?.name || '',
       email: user?.email || '',
-      password: '',
-      phone: user?.phone || ''
+      phone: user?.phone || '',
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: ''
     });
     setEditing(false);
+    setShowPasswordFields(false);
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
     setStatus(null);
     setError(null);
+    // Password change validation (front only)
+    if (showPasswordFields) {
+      if (!form.oldPassword || !form.newPassword || !form.confirmPassword) {
+        setError('Veuillez remplir tous les champs de mot de passe.');
+        return;
+      }
+      if (form.newPassword !== form.confirmPassword) {
+        setError('Les nouveaux mots de passe ne correspondent pas.');
+        return;
+      }
+    }
     try {
-      const updateData = { ...form };
-      if (!updateData.password) delete updateData.password;
+      const updateData = {
+        name: form.name,
+        email: form.email,
+        phone: form.phone
+      };
+      if (showPasswordFields) {
+        updateData.oldPassword = form.oldPassword;
+        updateData.password = form.newPassword;
+      }
       // Call API to update user
       const updated = await authService.updateUser(updateData);
       setUser && setUser({ ...user, ...updated.user });
       setForm({
         name: updated.user?.name || '',
         email: updated.user?.email || '',
-        password: '',
-        phone: updated.user?.phone || ''
+        phone: updated.user?.phone || '',
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
       });
       setStatus('Modifications enregistrées !');
       setEditing(false);
+      setShowPasswordFields(false);
     } catch (err) {
       setError('Erreur lors de la mise à jour.');
     }
@@ -138,6 +170,8 @@ const Profillivreur = () => {
             error={error}
             onCancel={handleCancel}
             onDelete={handleDelete}
+            showPasswordFields={showPasswordFields}
+            setShowPasswordFields={setShowPasswordFields}
           />
         )}
       </div>

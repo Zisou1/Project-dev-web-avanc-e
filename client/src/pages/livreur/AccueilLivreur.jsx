@@ -1,18 +1,23 @@
 import React from 'react';
+import { itemService } from '../../services/itemService';
 import InfoCard from '../../components/InfoCard';
 
 const AccueilLivreur = () => {
-  // Example data
-  const livreur = {
-    name: 'Ramy test',
-    phone: '0559922630',
-    commandesJour: 47,
-    commandesAttente: 40,
-    commandesTerminer: 5,
-    revenusJour: '7800 DA',
-    rating: 4.8,
-    totalDeliveries: 1247
-  };
+  // Retrieve user data from JWT token
+  const user = itemService.getUserFromToken();
+
+  // Fallback if user is not authenticated
+  const livreur = user ? {
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    phone: user.phone || '',
+    commandesJour: 47, // TODO: Replace with real data
+    commandesAttente: 40, // TODO: Replace with real data
+    commandesTerminer: 5, // TODO: Replace with real data
+    revenusJour: '7800 DA', // TODO: Replace with real data
+    totalDeliveries: 1247 // TODO: Replace with real data
+  } : {};
 
   const recentOrders = [
     { id: '#CMD001', restaurant: 'Pizza Palace', address: '15 Rue de la Liberté', status: 'En cours', time: '14:30', amount: '2450 DA' },
@@ -53,17 +58,16 @@ const AccueilLivreur = () => {
                 <span className="font-semibold text-gray-800">{livreur.name}</span>
               </div>
               <div className="flex items-center">
-                <span className="text-gray-600 w-24">Téléphone:</span>
-                <span className="font-semibold text-blue-600">{livreur.phone}</span>
+                <span className="text-gray-600 w-24">Email:</span>
+                <span className="font-semibold text-blue-600">{livreur.email}</span>
               </div>
               <div className="flex items-center">
-                <span className="text-gray-600 w-24">Note:</span>
-                <div className="flex items-center">
-                  <span className="font-semibold text-yellow-600 mr-1">{livreur.rating}</span>
-                  <div className="flex text-yellow-400">
-                    {'★'.repeat(Math.floor(livreur.rating))}{'☆'.repeat(5 - Math.floor(livreur.rating))}
-                  </div>
-                </div>
+                <span className="text-gray-600 w-24">Rôle:</span>
+                <span className="font-semibold text-gray-800">{livreur.role}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="text-gray-600 w-24">Téléphone:</span>
+                <span className="font-semibold text-blue-600">{livreur.phone}</span>
               </div>
               <div className="flex items-center">
                 <span className="text-gray-600 w-24">Total:</span>
