@@ -373,6 +373,61 @@ const getUserById = async (req, res) => {
   }
 }
 
+const updateUser = async (req, res) => {
+  try {
+const { id } = req.params;
+  const {username, email, phone} = req.body;
+
+  const user = await User.findByPk(id);
+  if (!user) {
+    return res.status(404).json({
+      error: 'Not Found',
+      message: 'Restaurant not found'
+    });
+  }
+  await user.update({username, email, phone});
+  res.json({
+      message: 'User updated successfully',
+      user
+    });
+  }catch (error) {
+    console.error('❌ Update Error:', error);
+    res.status(500).json({
+      error: 'Update Failed',
+      message: 'An error occurred while updating'
+    });
+  }
+  
+
+}
+
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'User not found'
+      });
+    }
+
+    await user.destroy(); // soft delete (paranoid: true)
+
+    res.json({
+      message: 'User deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Delete Error:', error);
+    res.status(500).json({
+      error: 'Delete Failed',
+      message: 'An error occurred while deleting'
+    });
+  }
+}
+
 module.exports = {
   register,
   login,
@@ -382,5 +437,7 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getAllUsers,
-  getUserById
+  getUserById,
+  updateUser,
+  deleteUser
 };

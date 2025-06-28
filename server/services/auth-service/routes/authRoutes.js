@@ -13,6 +13,9 @@ router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);
 router.get('/user/getAll', authController.getAllUsers);
 router.get('/user/getUser/:id', authController.getUserById);
+router.put('/user/update/:id', authController.updateUser);
+router.delete('/user/delete/:id', authController.deleteUser);
+
 
 
 // Token verification (internal use by other services)
