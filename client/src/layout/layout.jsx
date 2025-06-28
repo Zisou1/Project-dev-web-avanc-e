@@ -4,10 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import UserProfile from '../components/UserProfile';
 import NotificationDropdown from '../components/NotificationDropdown';
 import { useNotifications } from '../hooks/useNotifications';
+import { useCart } from '../context/CartContext';
 
 const Layout = ({ children}) => {
   const { isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { cart } = useCart(); // Ajout du contexte panier
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   // Initialize notifications with sample data
   const initialNotifications = [
@@ -55,7 +58,7 @@ const Layout = ({ children}) => {
                     <span className="relative z-10">Accueil</span>
                     <div className="absolute inset-0 bg-[#FF4D4F] opacity-0 group-hover:opacity-10 rounded-lg transition-opacity duration-300"></div>
                   </Link>
-                  <Link to="/explorer" className="relative text-gray-700 hover:text-[#FF4D4F] transition-all duration-300 px-3 py-2 rounded-lg hover:bg-red-50 group">
+                  <Link to="/client" className="relative text-gray-700 hover:text-[#FF4D4F] transition-all duration-300 px-3 py-2 rounded-lg hover:bg-red-50 group">
                     <span className="relative z-10">Explorer</span>
                     <div className="absolute inset-0 bg-[#FF4D4F] opacity-0 group-hover:opacity-10 rounded-lg transition-opacity duration-300"></div>
                   </Link>
@@ -66,11 +69,11 @@ const Layout = ({ children}) => {
                     <span className="relative z-10">Accueil</span>
                     <div className="absolute inset-0 bg-[#FF4D4F] opacity-0 group-hover:opacity-10 rounded-lg transition-opacity duration-300"></div>
                   </Link>
-                  <Link to="/explorer" className="relative text-gray-700 hover:text-[#FF4D4F] transition-all duration-300 px-3 py-2 rounded-lg hover:bg-red-50 group">
+                  <Link to="/client" className="relative text-gray-700 hover:text-[#FF4D4F] transition-all duration-300 px-3 py-2 rounded-lg hover:bg-red-50 group">
                     <span className="relative z-10">Explorer</span>
                     <div className="absolute inset-0 bg-[#FF4D4F] opacity-0 group-hover:opacity-10 rounded-lg transition-opacity duration-300"></div>
                   </Link>
-                  <Link to="/commandes" className="relative text-gray-700 hover:text-[#FF4D4F] transition-all duration-300 px-3 py-2 rounded-lg hover:bg-red-50 group">
+                  <Link to="/suivrecommande" className="relative text-gray-700 hover:text-[#FF4D4F] transition-all duration-300 px-3 py-2 rounded-lg hover:bg-red-50 group">
                     <span className="relative z-10">Commandes</span>
                     <div className="absolute inset-0 bg-[#FF4D4F] opacity-0 group-hover:opacity-10 rounded-lg transition-opacity duration-300"></div>
                   </Link>
@@ -93,7 +96,7 @@ const Layout = ({ children}) => {
                     </svg>
                     {/* Cart badge - Enhanced with animation */}
                     <span className="absolute -top-1 -right-1 bg-[#FF4D4F] text-white text-xs rounded-full h-4 w-4 lg:h-5 lg:w-5 flex items-center justify-center animate-pulse shadow-lg">
-                      3
+                      {cartCount}
                     </span>
                   </Link>
                   
@@ -144,7 +147,7 @@ const Layout = ({ children}) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 10H6L5 9z" />
                     </svg>
                     <span className="absolute -top-1 -right-1 bg-[#FF4D4F] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                      3
+                      {cartCount}
                     </span>
                   </Link>
                   
@@ -189,7 +192,7 @@ const Layout = ({ children}) => {
                       Accueil
                     </Link>
                     <Link 
-                      to="/explorer" 
+                      to="/client" 
                       className="text-gray-700 hover:text-[#FF4D4F] hover:bg-red-50 px-4 py-3 rounded-lg transition-all duration-300"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
@@ -222,14 +225,14 @@ const Layout = ({ children}) => {
                       Accueil
                     </Link>
                     <Link 
-                      to="/explorer" 
+                      to="/client" 
                       className="text-gray-700 hover:text-[#FF4D4F] hover:bg-red-50 px-4 py-3 rounded-lg transition-all duration-300"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Explorer
                     </Link>
                     <Link 
-                      to="/commandes" 
+                      to="/suivrecommande" 
                       className="text-gray-700 hover:text-[#FF4D4F] hover:bg-red-50 px-4 py-3 rounded-lg transition-all duration-300"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >

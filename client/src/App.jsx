@@ -1,13 +1,19 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { CartProvider } from './context/CartContext'
 import Layout from './layout/layout'
 import DashboardLayout from './layout/DashboardLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
 import RestaurantPage from './pages/restaurant/restaurantPage'
-import ClientPage from './pages/client/clientPage'
+import HomePage from './pages/client/HomePage'
+import PanierClient from './pages/client/PanierClient'
+import SuivreCommande from './pages/client/SuivreCommande'
+import ClientPage from './pages/client/ClientPage'
+import RestaurantInClient from './pages/client/RestaurantInClient'
+import HistoriqueClient from './pages/client/HistoriqueClient'
 import LivreurPage from './pages/livreur/livreurPage'
 import AdminPage from './pages/admin/adminPage'
 import LoginPage from './pages/auth/LoginPage'
@@ -22,6 +28,7 @@ import OrdersPage from './pages/restaurant/OrdersPage'
 import OrderDetailPage from './pages/restaurant/OrderDetailPage'
 import OrderTrackingPage from './pages/restaurant/OrderTrackingPage'
 import OrderHistoryPage from './pages/restaurant/OrderHistoryPage'
+import ClientProfilePage from './pages/client/ClientProfilePage'
 
 function App() {
   return (
