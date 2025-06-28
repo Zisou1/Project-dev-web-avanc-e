@@ -29,6 +29,11 @@ class OrderService {
     }
   }
 
+  // Alias for getRestaurantOrders for backward compatibility
+  async getOrdersByRestaurant(restaurantId) {
+    return await this.getRestaurantOrders(restaurantId);
+  }
+
   // Get order by ID using existing endpoint
   async getById(orderId) {
     try {

@@ -59,10 +59,20 @@ function RestaurantPage() {
       let orders = []
       try {
         const ordersData = await orderService.getOrdersByRestaurant(restaurantData.id)
-        console.log('📋 Orders data:', ordersData)
+        console.log('📋 Orders data received:', ordersData)
+        console.log('📋 Orders array:', ordersData.orders)
+        console.log('📋 Orders array length:', ordersData.orders?.length)
         orders = ordersData.orders || []
+        if (orders.length === 0) {
+          console.log('📋 No orders found for restaurant', restaurantData.id)
+        }
       } catch (ordersErr) {
-        console.error('⚠️ Error fetching orders (continuing with empty orders):', ordersErr)
+        console.error('⚠️ Error fetching orders:', ordersErr)
+        console.error('⚠️ Error details:', {
+          message: ordersErr.message,
+          response: ordersErr.response?.data,
+          status: ordersErr.response?.status
+        })
         // Continue with empty orders array
       }
         
@@ -82,12 +92,19 @@ function RestaurantPage() {
         const today = new Date()
         const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
         
-        const todayOrders = orders.filter(order => 
-          new Date(order.createdAt) >= todayStart
-        )
+        console.log('📊 Calculating stats with:', {
+          totalOrders: orders.length,
+          sampleOrder: orders[0],
+          todayStart: todayStart.toISOString()
+        })
+        
+        const todayOrders = orders.filter(order => {
+          const orderDate = new Date(order.createdAt || order.created_at)
+          return orderDate >= todayStart
+        })
         
         const pendingOrders = orders.filter(order => 
-          order.status === 'pending' || order.status === 'preparing'
+          order.status === 'pending' || order.status === 'confirmed'
         )
         
         const completedOrders = orders.filter(order => 
@@ -95,8 +112,15 @@ function RestaurantPage() {
         )
         
         const dailyRevenue = todayOrders.reduce((sum, order) => 
-          sum + (order.total_price || 0), 0
+          sum + (order.total_price || order.totalPrice || order.total || 0), 0
         )
+
+        console.log('📊 Calculated stats:', {
+          todayOrders: todayOrders.length,
+          pendingOrders: pendingOrders.length,
+          completedOrders: completedOrders.length,
+          dailyRevenue
+        })
 
         setStats({
           todayOrders: todayOrders.length,
@@ -109,19 +133,21 @@ function RestaurantPage() {
 
         // Set recent orders (last 5)
         const sortedOrders = orders
-          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .sort((a, b) => new Date(b.createdAt || b.created_at) - new Date(a.createdAt || a.created_at))
           .slice(0, 5)
           .map(order => ({
             id: order.id,
-            customer: order.user?.name || 'Client inconnu',
-            amount: order.total_price || 0,
-            time: new Date(order.createdAt).toLocaleTimeString('fr-FR', { 
+            customer: order.user?.name || order.user?.username || order.customer_name || 'Client inconnu',
+            amount: order.total_price || order.totalPrice || order.total || 0,
+            time: new Date(order.createdAt || order.created_at).toLocaleTimeString('fr-FR', { 
               hour: '2-digit', 
               minute: '2-digit' 
             }),
             status: order.status,
-            createdAt: order.createdAt
+            createdAt: order.createdAt || order.created_at
           }))
+        
+        console.log('📋 Recent orders processed:', sortedOrders)
         
         setRecentOrders(sortedOrders)
 
@@ -365,7 +391,7 @@ function RestaurantPage() {
               }))}
               actions={(row) => (
                 <button
-                  onClick={() => navigate(`/restaurant/orders/${row.id}`)}
+                  onClick={() => navigate(`/restaurant/orders/${row.id}/tracking`)}
                   className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition-colors"
                 >
                   Voir
