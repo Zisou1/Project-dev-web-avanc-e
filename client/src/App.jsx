@@ -44,10 +44,43 @@ function App() {
           {/* public Routes with Layout */}
           <Route path="/" element={
             <Layout>
-              <ClientPage />
+              <HomePage />
             </Layout>
           } />         
-          
+          <Route path="/client" element={
+              <Layout>
+                <ClientPage />
+              </Layout>
+            } />
+             <Route path="/restaurantinclient/:id" element={
+              <Layout>
+                <RestaurantInClient />
+              </Layout>
+            } />
+
+            <Route path="/suivrecommande" element={
+              <Layout>
+                <SuivreCommande />
+              </Layout>
+            } />
+
+            <Route path="/panier" element={
+              <Layout>
+                <PanierClient />
+              </Layout>
+            } />
+
+            <Route path="/historique-client" element={
+              <Layout>
+                <HistoriqueClient />
+              </Layout>
+            } />
+
+            <Route path="/profile" element={
+              <Layout>
+                <ClientProfilePage />
+              </Layout>
+            } />
           {/* Restaurant Routes with DashboardLayout */}
           <Route path="/restaurant" element={
             <ProtectedRoute requiredRole="restaurant">
