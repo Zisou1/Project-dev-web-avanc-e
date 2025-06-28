@@ -52,11 +52,10 @@ export default function OrderTrackingPage() {
               const deliveryData = await deliveryService.getDeliveryByUser(user.id);
               if (deliveryData.order_id === parseInt(orderId)) {
                 setDelivery(deliveryData);
-                setDeliveryId(deliveryData.id || deliveryData.delivery_id); // Capture delivery ID
+                setDeliveryId(deliveryData.id || deliveryData.delivery_id);
                 console.log('Delivery ID captured:', deliveryData.id || deliveryData.delivery_id);
               }
             } catch (deliveryErr) {
-              // No delivery found for this specific order, but order exists
               console.log('No active delivery found for this order');
             }
             
@@ -70,15 +69,38 @@ export default function OrderTrackingPage() {
           try {
             const deliveryData = await deliveryService.getDeliveryByUser(user.id);
             
-            if (!deliveryData || !deliveryData.order) {
+            if (!deliveryData) {
               setError("Aucune livraison active assignée");
               return;
             }
             
+            console.log('Delivery data received:', deliveryData);
             setDelivery(deliveryData);
-            setOrder(deliveryData.order);
-            setDeliveryId(deliveryData.id || deliveryData.delivery_id); // Capture delivery ID
-            console.log('Active delivery ID captured:', deliveryData.id || deliveryData.delivery_id);
+            setDeliveryId(deliveryData.id || deliveryData.delivery_id);
+            
+            // If the delivery has an order attached, use it
+            if (deliveryData.order) {
+              setOrder(deliveryData.order);
+              console.log('Order from delivery:', deliveryData.order);
+            } 
+            // If order is null but we have order_id, fetch the order separately
+            else if (deliveryData.order_id) {
+              console.log('Order is null, fetching order by ID:', deliveryData.order_id);
+              try {
+                const orderData = await orderService.getById(deliveryData.order_id);
+                const fetchedOrder = orderData.order || orderData;
+                setOrder(fetchedOrder);
+                console.log('Fetched order separately:', fetchedOrder);
+              } catch (orderErr) {
+                console.error('Error fetching order by ID:', orderErr);
+                setError("Erreur lors du chargement des détails de la commande");
+                return;
+              }
+            } else {
+              setError("Aucun ID de commande trouvé dans la livraison");
+              return;
+            }
+            
           } catch (deliveryErr) {
             console.error('No active delivery found for user:', deliveryErr);
             setError("Aucune livraison active assignée");

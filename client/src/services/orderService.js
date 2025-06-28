@@ -33,12 +33,30 @@ class OrderService {
   // Get order by ID using existing endpoint
   async getById(orderId) {
     try {
+      // First try the direct endpoint
       const response = await baseApi.get(`/orders/getOrder/${orderId}`);
       console.log('API /orders/getOrder response:', response);
       return response.data;
     } catch (error) {
-      console.error('Error fetching order:', error);
-      throw error;
+      console.error('Error fetching order directly:', error);
+      
+      // If direct fetch fails, try getting all orders and filter
+      try {
+        console.log('Trying to fetch order from getAllOrders...');
+        const allOrdersResponse = await baseApi.get('/orders/getAll');
+        const allOrders = allOrdersResponse.data?.orders || [];
+        const targetOrder = allOrders.find(order => order.id === parseInt(orderId));
+        
+        if (targetOrder) {
+          console.log('Found order in getAllOrders:', targetOrder);
+          return { order: targetOrder };
+        } else {
+          throw new Error('Order not found in getAllOrders');
+        }
+      } catch (fallbackError) {
+        console.error('Fallback getAllOrders also failed:', fallbackError);
+        throw error; // throw original error
+      }
     }
   }
 
