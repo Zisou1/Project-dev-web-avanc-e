@@ -387,8 +387,64 @@ const validateItemMenuUpdate = (req, res, next) => {
   next();
 };
 
+/**
+ * Validate Restaurant creation for user (more flexible, image optional)
+ */
+const validateRestaurantForUser = (req, res, next) => {
+  const schema = Joi.object({
+    user_id: Joi.number().integer().required().messages({
+      'number.base': 'User ID must be a number',
+      'any.required': 'User ID is required'
+    }),
+    name: Joi.string().min(2).max(100).required().messages({
+      'string.base': 'Name must be a string',
+      'string.min': 'Name must be at least 2 characters long',
+      'string.max': 'Name must not exceed 100 characters',
+      'any.required': 'Name is required'
+    }),
+    kitchen_type: Joi.string().min(2).max(100).required().messages({
+      'string.base': 'Kitchen type must be a string',
+      'string.min': 'Kitchen type must be at least 2 characters long',
+      'string.max': 'Kitchen type must not exceed 100 characters',
+      'any.required': 'Kitchen type is required'
+    }),
+    description: Joi.string().allow('').optional().messages({
+      'string.base': 'Description must be a string'
+    }),
+    timeStart: Joi.string()
+      .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
+      .optional()
+      .messages({
+        'string.pattern.base': 'timeStart must be in HH:MM format'
+      }),
+    timeEnd: Joi.string()
+      .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
+      .optional()
+      .messages({
+        'string.pattern.base': 'timeEnd must be in HH:MM format'
+      }),
+    address: Joi.string().max(255).optional().messages({
+      'string.max': 'Address must not exceed 255 characters'
+    })
+  });
+
+  const { error, value } = schema.validate(req.body);
+  // Image is optional for createForUser route
+  if (error) {
+    return res.status(400).json({
+      error: 'Validation Error',
+      message: error.details[0].message,
+      details: error.details
+    });
+  }
+
+  req.body = value;
+  next();
+};
+
 module.exports = {
   validateRestaurant,
+  validateRestaurantForUser,
   validateMenu,
   validateItem,
   validateItemMenu,

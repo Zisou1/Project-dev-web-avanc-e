@@ -5,11 +5,16 @@ const fs = require('fs');
 // Ensure upload directories exist
 const uploadDirMenus = 'uploads/menus';
 const uploadDirItems = 'uploads/items';
+const uploadDirRestaurants = 'uploads/restaurants';
+
 if (!fs.existsSync(uploadDirMenus)) {
   fs.mkdirSync(uploadDirMenus, { recursive: true });
 }
 if (!fs.existsSync(uploadDirItems)) {
   fs.mkdirSync(uploadDirItems, { recursive: true });
+}
+if (!fs.existsSync(uploadDirRestaurants)) {
+  fs.mkdirSync(uploadDirRestaurants, { recursive: true });
 }
 
 const storage = multer.diskStorage({
@@ -20,6 +25,8 @@ const storage = multer.diskStorage({
       uploadDir = uploadDirItems;
     } else if (req.originalUrl.includes('/menu/')) {
       uploadDir = uploadDirMenus;
+    } else if (req.originalUrl.includes('/createForUser') || req.originalUrl.includes('/creat')) {
+      uploadDir = uploadDirRestaurants;
     } else {
       uploadDir = uploadDirMenus; // default fallback
     }
@@ -33,6 +40,8 @@ const storage = multer.diskStorage({
       prefix = 'item';
     } else if (req.originalUrl.includes('/menu/')) {
       prefix = 'menu';
+    } else if (req.originalUrl.includes('/createForUser') || req.originalUrl.includes('/creat')) {
+      prefix = 'restaurant';
     } else {
       prefix = 'upload'; // default fallback
     }
@@ -45,8 +54,12 @@ const fileFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|webp/;
   const ext = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mime = allowedTypes.test(file.mimetype);
-  if (ext && mime) cb(null, true);
-  else cb(new Error('Only image files are allowed'));
+  
+  if (ext && mime) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed'));
+  }
 };
 
 const upload = multer({

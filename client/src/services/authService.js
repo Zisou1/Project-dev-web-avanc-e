@@ -5,9 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 // Create axios instance with default config
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // Don't set default Content-Type, let each request set its own
 });
 
 // Request interceptor to add auth token
@@ -17,6 +15,12 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Set default Content-Type only if not already set and not FormData
+    if (!config.headers['Content-Type'] && !(config.data instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+    
     return config;
   },
   (error) => {
@@ -64,7 +68,23 @@ export const authService = {
   // Register new user
   async register(userData) {
     try {
-      const response = await api.post('/auth/register', userData);
+      // Check if we need to send as FormData (when image is present)
+      let requestData = userData;
+      
+      if (userData.image) {
+        // Create FormData for file upload
+        const formData = new FormData();
+        Object.keys(userData).forEach(key => {
+          if (key === 'image') {
+            formData.append('image', userData[key]);
+          } else {
+            formData.append(key, userData[key]);
+          }
+        });
+        requestData = formData;
+      }
+      
+      const response = await api.post('/auth/register', requestData);
       return response.data;
     } catch (error) {
       throw error;

@@ -10,12 +10,10 @@ const createRestaurant = async (req, res) => {
     const { name, user_id, kitchen_type, description, timeStart, timeEnd, address} = req.body ?? {};
     const image = req.file;
 
-    console.log('📥 Creating restaurant:', name);
-
     if (!image) {
       return res.status(400).json({
         error: 'Image Required',
-        message: 'Please upload an image for the menu'
+        message: 'Please upload an image for the restaurant'
       });
     }
 
@@ -28,7 +26,7 @@ const createRestaurant = async (req, res) => {
       });
     }
 
-        const imagePath = `/uploads/menus/${image.filename}`;
+    const imagePath = `/uploads/restaurants/${image.filename}`;
 
     const restaurant = await Restaurant.create({
        name,
@@ -166,21 +164,26 @@ const deleteRestaurant = async (req, res) => {
  */
 const createOrGetRestaurantForUser = async (req, res) => {
   try {
-    const { user_id, name, kitchen_type } = req.body ?? {};
-
-    console.log('🔍 Checking for existing restaurant for user:', user_id);
+    const { user_id, name, kitchen_type, description, timeStart, timeEnd, address } = req.body ?? {};
+    const image = req.file;
 
     // Check if restaurant already exists for this user
     const existingRestaurant = await Restaurant.findOne({ where: { user_id } });
     if (existingRestaurant) {
-      console.log('✅ Restaurant already exists for user');
       return res.status(200).json({
         message: 'Restaurant already exists for this user',
         restaurant: existingRestaurant
       });
     }
 
-    console.log('📥 Creating new restaurant for user:', user_id);
+    // Handle image path
+    let imagePath = null;
+    if (image) {
+      imagePath = `/uploads/restaurants/${image.filename}`;
+    } else {
+      // Provide a default image path if no image is uploaded
+      imagePath = '/uploads/restaurants/default-restaurant.jpg';
+    }
 
     // Check if a restaurant with this name already exists (if name is provided)
     if (name) {
@@ -188,12 +191,16 @@ const createOrGetRestaurantForUser = async (req, res) => {
       if (existing) {
         // If name conflicts, append user ID to make it unique
         const uniqueName = `${name} (${user_id})`;
-        console.log(`⚠️ Restaurant name "${name}" exists, using "${uniqueName}"`);
         
         const restaurant = await Restaurant.create({ 
           name: uniqueName, 
           user_id, 
-          kitchen_type 
+          kitchen_type,
+          imageUrl: imagePath,
+          description: description || '',
+          timeStart: timeStart || '09:00',
+          timeEnd: timeEnd || '22:00',
+          address: address || ''
         });
 
         return res.status(201).json({
@@ -203,7 +210,16 @@ const createOrGetRestaurantForUser = async (req, res) => {
       }
     }
 
-    const restaurant = await Restaurant.create({ name, user_id, kitchen_type });
+    const restaurant = await Restaurant.create({ 
+      name, 
+      user_id, 
+      kitchen_type,
+      imageUrl: imagePath,
+      description: description || '',
+      timeStart: timeStart || '09:00',
+      timeEnd: timeEnd || '22:00',
+      address: address || ''
+    });
 
     res.status(201).json({
       message: 'Restaurant created successfully',

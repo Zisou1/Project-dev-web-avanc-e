@@ -10,8 +10,6 @@ const createMenu = async (req, res) => {
     const { restaurant_id, name, price, status } = req.body ?? {};
     const image = req.file;
 
-    console.log('📥 Creating menu:', name);
-
     if (!image) {
       return res.status(400).json({
         error: 'Image Required',

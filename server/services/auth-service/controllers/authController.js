@@ -34,26 +34,21 @@ const generateTokens = (user) => {
  */
 const register = async (req, res) => {
   try {
-    console.log('🔄 Registration request received:', req.body);
-    const { name, email, password, role = 'customer', phone, kitchen_type, restaurantName } = req.body;
+    const { name, email, password, role = 'customer', phone, kitchen_type, restaurantName, description, timeStart, timeEnd, address } = req.body;
 
-    console.log('🔍 Checking if user exists...');
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      console.log('❌ User already exists');
       return res.status(409).json({
         error: 'User Already Exists',
         message: 'A user with this email already exists'
       });
     }
 
-    console.log('🔐 Hashing password...');
     // Hash password
     const saltRounds = 10; // Reduced from 12 to prevent timeout
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    console.log('💾 Creating user...');
     // Create user
     const user = await User.create({
       name,
@@ -64,8 +59,6 @@ const register = async (req, res) => {
       isActive: true
     });
 
-    console.log('🎫 Generating tokens...');
-
     // Generate tokens
     const { accessToken, refreshToken } = generateTokens(user);
 
@@ -75,34 +68,55 @@ const register = async (req, res) => {
     // If user is a restaurant, create restaurant record
     if (role === 'restaurant' && kitchen_type) {
       try {
-        console.log('🏭 Creating restaurant record...');
         const restaurantServiceUrl = process.env.RESTAURANT_SERVICE_URL || 'http://localhost:3005';
         
         const restaurantData = {
           user_id: user.id,
           name: restaurantName || name, // Use restaurantName if provided, otherwise user name
-          kitchen_type: kitchen_type
+          kitchen_type: kitchen_type,
+          description: description || '',
+          timeStart: timeStart || '09:00',
+          timeEnd: timeEnd || '22:00',
+          address: address || ''
         };
 
-        console.log('📤 Sending restaurant data:', restaurantData);
+        // Create FormData if image is present
+        let requestData;
+        let headers = { 'Content-Type': 'application/json' };
+        
+        if (req.file) {
+          // Create FormData for file upload using memory buffer
+          const FormData = require('form-data');
+          
+          requestData = new FormData();
+          Object.keys(restaurantData).forEach(key => {
+            requestData.append(key, restaurantData[key]);
+          });
+          
+          // Add the image file from memory buffer
+          requestData.append('image', req.file.buffer, {
+            filename: req.file.originalname,
+            contentType: req.file.mimetype
+          });
+          
+          headers = requestData.getHeaders();
+        } else {
+          requestData = restaurantData;
+        }
         
         const restaurantResponse = await axios.post(
           `${restaurantServiceUrl}/api/restaurants/createForUser`,
-          restaurantData,
+          requestData,
           {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            timeout: 5000 // 5 second timeout
+            headers,
+            timeout: 10000 // 10 second timeout
           }
         );
 
-        console.log('✅ Restaurant created successfully:', restaurantResponse.data);
       } catch (restaurantError) {
         console.error('❌ Failed to create restaurant record:', restaurantError.message);
         // We don't fail the user registration if restaurant creation fails
         // This prevents data inconsistency
-        console.log('⚠️ User created but restaurant creation failed. Restaurant can be created manually later.');
       }
     }
 

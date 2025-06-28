@@ -59,6 +59,27 @@ const errorHandler = (err, req, res, next) => {
     error.message = 'Authentication processing error';
   }
 
+  // Handle multer errors
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    error.status = 400;
+    error.message = 'File too large. Maximum size is 5MB';
+  }
+
+  if (err.code === 'LIMIT_FILE_COUNT') {
+    error.status = 400;
+    error.message = 'Too many files uploaded';
+  }
+
+  if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+    error.status = 400;
+    error.message = 'Unexpected file field';
+  }
+
+  if (err.message && err.message.includes('Only image files')) {
+    error.status = 400;
+    error.message = err.message;
+  }
+
   // Don't expose internal errors in production
   if (process.env.NODE_ENV === 'production' && error.status === 500) {
     error.message = 'Something went wrong';

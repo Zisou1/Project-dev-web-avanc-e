@@ -48,10 +48,25 @@ const initializeDatabase = async () => {
   
   if (isConnected && process.env.NODE_ENV === 'development') {
     try {
-      await sequelize.sync({ alter: true });
+      // Use 'force: false' and 'alter: false' to prevent duplicate index creation
+      // Only sync if tables don't exist
+      await sequelize.sync({ force: false, alter: false });
       console.log('✅ Database models synchronized');
     } catch (error) {
       console.error('❌ Error synchronizing database models:', error);
+      
+      // If sync fails due to table structure issues, try with alter: true as a fallback
+      // but only once to prevent continuous index duplication
+      if (error.name === 'SequelizeDatabaseError' && 
+          !error.message.includes('Too many keys specified')) {
+        try {
+          console.log('🔄 Attempting table structure update...');
+          await sequelize.sync({ alter: true });
+          console.log('✅ Database models synchronized with alter');
+        } catch (alterError) {
+          console.error('❌ Failed to sync with alter:', alterError);
+        }
+      }
     }
   }
   

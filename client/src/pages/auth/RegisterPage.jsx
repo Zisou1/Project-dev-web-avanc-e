@@ -39,7 +39,12 @@ const RegisterPage = () => {
     confirmPassword: '',
     phone: '',
     role: '',
-    cuisineType: '' // Cuisine type for restaurant
+    cuisineType: '', // Cuisine type for restaurant
+    image: null, // Restaurant image for restaurant role
+    description: '', // Restaurant description
+    timeStart: '', // Opening time
+    timeEnd: '', // Closing time
+    address: '' // Restaurant address
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -130,12 +135,18 @@ const RegisterPage = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, files } = e.target;
     // Clear errors when user starts typing
     if (error) {
       clearError();
     }
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    if (type === 'file') {
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+    
     // Clear validation error for this field
     if (validationErrors[name]) {
       setValidationErrors((prev) => ({ ...prev, [name]: '' }));
@@ -148,6 +159,16 @@ const RegisterPage = () => {
     // Name validation
     if (!formData.name || formData.name.length < 2) {
       errors.name = 'Name must be at least 2 characters long';
+    }
+
+    // Restaurant name validation (for restaurant role)
+    if (role === 'restaurant' && (!formData.restaurantName || formData.restaurantName.length < 2)) {
+      errors.restaurantName = 'Restaurant name must be at least 2 characters long';
+    }
+
+    // Image validation (for restaurant role)
+    if (role === 'restaurant' && !formData.image) {
+      errors.image = 'Restaurant image is required';
     }
 
     // Email validation
@@ -174,6 +195,11 @@ const RegisterPage = () => {
       errors.phone = 'Please enter a valid phone number';
     }
 
+    // Cuisine type validation (for restaurant role)
+    if (role === 'restaurant' && !formData.cuisineType) {
+      errors.cuisineType = 'Cuisine type is required';
+    }
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -184,12 +210,20 @@ const RegisterPage = () => {
       return;
     }
     try {
-      const { name, restaurantName, email, password, phone, role } = formData;
+      const { name, restaurantName, email, password, phone, role, image, description, timeStart, timeEnd, address } = formData;
+      
       const registrationData = { name, email, password, phone, role };
       if (role === 'restaurant') {
         registrationData.kitchen_type = formData.cuisineType;
         registrationData.restaurantName = restaurantName;
+        // Add optional fields only if they have values
+        if (image) registrationData.image = image;
+        if (description) registrationData.description = description;
+        if (timeStart) registrationData.timeStart = timeStart;
+        if (timeEnd) registrationData.timeEnd = timeEnd;
+        if (address) registrationData.address = address;
       }
+      
       await register(registrationData);
     } catch (err) {
       console.error('Registration failed:', err);
@@ -260,6 +294,31 @@ const RegisterPage = () => {
                   {validationErrors.restaurantName && <div className="text-red-500 text-xs">{validationErrors.restaurantName}</div>}
                 </div>
               )}
+              {role === 'restaurant' && (
+                <div>
+                  <label 
+                    htmlFor="image" 
+                    className="block text-sm font-medium text-[#c94e38] mb-2"
+                  >
+                    Image du restaurant *
+                  </label>
+                  <input
+                    id="image"
+                    name="image"
+                    type="file"
+                    accept="image/*"
+                    required
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-md border border-[#ffccb3] bg-[#fae9e3] text-[#c94e38] focus:outline-none focus:ring-2 focus:ring-[#ff4d30] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#ff4d30] file:text-white hover:file:bg-[#ff7043]"
+                  />
+                  {formData.image && (
+                    <div className="mt-2 text-xs text-[#c94e38]">
+                      Fichier sélectionné: {formData.image.name}
+                    </div>
+                  )}
+                  {validationErrors.image && <div className="text-red-500 text-xs">{validationErrors.image}</div>}
+                </div>
+              )}
               <div>
                 <Input
                   id="name"
@@ -319,6 +378,72 @@ const RegisterPage = () => {
                     <option value="autre">Autre</option>
                   </select>
                   {validationErrors.cuisineType && <div className="text-red-500 text-xs">{validationErrors.cuisineType}</div>}
+                </div>
+              )}
+              {role === 'restaurant' && (
+                <div>
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows="3"
+                    className="w-full px-4 py-3 rounded-md border border-[#ffccb3] bg-[#fae9e3] text-[#c94e38] focus:outline-none focus:ring-2 focus:ring-[#ff4d30] resize-none"
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Description du restaurant (optionnel)"
+                  />
+                  {validationErrors.description && <div className="text-red-500 text-xs">{validationErrors.description}</div>}
+                </div>
+              )}
+              {role === 'restaurant' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label 
+                      htmlFor="timeStart" 
+                      className="block text-sm font-medium text-[#c94e38] mb-2"
+                    >
+                      Heure d'ouverture
+                    </label>
+                    <input
+                      id="timeStart"
+                      name="timeStart"
+                      type="time"
+                      className="w-full px-4 py-3 rounded-md border border-[#ffccb3] bg-[#fae9e3] text-[#c94e38] focus:outline-none focus:ring-2 focus:ring-[#ff4d30]"
+                      value={formData.timeStart}
+                      onChange={handleChange}
+                    />
+                    {validationErrors.timeStart && <div className="text-red-500 text-xs">{validationErrors.timeStart}</div>}
+                  </div>
+                  <div>
+                    <label 
+                      htmlFor="timeEnd" 
+                      className="block text-sm font-medium text-[#c94e38] mb-2"
+                    >
+                      Heure de fermeture
+                    </label>
+                    <input
+                      id="timeEnd"
+                      name="timeEnd"
+                      type="time"
+                      className="w-full px-4 py-3 rounded-md border border-[#ffccb3] bg-[#fae9e3] text-[#c94e38] focus:outline-none focus:ring-2 focus:ring-[#ff4d30]"
+                      value={formData.timeEnd}
+                      onChange={handleChange}
+                    />
+                    {validationErrors.timeEnd && <div className="text-red-500 text-xs">{validationErrors.timeEnd}</div>}
+                  </div>
+                </div>
+              )}
+              {role === 'restaurant' && (
+                <div>
+                  <Input
+                    id="address"
+                    name="address"
+                    type="text"
+                    autoComplete="street-address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    placeholder="Adresse du restaurant (optionnel)"
+                  />
+                  {validationErrors.address && <div className="text-red-500 text-xs">{validationErrors.address}</div>}
                 </div>
               )}
               <div>

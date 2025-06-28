@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { validateLogin, validateRegister } = require('../middleware/validation');
+const upload = require('../middleware/upload');
 
 // Authentication routes
-router.post('/register', validateRegister, authController.register);
+router.post('/register', upload.single('image'), validateRegister, authController.register);
 router.post('/login', validateLogin, authController.login);
 router.post('/refresh', authController.refreshToken);
 router.post('/logout', authController.logout);

@@ -56,10 +56,36 @@ const validateRegister = (req, res, next) => {
       .messages({
         'string.min': 'Restaurant name must be at least 2 characters long',
         'string.max': 'Restaurant name must not exceed 100 characters'
+      }),
+    description: Joi.string()
+      .max(500)
+      .optional()
+      .allow('')
+      .messages({
+        'string.max': 'Description must not exceed 500 characters'
+      }),
+    timeStart: Joi.string()
+      .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
+      .optional()
+      .messages({
+        'string.pattern.base': 'Start time must be in HH:MM format'
+      }),
+    timeEnd: Joi.string()
+      .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)$/)
+      .optional()
+      .messages({
+        'string.pattern.base': 'End time must be in HH:MM format'
+      }),
+    address: Joi.string()
+      .max(255)
+      .optional()
+      .allow('')
+      .messages({
+        'string.max': 'Address must not exceed 255 characters'
       })
   });
 
-  const { error, value } = schema.validate(req.body);
+  const { error, value } = schema.validate(req.body, { allowUnknown: true });
   
   if (error) {
     return res.status(400).json({

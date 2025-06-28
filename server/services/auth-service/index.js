@@ -1,4 +1,5 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
@@ -19,6 +20,9 @@ initializeDatabase().then(() => {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files (uploaded images)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.get('/health', (req, res) => {
