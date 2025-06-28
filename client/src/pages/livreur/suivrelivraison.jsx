@@ -11,36 +11,54 @@ import {
   faMapMarkerAlt
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../../context/AuthContext";
-import { useState } from "react";
-
-// Mock order object
-const mockOrder = {
-  id: 'CMD1234',
-  status: 'waiting for pickup', // Set to show the first button for testing
-  restaurant: { name: 'Pizza Palace', address: '15 Rue de la Liberté' },
-  user: { name: 'Ali Benali' },
-  adress: '12 Rue des Fleurs',
-  items: [
-    { name: 'Pizza Margherita', price: 1200 },
-    { name: 'Coca-Cola', price: 200 }
-  ],
-  total_price: 1400
-};
+import { useState, useEffect } from "react";
+import { deliveryService } from "../../services/deliveryService";
+import { orderService } from "../../services/orderService";
 
 export default function OrderTrackingPage() {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Local state for status and loading
-  const [status, setStatus] = useState(mockOrder.status);
+  // State management
+  const [delivery, setDelivery] = useState(null);
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [loadingAction, setLoadingAction] = useState(false);
   const [toast, setToast] = useState("");
-  const order = { ...mockOrder, status };
-  // Remove all state and useEffect for loading, error, order
-  // Use mockOrder directly
-  const loading = false;
-  const error = null;
+
+  // Fetch delivery and order data
+  useEffect(() => {
+    const fetchDeliveryData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        if (!user?.id) {
+          setError("Utilisateur non connecté");
+          return;
+        }
+
+        // Get delivery assigned to this user
+        const deliveryData = await deliveryService.getDeliveryByUser(user.id);
+        setDelivery(deliveryData);
+        setOrder(deliveryData.order);
+
+      } catch (err) {
+        console.error('Error fetching delivery data:', err);
+        if (err.response?.status === 404) {
+          setError("Aucune livraison assignée");
+        } else {
+          setError("Erreur lors du chargement des données de livraison");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDeliveryData();
+  }, [user]);
 
   // Status mapping
   const getStatusDisplay = (status) => {
@@ -55,6 +73,31 @@ export default function OrderTrackingPage() {
       'completed': 'Terminée'
     };
     return statusMap[status] || status;
+  };
+
+  // Handler for status update
+  const handleStatusUpdate = async (nextStatus, toastMsg) => {
+    if (!order) return;
+    
+    setLoadingAction(true);
+    setToast("");
+    
+    try {
+      // Update order status
+      await orderService.updateOrderStatus(order.id, nextStatus);
+      
+      // Update local state
+      setOrder(prev => ({ ...prev, status: nextStatus }));
+      setToast(toastMsg);
+      setTimeout(() => setToast(""), 3000);
+      
+    } catch (error) {
+      console.error('Error updating status:', error);
+      setToast("Erreur lors de la mise à jour du statut");
+      setTimeout(() => setToast(""), 3000);
+    } finally {
+      setLoadingAction(false);
+    }
   };
 
   if (loading) {
@@ -72,32 +115,27 @@ export default function OrderTrackingPage() {
       <div className="min-h-screen py-8 px-2 sm:px-4">
         <div className="max-w-4xl mx-auto">
           <Button
-            onClick={() => navigate('/restaurant/orders')}
+            onClick={() => navigate('/livreur')}
             className="mb-4 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
           >
             <FontAwesomeIcon icon={faArrowLeft} />
-            Retour aux commandes
+            Retour
           </Button>
-          {error && <ErrorMessage error={error} />}
-          {!order && !error && (
-            <div className="text-center text-gray-500">Commande non trouvée</div>
+          {error && (
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
+              <p className="font-medium">{error}</p>
+              <p className="text-sm mt-1">
+                {error === "Aucune livraison assignée" 
+                  ? "Vous n'avez actuellement aucune livraison en cours. Les nouvelles livraisons apparaîtront ici automatiquement."
+                  : "Veuillez réessayer plus tard ou contacter le support technique."
+                }
+              </p>
+            </div>
           )}
         </div>
       </div>
     );
   }
-
-  // Handler for status update (UI only, no API)
-  const handleStatusUpdate = (nextStatus, toastMsg) => {
-    setLoadingAction(true);
-    setToast("");
-    setTimeout(() => {
-      setStatus(nextStatus);
-      setLoadingAction(false);
-      setToast(toastMsg);
-      setTimeout(() => setToast(""), 2000);
-    }, 1200);
-  };
 
   return (
     <div className="min-h-screen py-6 px-3 sm:px-6 bg-gradient-to-br from-gray-50 to-gray-100">
@@ -107,7 +145,7 @@ export default function OrderTrackingPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <Button
-                onClick={() => navigate('/restaurant/orders')}
+                onClick={() => navigate('/livreur')}
                 className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg transition-all duration-200 hover:shadow-xl"
               >
                 <FontAwesomeIcon icon={faArrowLeft} />
@@ -150,7 +188,7 @@ export default function OrderTrackingPage() {
         {/* Dynamic action buttons for delivery agent (UI only) */}
         {user?.role === 'livreur' || user?.role === 'delivery' ? (
           <div className="mb-6 flex gap-4">
-            {status === 'waiting for pickup' && (
+            {order.status === 'waiting for pickup' && (
               <Button
                 onClick={() => handleStatusUpdate('product pickedup', 'Commande récupérée !')}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold"
@@ -163,7 +201,7 @@ export default function OrderTrackingPage() {
                 )}
               </Button>
             )}
-            {status === 'product pickedup' && (
+            {order.status === 'product pickedup' && (
               <Button
                 onClick={() => handleStatusUpdate('confirmed by delivery', 'Livraison lancée !')}
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold"
@@ -176,7 +214,7 @@ export default function OrderTrackingPage() {
                 )}
               </Button>
             )}
-            {status === 'confirmed by delivery' && (
+            {order.status === 'confirmed by delivery' && (
               <span className="text-green-700 font-semibold">Livraison en cours...</span>
             )}
           </div>
@@ -300,7 +338,7 @@ export default function OrderTrackingPage() {
 
             <div className="mt-6 space-y-3">
               <Button
-                onClick={() => navigate('/restaurant/orders')}
+                onClick={() => navigate('/livreur')}
                 className="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg font-medium"
               >
                 Retour aux commandes
