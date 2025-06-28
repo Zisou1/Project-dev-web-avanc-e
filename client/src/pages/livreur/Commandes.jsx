@@ -13,17 +13,13 @@ export default function Commandes() {
       setLoading(true);
       setError(null);
       try {
-        // Get all orders from API
-        const response = await orderService.getAllOrders
-          ? await orderService.getAllOrders()
-          : await orderService.getRestaurantOrders(); // fallback if getAllOrders doesn't exist
-        // Filter only confirmed orders
-        const confirmedOrders = (response.orders || []).filter(
-          (order) => order.status === "confirmed"
-        );
-        setOrders(confirmedOrders);
+        // Fetch all orders using /orders/getAll
+        const response = await orderService.getAllOrders();
+        setOrders(response.orders || []);
+        console.log('Orders set in state:', response.orders || []);
       } catch (err) {
         setError("Erreur lors du chargement des commandes.");
+        console.error("Error in fetchOrders:", err);
       } finally {
         setLoading(false);
       }
@@ -33,8 +29,7 @@ export default function Commandes() {
 
   const filtered = orders.filter(
     (cmd) =>
-      cmd.pickup_address?.toLowerCase().includes(search.toLowerCase()) ||
-      cmd.delivery_address?.toLowerCase().includes(search.toLowerCase())
+      (cmd.address?.toLowerCase().includes(search.toLowerCase()) || "")
   );
 
   return (
@@ -75,8 +70,8 @@ export default function Commandes() {
               {filtered.map(cmd => (
                 <tr key={cmd.id} className="border-b">
                   <td className="py-4">{cmd.id}</td>
-                  <td className="py-4">{cmd.pickup_address}</td>
-                  <td className="py-4">{cmd.delivery_address}</td>
+                  <td className="py-4">{cmd.address}</td>
+                  <td className="py-4">{cmd.address}</td>
                   <td className="py-4 font-semibold">{cmd.prime || cmd.price || "-"}</td>
                   <td className="py-4">
                     <button

@@ -6,6 +6,7 @@ class OrderService {
     try {
       // Use existing getAllOrders endpoint and filter client-side
       const response = await baseApi.get('/orders/getAll');
+      console.log('API /orders/getAll response:', response);
       
       // Filter orders for the specific restaurant
       const restaurantOrders = response.data?.orders?.filter(order => 
@@ -33,6 +34,7 @@ class OrderService {
   async getById(orderId) {
     try {
       const response = await baseApi.get(`/orders/getOrder/${orderId}`);
+      console.log('API /orders/getOrder response:', response);
       return response.data;
     } catch (error) {
       console.error('Error fetching order:', error);
@@ -101,6 +103,12 @@ class OrderService {
       console.error('Error marking order as completed:', error);
       throw error;
     }
+  }
+
+  // Get all orders (calls /orders/getAll)
+  async getAllOrders() {
+    const response = await baseApi.get('/orders/getAll');
+    return response.data;
   }
 }
 
