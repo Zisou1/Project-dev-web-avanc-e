@@ -216,11 +216,39 @@ const getDeliveryByUser = async (req, res) => {
   }
 }
 
+const updateDeliveryStatus = async (req, res)=> {
+  try {
+    const { id } = req.params;
+    const delivery = await Delivery.findOne({ where: { id, status: true } });
+
+    if (!delivery) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'Delivery not found'
+      });
+    }
+
+    await delivery.update(req.body);
+
+    res.json({
+      message: 'Delivery updated successfully',
+      delivery
+    });
+  } catch (error) {
+    console.error('❌ Update Delivery Error:', error);
+    res.status(500).json({
+      error: 'Update Failed',
+      message: error.message
+    });
+  }
+}
+
 module.exports = {
   createDelivery,
   getAllDeliveries,
   getDeliveryById,
   updateDelivery,
   deleteDelivery,
-  getDeliveryByUser
+  getDeliveryByUser,
+  updateDeliveryStatus
 };

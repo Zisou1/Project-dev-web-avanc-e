@@ -23,5 +23,8 @@ router.put('/update/:id', validateDeliveryUpdate, deliveryController.updateDeliv
 // Delete (soft) a delivery
 router.delete('/delete/:id', deliveryController.deleteDelivery);
 
+// updateStatus
+router.put('/updateStatus/:id', deliveryController.updateDeliveryStatus);
+
+
 module.exports = router;
-;
