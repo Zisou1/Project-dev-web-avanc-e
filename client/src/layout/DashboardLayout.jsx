@@ -191,10 +191,22 @@ const DashboardLayout = () => {
               active: location.pathname.startsWith('/restaurant/menu')
             },
             {
+              name: 'Gestion articles',
+              icon: faBox,
+              path: '/restaurant/items',
+              active: location.pathname.startsWith('/restaurant/items')
+            },
+            {
               name: 'Commandes',
               icon: faClipboardList,
               path: '/restaurant/orders',
-              active: location.pathname.startsWith('/restaurant/orders')
+              active: location.pathname.startsWith('/restaurant/orders') && !location.pathname.includes('/history')
+            },
+            {
+              name: 'Historique',
+              icon: faChartLine,
+              path: '/restaurant/orders/history',
+              active: location.pathname.startsWith('/restaurant/orders/history')
             },
             {
               name: 'Analyses',
