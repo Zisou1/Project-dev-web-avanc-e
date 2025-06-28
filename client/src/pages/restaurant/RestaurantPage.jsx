@@ -345,36 +345,6 @@ function RestaurantPage() {
           </div>
         </div>
       </div>
-
-      {/* Recent Orders Table - Hidden on mobile for better UX */}
-      {recentOrders.length > 0 && (
-        <div className="hidden lg:block bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <h3 className="text-xl font-bold text-gray-800 mb-6">5 dernières commandes</h3>
-          <div className="overflow-x-auto">
-            <DataTable
-              columns={[
-                { key: 'id', label: 'ID' },
-                { key: 'customer', label: 'Client' },
-                { key: 'amount', label: 'Montant (DA)' },
-                { key: 'time', label: 'Heure' },
-                { key: 'status', label: 'Statut' }
-              ]}
-              data={recentOrders.slice(0, 5).map(order => ({
-                ...order,
-                status: getStatusText(order.status)
-              }))}
-              actions={(row) => (
-                <button
-                  onClick={() => navigate(`/restaurant/orders/${row.id}`)}
-                  className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition-colors"
-                >
-                  Voir
-                </button>
-              )}
-            />
-          </div>
-        </div>
-      )}
     </div>
   )
 }
