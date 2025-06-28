@@ -18,6 +18,10 @@ import AccueilLivreur from './pages/livreur/AccueilLivreur'
 import ItemsPage from './pages/restaurant/ItemsPage'
 import AddItemPage from './pages/restaurant/AddItemPage'
 import EditItemPage from './pages/restaurant/EditItemPage'
+import OrdersPage from './pages/restaurant/OrdersPage'
+import OrderDetailPage from './pages/restaurant/OrderDetailPage'
+import OrderTrackingPage from './pages/restaurant/OrderTrackingPage'
+import OrderHistoryPage from './pages/restaurant/OrderHistoryPage'
 
 function App() {
   return (
@@ -50,7 +54,10 @@ function App() {
             <Route path="items" element={<ItemsPage />} />
             <Route path="items/add" element={<AddItemPage />} />
             <Route path="items/edit/:id" element={<EditItemPage />} />
-            <Route path="orders" element={<div>Restaurant Orders Page</div>} />
+            <Route path="orders" element={<OrdersPage />} />
+            <Route path="orders/:orderId/tracking" element={<OrderTrackingPage />} />
+            <Route path="orders/history" element={<OrderHistoryPage />} />
+            <Route path="orders/history/:orderId/detail" element={<OrderDetailPage />} />
             <Route path="analytics" element={<div>Restaurant Analytics Page</div>} />
             <Route path="profile" element={<div>Restaurant Profile Page</div>} />
             <Route path="settings" element={<div>Restaurant Settings Page</div>} />
