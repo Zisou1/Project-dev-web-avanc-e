@@ -76,9 +76,13 @@ const validateMenu = (req, res, next) => {
       'number.base': 'Price must be a number',
       'any.required': 'Price is required'
     }),
-    status: Joi.boolean().required().messages({
-      'boolean.base': 'Status must be a boolean',
-      'any.required': 'Status is required'
+    status: Joi.alternatives().try(
+      Joi.boolean(),
+      Joi.number().integer().valid(0, 1).custom((value) => Boolean(value)),
+      Joi.string().valid('true', 'false').custom((value) => value === 'true')
+    ).required().messages({
+      'any.required': 'Status is required',
+      'alternatives.match': 'Status must be a boolean, 0/1, or "true"/"false" string'
     }),
 
   });
@@ -124,10 +128,11 @@ const validateItem = (req, res, next) => {
     }),
     status: Joi.alternatives().try(
       Joi.boolean(),
+      Joi.number().integer().valid(0, 1).custom((value) => Boolean(value)),
       Joi.string().valid('true', 'false').custom((value) => value === 'true')
     ).required().messages({
       'any.required': 'Status is required',
-      'alternatives.match': 'Status must be a boolean or "true"/"false" string'
+      'alternatives.match': 'Status must be a boolean, 0/1, or "true"/"false" string'
     }),
     description: Joi.string().optional().allow('').messages({
       'string.base': 'Description must be a string'
@@ -255,9 +260,13 @@ const validateMenuUpdate = (req, res, next) => {
       'number.base': 'Price must be a number',
       'any.required': 'Price is required'
     }),
-    status: Joi.boolean().required().messages({
-      'boolean.base': 'Status must be a boolean',
-      'any.required': 'Status is required'
+    status: Joi.alternatives().try(
+      Joi.boolean(),
+      Joi.number().integer().valid(0, 1).custom((value) => Boolean(value)),
+      Joi.string().valid('true', 'false').custom((value) => value === 'true')
+    ).required().messages({
+      'any.required': 'Status is required',
+      'alternatives.match': 'Status must be a boolean, 0/1, or "true"/"false" string'
     }),
     imageUrl: Joi.string().required().messages({
       'any.required': 'Image URL is required'
@@ -311,9 +320,13 @@ const validateItemUpdate = (req, res, next) => {
       'number.base': 'Price must be a number',
       'any.required': 'Price is required'
     }),
-    status: Joi.boolean().required().messages({
-      'boolean.base': 'Status must be a boolean',
-      'any.required': 'Status is required'
+    status: Joi.alternatives().try(
+      Joi.boolean(),
+      Joi.number().integer().valid(0, 1).custom((value) => Boolean(value)),
+      Joi.string().valid('true', 'false').custom((value) => value === 'true')
+    ).required().messages({
+      'any.required': 'Status is required',
+      'alternatives.match': 'Status must be a boolean, 0/1, or "true"/"false" string'
     }),
     image: Joi.string().required().messages({
       'any.required': 'Image URL is required'
