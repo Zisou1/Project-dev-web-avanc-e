@@ -107,6 +107,27 @@ class OrderService {
       throw error;
     }
   }
+
+  // Get orders for a specific user
+  async getUserOrders(userId) {
+    try {
+      const response = await baseApi.get(`/orders/getOrderByUser/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user orders:', error);
+      
+      // If service is unavailable, return empty array with helpful message
+      if (error.response?.status === 503 || error.code === 'ERR_BAD_RESPONSE') {
+        console.warn('Order service is currently unavailable. Returning empty orders list.');
+        return { 
+          orders: [], 
+          error: 'Le service de commandes est temporairement indisponible. Veuillez réessayer plus tard.' 
+        };
+      }
+      
+      throw error;
+    }
+  }
 }
 
 export const orderService = new OrderService();
