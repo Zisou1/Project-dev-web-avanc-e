@@ -32,16 +32,7 @@ const MenuItemsModal = ({ isOpen, onClose, menu, restaurantId }) => {
     try {
       const response = await api.get(`/restaurants/menuItem/getItemMenu/${menu.id}`);
       const items = response.data.items || [];
-      
-      // Add full image URLs
-      const itemsWithFullUrls = items.map(item => ({
-        ...item,
-        imageUrl: item.imageUrl && !item.imageUrl.startsWith('http') 
-          ? `http://localhost:3000${item.imageUrl}`
-          : item.imageUrl
-      }));
-      
-      setMenuItems(itemsWithFullUrls);
+      setMenuItems(items);
     } catch (err) {
       console.error('Error fetching menu items:', err);
       setError('Erreur lors du chargement des articles du menu');
@@ -56,16 +47,7 @@ const MenuItemsModal = ({ isOpen, onClose, menu, restaurantId }) => {
     try {
       const response = await api.get(`/restaurants/item/getRestaurentItem/${restaurantId}`);
       const items = response.data.item || [];
-      
-      // Add full image URLs
-      const itemsWithFullUrls = items.map(item => ({
-        ...item,
-        imageUrl: item.imageUrl && !item.imageUrl.startsWith('http') 
-          ? `http://localhost:3000${item.imageUrl}`
-          : item.imageUrl
-      }));
-      
-      setAvailableItems(itemsWithFullUrls);
+      setAvailableItems(items);
     } catch (err) {
       console.error('Error fetching available items:', err);
     }
@@ -81,14 +63,18 @@ const MenuItemsModal = ({ isOpen, onClose, menu, restaurantId }) => {
 
   const addItemToMenu = async (itemId) => {
     setAdding(prev => ({ ...prev, [itemId]: true }));
+    setError(null);
     try {
       await api.post('/restaurants/menuItem/add', {
         menu_id: menu.id,
         item_id: itemId
       });
       
-      // Refresh menu items
-      await fetchMenuItems();
+      // Small delay to ensure backend processing is complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Refresh both menu items and available items
+      await Promise.all([fetchMenuItems(), fetchAvailableItems()]);
     } catch (err) {
       console.error('Error adding item to menu:', err);
       setError(err.response?.data?.message || 'Erreur lors de l\'ajout de l\'article');
@@ -99,11 +85,15 @@ const MenuItemsModal = ({ isOpen, onClose, menu, restaurantId }) => {
 
   const removeItemFromMenu = async (itemId) => {
     setRemoving(prev => ({ ...prev, [itemId]: true }));
+    setError(null);
     try {
       await api.delete(`/restaurants/menuItem/delete/${menu.id}/${itemId}`);
       
-      // Refresh menu items
-      await fetchMenuItems();
+      // Small delay to ensure backend processing is complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Refresh both menu items and available items
+      await Promise.all([fetchMenuItems(), fetchAvailableItems()]);
     } catch (err) {
       console.error('Error removing item from menu:', err);
       setError(err.response?.data?.message || 'Erreur lors de la suppression de l\'article');

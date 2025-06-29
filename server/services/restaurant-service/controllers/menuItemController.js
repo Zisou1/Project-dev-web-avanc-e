@@ -52,8 +52,6 @@ const removeItemFromMenu = async (req, res) => {
 const getItemsForMenu = async (req, res) => {
   try {
     const { menu_id } = req.params;
-    const retur = menu_id
-    console.log(req.params)
 
     const menu = await Menu.findByPk(menu_id, {
       include: {
@@ -63,10 +61,19 @@ const getItemsForMenu = async (req, res) => {
     });
 
     if (!menu) {
-      return res.status(404).json({ message: 'Menu not found', menu: retur});
+      return res.status(404).json({ message: 'Menu not found' });
     }
 
-    res.json({ items: menu.Items });
+    // Add full image URLs to each item
+    const itemsWithFullUrls = menu.Items.map(item => {
+      let imageUrl = item.imageUrl;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+      }
+      return { ...item.toJSON(), imageUrl };
+    });
+
+    res.json({ items: itemsWithFullUrls });
   } catch (error) {
     console.error('❌ Error fetching items for menu:', error);
     res.status(500).json({ message: 'Internal server error' });
