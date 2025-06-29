@@ -48,7 +48,7 @@ router.get('/item/byIds', itemController.getItemsByIds);
 router.post('/menuItem/add', validateItemMenu, menuItemController.addItemToMenu);
 router.get('/menuItem/getItemMenu/:menu_id', menuItemController.getItemsForMenu);
 router.put('/menuItem/update/:id', validateItemMenuUpdate, menuItemController.updateItemInMenu);
-router.delete('/menuItem/delete/:id', menuItemController.removeItemFromMenu);
+router.delete('/menuItem/delete/:menu_id/:item_id', menuItemController.removeItemFromMenu);
 
 
 

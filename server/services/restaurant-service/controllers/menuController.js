@@ -124,8 +124,8 @@ const getMenuById = async (req, res) => {
 const updateMenu = async (req, res) => {
   try {
     const { id } = req.params;
-    const { restaurant_id, name, price, status, imageUrl } = req.body ?? {};
-
+    const { restaurant_id, name, price, status } = req.body ?? {};
+    const image = req.file;
 
     const menu = await Menu.findByPk(id);
     if (!menu) {
@@ -137,16 +137,23 @@ const updateMenu = async (req, res) => {
 
     // Optional update image
     let imagePath = menu.imageUrl;
-    if (imageUrl) {
+    if (image) {
       imagePath = `/uploads/menus/${image.filename}`;
     }
 
-    await menu.update({restaurant_id, 
+    await menu.update({
+      restaurant_id, 
       name, 
       price, 
       status, 
       imageUrl: imagePath
-     });
+    });
+
+    // Return full image URL
+    let fullImageUrl = imagePath;
+    if (fullImageUrl && !fullImageUrl.startsWith('http')) {
+      fullImageUrl = `${req.protocol}://${req.get('host')}${fullImageUrl}`;
+    }
 
     res.json({
       message: 'Menu updated successfully',
@@ -156,7 +163,7 @@ const updateMenu = async (req, res) => {
         restaurant_id: menu.restaurant_id,
         price: menu.price,
         status: menu.status,
-        imageUrl: `${req.protocol}://${req.get('host')}${imagePath}`
+        imageUrl: fullImageUrl
       }
     });
 
@@ -215,7 +222,16 @@ const getRestaurentMenu = async (req, res) => {
       });
     }
 
-    res.json({ menu });
+    // Add full imageUrl to each menu
+    const menuWithFullUrl = menu.map(menuItem => {
+      let imageUrl = menuItem.imageUrl;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+      }
+      return { ...menuItem.toJSON(), imageUrl };
+    });
+
+    res.json({ menu: menuWithFullUrl });
 
   } catch (error) {
     console.error('❌ Get Menu Error:', error);

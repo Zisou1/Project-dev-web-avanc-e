@@ -29,16 +29,15 @@ const Menu = sequelize.define('Menu', {
     type: DataTypes.INTEGER,
     allowNull: false, 
     validate: {
-      notEmpty: true,
-      len: [2, 100]
+      min: 0,
+      max: 999999
     }
   },
   status: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     validate: {
-      notEmpty: true,
-      len: [2, 100]
+      notEmpty: true
     }
   },
   imageUrl: {
