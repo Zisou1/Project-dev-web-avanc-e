@@ -9,8 +9,9 @@ const PanierClient = () => {
 	const { user } = useAuth();
 	const { id: restaurantId } = useParams();
 	const navigate = useNavigate();
-    // Vérification de l'ID du restaurant
-
+	const [deliveryAddress, setDeliveryAddress] = useState('');
+	const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const total = cart.reduce(
 		(sum, item) => sum + item.price * item.quantity,
@@ -24,6 +25,49 @@ const PanierClient = () => {
 			addToCart({ ...item, quantity: -1 }); // On va gérer ce cas dans le contexte
 		} else {
 			removeFromCart(id);
+		}
+	};
+
+	// Fonction pour valider et passer la commande
+	const handleOrderSubmit = async () => {
+		if (!deliveryAddress.trim()) {
+			alert('Veuillez saisir une adresse de livraison');
+			return;
+		}
+
+		setIsSubmitting(true);
+		try {
+			const user_id = user?.id;
+			const restaurantIds = Array.from(new Set(cart.map(item => item.restaurant_id)));
+			const total_price = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+			const items = cart.flatMap(item => Array(item.quantity).fill(item.id));
+			
+			const orderPayload = {
+				user_id,
+				restaurant_id: restaurantIds.length === 1 ? restaurantIds[0] : restaurantIds,
+				total_price,
+				address: deliveryAddress.trim(),
+				items
+			};
+			
+			console.log('Payload envoyé à l\'API :', orderPayload);
+			
+			await axios.post('http://localhost:3000/api/orders/create', orderPayload, {
+				headers: { Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}` }
+			});
+			
+			// Succès - fermer le modal et vider le panier
+			setIsOrderModalOpen(false);
+			clearCart();
+			setDeliveryAddress('');
+			
+			// Afficher un message de succès plus élégant
+			alert('🎉 Commande passée avec succès ! Vous recevrez bientôt votre délicieux repas.');
+			
+		} catch (err) {
+			alert("❌ Erreur lors de la commande : " + (err.response?.data?.message || err.message));
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 
@@ -179,33 +223,33 @@ const PanierClient = () => {
 									</div>
 								</div>
 
+								{/* Adresse de livraison */}
+								<div className="mb-6">
+									<label className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+										<svg className="w-4 h-4 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+										</svg>
+										Adresse de livraison *
+									</label>
+									<textarea
+										value={deliveryAddress}
+										onChange={(e) => setDeliveryAddress(e.target.value)}
+										placeholder="Entrez votre adresse complète de livraison..."
+										className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 resize-none"
+										rows="3"
+										required
+									/>
+									{deliveryAddress.trim() === '' && (
+										<p className="text-sm text-red-500 mt-1">L'adresse de livraison est obligatoire</p>
+									)}
+								</div>
+
 								<div className="space-y-3">
 									<button 
 										className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
-										onClick={async () => {
-											try {
-												const user_id = user?.id;
-												const restaurantIds = Array.from(new Set(cart.map(item => item.restaurant_id)));
-												const total_price = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-												const items = cart.flatMap(item => Array(item.quantity).fill(item.id));
-												const orderPayload = {
-													user_id,
-													restaurant_id: restaurantIds.length === 1 ? restaurantIds[0] : restaurantIds,
-													total_price,
-													address: "Adresse de livraison",
-													items
-												};
-												console.log('Payload envoyé à l\'API :', orderPayload);
-												await axios.post('http://localhost:3000/api/orders/create', orderPayload, {
-													headers: { Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}` }
-												});
-												alert('Commande passée avec succès !');
-												clearCart();
-											} catch (err) {
-												alert("Erreur lors de la commande : " + (err.response?.data?.message || err.message));
-											}
-										}}
-										disabled={cart.length === 0}
+										onClick={() => setIsOrderModalOpen(true)}
+										disabled={cart.length === 0 || !deliveryAddress.trim()}
 									>
 										<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
@@ -228,6 +272,97 @@ const PanierClient = () => {
 					</div>
 				)}
 			</div>
+
+			{/* Modal de confirmation de commande */}
+			{isOrderModalOpen && (
+				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
+					<div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-scaleIn">
+						<div className="p-8">
+							{/* Header du modal */}
+							<div className="text-center mb-6">
+								<div className="bg-gradient-to-r from-green-500 to-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+									<svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+									</svg>
+								</div>
+								<h3 className="text-2xl font-bold text-gray-800 mb-2">Confirmer votre commande</h3>
+								<p className="text-gray-600">Vérifiez les détails avant de finaliser</p>
+							</div>
+
+							{/* Résumé de la commande */}
+							<div className="bg-gray-50 rounded-2xl p-4 mb-6">
+								<h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+									<svg className="w-5 h-5 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+									</svg>
+									Articles commandés
+								</h4>
+								<div className="space-y-2 max-h-32 overflow-y-auto">
+									{cart.map((item) => (
+										<div key={item.id} className="flex justify-between items-center text-sm">
+											<span className="text-gray-700">{item.name} x{item.quantity}</span>
+											<span className="font-semibold text-gray-800">{(item.price * item.quantity).toFixed(2)} DA</span>
+										</div>
+									))}
+								</div>
+								<div className="border-t border-gray-200 pt-2 mt-3">
+									<div className="flex justify-between items-center font-bold text-lg">
+										<span className="text-gray-800">Total:</span>
+										<span className="text-green-600">{total.toFixed(2)} DA</span>
+									</div>
+								</div>
+							</div>
+
+							{/* Adresse de livraison */}
+							<div className="bg-blue-50 rounded-2xl p-4 mb-6">
+								<h4 className="font-semibold text-gray-800 mb-2 flex items-center">
+									<svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+									</svg>
+									Adresse de livraison
+								</h4>
+								<p className="text-gray-700 text-sm bg-white rounded-lg p-3 border">
+									{deliveryAddress}
+								</p>
+							</div>
+
+							{/* Boutons d'action */}
+							<div className="flex space-x-3">
+								<button
+									className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl transition-all duration-200 border border-gray-300"
+									onClick={() => setIsOrderModalOpen(false)}
+									disabled={isSubmitting}
+								>
+									Annuler
+								</button>
+								<button
+									className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+									onClick={handleOrderSubmit}
+									disabled={isSubmitting}
+								>
+									{isSubmitting ? (
+										<>
+											<svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+												<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+												<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+											</svg>
+											<span>Traitement...</span>
+										</>
+									) : (
+										<>
+											<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+											</svg>
+											<span>Confirmer</span>
+										</>
+									)}
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 };

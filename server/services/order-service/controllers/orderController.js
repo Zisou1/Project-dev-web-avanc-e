@@ -8,7 +8,7 @@ const OrderItem = require('../models/OrderItem');
  */
 const createOrder = async (req, res) => {
   try {
-    const { user_id, restaurant_id, status, total_price, items, adress } = req.body ?? {};
+    const { user_id, restaurant_id, status, total_price, items, address } = req.body ?? {};
 
     console.log('📥 Creating order for user:', user_id);
 
@@ -34,7 +34,7 @@ const createOrder = async (req, res) => {
       status,
       total_price,
       timestamp: new Date(),
-      adress
+      address
     });
 
     // Insert into order_items table manually
