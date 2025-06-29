@@ -23,12 +23,15 @@ import UnauthorizedPage from './pages/UnauthorizedPage'
 import AccueilLivreur from './pages/livreur/AccueilLivreur'
 import ItemsPage from './pages/restaurant/ItemsPage'
 import AddItemPage from './pages/restaurant/AddItemPage'
-import EditItemPage from './pages/restaurant/EditItemPage'
-import OrdersPage from './pages/restaurant/OrdersPage'
-import OrderDetailPage from './pages/restaurant/OrderDetailPage'
-import OrderTrackingPage from './pages/restaurant/OrderTrackingPage'
-import OrderHistoryPage from './pages/restaurant/OrderHistoryPage'
-import ClientProfilePage from './pages/client/ClientProfilePage'
+import RestaurantProfilePage from './pages/restaurant/RestaurantProfilePage'
+
+// Placeholder components for routes that don't exist yet
+const EditItemPage = () => <div>Edit Item Page (Coming Soon)</div>
+const OrdersPage = () => <div>Orders Page (Coming Soon)</div>
+const OrderTrackingPage = () => <div>Order Tracking Page (Coming Soon)</div>
+const OrderHistoryPage = () => <div>Order History Page (Coming Soon)</div>
+const OrderDetailPage = () => <div>Order Detail Page (Coming Soon)</div>
+const ClientProfilePage = () => <div>Client Profile Page (Coming Soon)</div>
 
 function App() {
   return (
@@ -90,7 +93,7 @@ function App() {
             {/* Nested restaurant routes */}
             <Route index element={<RestaurantPage />} />
             <Route path="dashboard" element={<RestaurantPage />} />
-            <Route path="menu" element={<div>Menu Management Page</div>} />
+            <Route path="menu" element={<div>Restaurant menu</div>} />
             <Route path="items" element={<ItemsPage />} />
             <Route path="items/add" element={<AddItemPage />} />
             <Route path="items/edit/:id" element={<EditItemPage />} />
@@ -99,8 +102,7 @@ function App() {
             <Route path="orders/history" element={<OrderHistoryPage />} />
             <Route path="orders/history/:orderId/detail" element={<OrderDetailPage />} />
             <Route path="analytics" element={<div>Restaurant Analytics Page</div>} />
-            <Route path="profile" element={<div>Restaurant Profile Page</div>} />
-            <Route path="settings" element={<div>Restaurant Settings Page</div>} />
+            <Route path="profile" element={<RestaurantProfilePage />} />
           </Route>
           
           {/* Livreur Routes with DashboardLayout */}

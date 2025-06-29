@@ -154,6 +154,16 @@ export const authService = {
     }
   },
 
+  // Update user profile
+  async updateUser(userId, userData) {
+    try {
+      const response = await api.put(`/auth/user/update/${userId}`, userData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Verify token
   async verifyToken(token) {
     try {
