@@ -69,9 +69,20 @@ export const itemService = {
       return null;
     }
   },
-  // Get all items
+  // Get all items (for backward compatibility)
   async getAll() {
     const response = await api.get('/restaurants/item/getAll', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+    return response.data;
+  },
+
+  // Get items for a specific restaurant
+  async getRestaurantItems(restaurantId) {
+    const response = await api.get(`/restaurants/item/getRestaurentItem/${restaurantId}`, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
