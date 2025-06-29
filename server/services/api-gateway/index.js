@@ -255,6 +255,11 @@ app.all('/api/user/*', authenticateToken, async (req, res) => {
   });
 });
 
+// Public restaurant routes (no authentication required)
+app.get('/api/restaurants/getAll', async (req, res) => {
+  await proxyRequest(req, res, services.restaurant.url, {});
+});
+
 // Protected routes with authentication
 const createProtectedRoute = (path, serviceKey) => {
   app.all(path, authenticateToken, async (req, res) => {
@@ -294,6 +299,7 @@ app.get('/api', (req, res) => {
       auth: '/api/auth/* (public)',
       user: '/api/user/* (protected)',
       users: '/api/users/* (protected)',
+      restaurants_public: '/api/restaurants/getAll (public)',
       restaurants: '/api/restaurants/* (protected)',
       orders: '/api/orders/* (protected)',
       payments: '/api/payments/* (protected)',

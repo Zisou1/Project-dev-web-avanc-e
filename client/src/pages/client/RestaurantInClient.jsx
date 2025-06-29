@@ -66,7 +66,7 @@ const RestaurantInClient = () => {
       {/* Image du restaurant */}
       <div className="rounded-3xl overflow-hidden shadow-xl mb-8">
         <img
-          src={restaurant.image_url || '/images/restaurant-banner.jpg'}
+          src={restaurant.imageUrl || restaurant.image_url || '/images/restaurant-banner.jpg'}
           alt={restaurant.name || 'Restaurant Image'}
           className="w-full h-64 object-cover"
           onError={(e) => { e.target.src = '/images/restaurant-banner.jpg'; }} // Fallback image on error
@@ -101,7 +101,7 @@ const RestaurantInClient = () => {
               className="bg-white rounded-xl overflow-hidden shadow relative group hover:shadow-lg transition"
             >
               <img
-                src={item.image_url || item.image || '/images/placeholder-item.jpg'}
+                src={item.imageUrl || item.image_url || item.image || '/images/placeholder-item.jpg'}
                 alt={item.name}
                 className="w-full h-32 object-contain p-3"
                 onError={(e) => { e.target.src = '/images/placeholder-item.jpg'; }} // Fallback image on error

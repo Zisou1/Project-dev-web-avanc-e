@@ -48,9 +48,9 @@ const initializeDatabase = async () => {
   
   if (isConnected && process.env.NODE_ENV === 'development') {
     try {
-      // Use 'force: false' and 'alter: false' to prevent duplicate index creation
-      // Only sync if tables don't exist
-      await sequelize.sync({ force: false, alter: false });
+      // Use 'alter: true' to update existing tables to match model changes
+      // 'force: false' to prevent data loss
+      await sequelize.sync({ force: false, alter: true });
       console.log('✅ Database models synchronized');
     } catch (error) {
       console.error('❌ Error synchronizing database models:', error);

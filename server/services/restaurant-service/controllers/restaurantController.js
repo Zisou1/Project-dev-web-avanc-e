@@ -59,7 +59,17 @@ const createRestaurant = async (req, res) => {
 const getAllRestaurants = async (req, res) => {
   try {
     const restaurants = await Restaurant.findAll();
-    res.json({ restaurants });
+    
+    // Add full imageUrl to each restaurant
+    const restaurantsWithFullUrl = restaurants.map(restaurant => {
+      let imageUrl = restaurant.imageUrl;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+      }
+      return { ...restaurant.toJSON(), imageUrl };
+    });
+    
+    res.json({ restaurants: restaurantsWithFullUrl });
   } catch (error) {
     console.error('❌ Fetch Error:', error);
     res.status(500).json({
@@ -84,7 +94,13 @@ const getRestaurantById = async (req, res) => {
       });
     }
 
-    res.json({ restaurant });
+    // Add full imageUrl
+    let imageUrl = restaurant.imageUrl;
+    if (imageUrl && !imageUrl.startsWith('http')) {
+      imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+    }
+
+    res.json({ restaurant: { ...restaurant.toJSON(), imageUrl } });
 
   } catch (error) {
     console.error('❌ Get by ID Error:', error);
