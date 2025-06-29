@@ -218,7 +218,7 @@ export default function OrderTrackingPage() {
                 <h1 className="text-3xl font-bold text-gray-900">
                   Suivi de la commande #{order.id}
                 </h1>
-                <p className="text-gray-600">Suivez l'état de votre commande en temps réel</p>
+                <p className="text-gray-600">Suivez l'état de la livraison en temps réel</p>
               </div>
             </div>
           </div>
@@ -246,7 +246,7 @@ export default function OrderTrackingPage() {
         </div>
 
         {/* Tracking Stepper */}
-        <OrderTrackingStepper status={order.status} className="mb-6" />
+        <OrderTrackingStepper status={order.status} restaurant={order.restaurant} className="mb-6" />
 
         {/* Dynamic action buttons for delivery agent (UI only) */}
         {user?.role === 'livreur' || user?.role === 'delivery' ? (
@@ -273,7 +273,7 @@ export default function OrderTrackingPage() {
                 {loadingAction ? (
                   <span className="flex items-center gap-2"><span className="loader"></span>Traitement...</span>
                 ) : (
-                  'Lancer la livraison'
+                  'Confirmée la livraison'
                 )}
               </Button>
             )}

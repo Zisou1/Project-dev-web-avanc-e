@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { orderService } from "../../services/orderService";
 import { deliveryService } from "../../services/deliveryService";
 import { useAuth } from "../../context/AuthContext";
@@ -19,6 +20,7 @@ export default function Commandes() {
   const [activeDeliveryOrderId, setActiveDeliveryOrderId] = useState(null);
   
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchData() {
@@ -61,11 +63,21 @@ export default function Commandes() {
   const handleAccept = async (orderId) => {
     try {
       await orderService.updateOrderStatus(orderId, "waiting for pickup", user.id);
-      setOrders((prev) => prev.filter((cmd) => cmd.id !== orderId)); // Remove from list
+      
+      // Update state to reflect the change
       setUserHasActiveDelivery(true);
       setActiveDeliveryOrderId(orderId);
+      
+      // Refresh the orders list to reflect the new status
+      const response = await orderService.getAllOrders();
+      setOrders(response.orders || []);
+      
+      // Redirect to the delivery tracking page
+      navigate(`/livreur/suivi-livraison/${orderId}`);
+      
     } catch (err) {
       alert("Erreur lors de l'acceptation de la commande.");
+      console.error("Error accepting order:", err);
     }
   };
 
@@ -197,7 +209,7 @@ export default function Commandes() {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <span className="text-gray-500">🏪 Récupération:</span>
-                        <span className="font-medium">{cmd.address}</span>
+                        <span className="font-medium">{cmd.restaurant?.name || 'Restaurant inconnu'}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-gray-500">🏠 Livraison:</span>
@@ -210,7 +222,7 @@ export default function Commandes() {
                           className="flex items-center justify-between w-full text-left hover:bg-gray-50 p-2 rounded-lg transition-colors"
                           onClick={() => setShowArticles(showArticles === cmd.id ? null : cmd.id)}
                         >
-                          <span className="font-medium text-gray-700">📋 Articles ({(cmd.articles || []).length})</span>
+                          <span className="font-medium text-gray-700">📋 Articles ({(cmd.items || []).length})</span>
                           <span className="text-[#FE5336]">
                             {showArticles === cmd.id ? '▼' : '▶'}
                           </span>
@@ -219,10 +231,11 @@ export default function Commandes() {
                         {showArticles === cmd.id && (
                           <div className="mt-2 p-3 bg-gray-50 rounded-lg">
                             <ul className="space-y-1">
-                              {(cmd.articles || []).map((a, i) => (
+                              {(cmd.items || []).map((item, i) => (
                                 <li key={i} className="flex items-center gap-2 text-sm">
                                   <span className="w-2 h-2 bg-[#FE5336] rounded-full"></span>
-                                  {a.name || a}
+                                  <span className="font-medium">{item.name}</span>
+                                  {item.price && <span className="text-gray-500">- {item.price}€</span>}
                                 </li>
                               ))}
                             </ul>
