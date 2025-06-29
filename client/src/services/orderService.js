@@ -6,14 +6,28 @@ class OrderService {
     try {
       // Use existing getAllOrders endpoint and filter client-side
       const response = await baseApi.get('/orders/getAll');
-      console.log('API /orders/getAll response:', response);
+      console.log('API /orders/getAll response for restaurant filter:', response);
+      console.log('API /orders/getAll response data:', response.data);
       
-      // Filter orders for the specific restaurant
-      const restaurantOrders = response.data?.orders?.filter(order => 
-        order.restaurant_id === parseInt(restaurantId)
-      ) || [];
+      // Ensure we have the orders array and preserve all nested data
+      const allOrders = response.data?.orders || [];
+      console.log('All orders before filtering:', allOrders);
       
-      return { orders: restaurantOrders };
+      // Filter orders for the specific restaurant while preserving all nested data
+      const restaurantOrders = allOrders.filter(order => {
+        const matches = order.restaurant_id === parseInt(restaurantId);
+        if (matches) {
+          console.log('Matching order found:', order);
+        }
+        return matches;
+      });
+      
+      console.log('Filtered restaurant orders:', restaurantOrders);
+      
+      return { 
+        orders: restaurantOrders,
+        total: restaurantOrders.length 
+      };
     } catch (error) {
       console.error('Error fetching restaurant orders:', error);
       
@@ -36,6 +50,9 @@ class OrderService {
       // First try the direct endpoint
       const response = await baseApi.get(`/orders/getOrder/${orderId}`);
       console.log('API /orders/getOrder response:', response);
+      console.log('API /orders/getOrder response data:', response.data);
+      
+      // Ensure we return the complete order data with nested objects
       return response.data;
     } catch (error) {
       console.error('Error fetching order directly:', error);
@@ -48,7 +65,8 @@ class OrderService {
         const targetOrder = allOrders.find(order => order.id === parseInt(orderId));
         
         if (targetOrder) {
-          console.log('Found order in getAllOrders:', targetOrder);
+          console.log('Found order in getAllOrders with full data:', targetOrder);
+          // Return the order with the same structure as the direct endpoint
           return { order: targetOrder };
         } else {
           throw new Error('Order not found in getAllOrders');
@@ -128,8 +146,17 @@ class OrderService {
 
   // Get all orders (calls /orders/getAll)
   async getAllOrders() {
-    const response = await baseApi.get('/orders/getAll');
-    return response.data;
+    try {
+      const response = await baseApi.get('/orders/getAll');
+      console.log('getAllOrders API response:', response);
+      console.log('getAllOrders API response data:', response.data);
+      
+      // Ensure we return the full data structure with nested objects
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching all orders:', error);
+      throw error;
+    }
   }
 }
 

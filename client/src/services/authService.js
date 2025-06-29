@@ -1,6 +1,8 @@
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { io } from "socket.io-client";
+const socket = io("http://localhost:3008");
 
 // Create axios instance with default config
 const api = axios.create({
@@ -93,18 +95,42 @@ export const authService = {
 
   // Login user
   async login(email, password) {
+    // eslint-disable-next-line no-useless-catch
     try {
-      const response = await api.post('/auth/login', { email, password });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await api.post('/auth/login', { email, password });
+
+    const user = response.data.user; // ✅ get logged-in user from response
+
+    // 👉 Register socket for notifications;
+    if (user.role === 'restaurant') {
+      socket.emit("register", { restaurant_id: user.id });
+      console.log('Registering restaurant with socket:', user.id);
+      
+    } else if ( user.role === 'register') {
+      socket.emit("register", { user_id: user.id });
+    } else{
+      console.log('user not conected');
+      
+    } 
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
   },
 
   // Logout user
   async logout(refreshToken) {
     try {
       const response = await api.post('/auth/logout', { refreshToken });
+      const user = response.data.user; // You must extract this from the response
+
+      // 👉 Register the socket after login
+      if (user.role === "restaurant") {
+        socket.emit("register", { restaurant_id: user.id });
+      } else {
+        socket.emit("register", { user_id: user.id });
+      }
       return response.data;
     } catch (error) {
       throw error;
