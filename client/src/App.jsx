@@ -36,6 +36,7 @@ import OrderDetailPage from './pages/restaurant/OrderDetailPage'
 import RestaurantOrderTrackingPage from './pages/restaurant/OrderTrackingPage'
 import OrderHistoryPage from './pages/restaurant/OrderHistoryPage'
 import ClientProfilePage from './pages/client/ClientProfilePage'
+import AnalyticsPagerest from './pages/restaurant/AnalyticsPagerest'
 
 function App() {
   return (
@@ -111,7 +112,7 @@ function App() {
             <Route path="orders/:orderId/tracking" element={<RestaurantOrderTrackingPage />} />
             <Route path="orders/history" element={<OrderHistoryPage />} />
             <Route path="orders/history/:orderId/detail" element={<OrderDetailPage />} />
-            <Route path="analytics" element={<div>Restaurant Analytics Page</div>} />
+            <Route path="analytics" element={<AnalyticsPagerest />} />
             <Route path="profile" element={<div>Restaurant Profile Page</div>} />
           </Route>
           
