@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
-import menuService from '../../services/menuService';
+import { menuService } from '../../services/menuService';
 
 const RestaurantInClient = () => {
   const { id } = useParams(); // Get restaurant ID from URL
@@ -51,7 +51,7 @@ const RestaurantInClient = () => {
           menusWithItems = await Promise.all(
             restaurantMenus.map(async (menu) => {
               try {
-                const menuItemsResponse = await menuService.getMenuItems(menu.id);
+                const menuItemsResponse = await menuService.menuItems.getMenuItems(menu.id);
                 const items = menuItemsResponse.items || [];
                 
                 // Add item IDs to the set
