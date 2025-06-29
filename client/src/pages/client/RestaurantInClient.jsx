@@ -12,6 +12,7 @@ const RestaurantInClient = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { addToCart } = useCart();
   const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState({ title: '', subtitle: '' });
 
   useEffect(() => {
     const fetchRestaurantData = async () => {
@@ -235,15 +236,44 @@ const RestaurantInClient = () => {
                         />
                         <div className="flex-1">
                           <h3 className="text-2xl font-bold text-gray-800 mb-2">{menu.name}</h3>
-                          <div className="flex items-center space-x-4">
-                            <span className="text-lg font-semibold text-orange-600">
-                              {menu.price} DZD
-                            </span>
-                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              menu.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
-                              {menu.status ? 'Disponible' : 'Non disponible'}
-                            </span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                              <span className="text-lg font-semibold text-orange-600">
+                                {menu.price} DZD
+                              </span>
+                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                menu.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
+                                {menu.status ? 'Disponible' : 'Non disponible'}
+                              </span>
+                            </div>
+                            {/* Buy Menu Button */}
+                            {menu.status && menu.items && menu.items.length > 0 && (
+                              <button
+                                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+                                onClick={() => {
+                                  // Add all menu items to cart
+                                  menu.items.forEach(item => {
+                                    addToCart(item);
+                                  });
+                                  setPopupMessage({
+                                    title: 'Menu ajouté !',
+                                    subtitle: `${menu.items.length} articles ajoutés au panier`
+                                  });
+                                  setShowPopup(true);
+                                  setTimeout(() => setShowPopup(false), 3000);
+                                }}
+                                aria-label={`Acheter tout le menu ${menu.name}`}
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 6H6L5 9z" />
+                                </svg>
+                                <span>Acheter menu</span>
+                                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                                  {menu.items.length} articles
+                                </span>
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -295,6 +325,10 @@ const RestaurantInClient = () => {
                                 className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 group-hover:shadow-lg transform hover:scale-105"
                                 onClick={() => {
                                   addToCart(item);
+                                  setPopupMessage({
+                                    title: 'Article ajouté !',
+                                    subtitle: 'Consultez votre panier pour finaliser'
+                                  });
                                   setShowPopup(true);
                                   setTimeout(() => setShowPopup(false), 2000);
                                 }}
@@ -380,6 +414,10 @@ const RestaurantInClient = () => {
                               className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 group-hover:shadow-lg transform hover:scale-105"
                               onClick={() => {
                                 addToCart(item);
+                                setPopupMessage({
+                                  title: 'Article ajouté !',
+                                  subtitle: 'Consultez votre panier pour finaliser'
+                                });
                                 setShowPopup(true);
                                 setTimeout(() => setShowPopup(false), 2000);
                               }}
@@ -424,8 +462,8 @@ const RestaurantInClient = () => {
                 </svg>
               </div>
               <div>
-                <p className="text-lg font-semibold text-gray-800">Article ajouté !</p>
-                <p className="text-sm text-gray-600">Consultez votre panier pour finaliser</p>
+                <p className="text-lg font-semibold text-gray-800">{popupMessage.title}</p>
+                <p className="text-sm text-gray-600">{popupMessage.subtitle}</p>
               </div>
             </div>
           </div>
