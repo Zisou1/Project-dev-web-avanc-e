@@ -3,6 +3,7 @@ import { useCart } from "../../context/CartContext";
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import Toast from '../../components/Toast';
 
 const PanierClient = () => {
 	const { cart, removeFromCart, clearCart, addToCart } = useCart();
@@ -12,13 +13,21 @@ const PanierClient = () => {
 	const [deliveryAddress, setDeliveryAddress] = useState('');
 	const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [toast, setToast] = useState({ isVisible: false, message: '', type: 'success' });
 
 	const total = cart.reduce(
 		(sum, item) => sum + item.price * item.quantity,
 		0
 	);
 
-	// Nouvelle fonction pour diminuer la quantité
+	// Fonction pour afficher les toasts
+	const showToast = (message, type = 'success') => {
+		setToast({ isVisible: true, message, type });
+	};
+
+	const hideToast = () => {
+		setToast(prev => ({ ...prev, isVisible: false }));
+	};
 	const decreaseQuantity = (id) => {
 		const item = cart.find((i) => i.id === id);
 		if (item && item.quantity > 1) {
@@ -31,7 +40,7 @@ const PanierClient = () => {
 	// Fonction pour valider et passer la commande
 	const handleOrderSubmit = async () => {
 		if (!deliveryAddress.trim()) {
-			alert('Veuillez saisir une adresse de livraison');
+			showToast('Veuillez saisir une adresse de livraison', 'warning');
 			return;
 		}
 
@@ -61,11 +70,11 @@ const PanierClient = () => {
 			clearCart();
 			setDeliveryAddress('');
 			
-			// Afficher un message de succès plus élégant
-			alert('🎉 Commande passée avec succès ! Vous recevrez bientôt votre délicieux repas.');
+			// Afficher un message de succès élégant
+			showToast('🎉 Commande passée avec succès ! Vous recevrez bientôt votre délicieux repas.', 'success');
 			
 		} catch (err) {
-			alert("❌ Erreur lors de la commande : " + (err.response?.data?.message || err.message));
+			showToast("❌ Erreur lors de la commande : " + (err.response?.data?.message || err.message), 'error');
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -363,6 +372,14 @@ const PanierClient = () => {
 					</div>
 				</div>
 			)}
+
+			{/* Toast Notification */}
+			<Toast
+				message={toast.message}
+				type={toast.type}
+				isVisible={toast.isVisible}
+				onClose={hideToast}
+			/>
 		</div>
 	);
 };
