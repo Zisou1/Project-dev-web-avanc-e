@@ -31,6 +31,7 @@ export default function OrderDetailPage() {
     const statusMap = {
       'pending': 'En attente de validation',
       'confirmed': 'Confirmée',
+      'waiting for pickup': 'En attente de récupération',
       'preparing': 'En préparation',
       'delivering': 'En livraison',
       'completed': 'Livrée',
@@ -42,7 +43,8 @@ export default function OrderDetailPage() {
   const getStatusStyle = (status) => {
     const statusStyles = {
       'pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'confirmed': 'bg-blue-100 text-blue-800 border-blue-200', 
+      'confirmed': 'bg-blue-100 text-blue-800 border-blue-200',
+      'waiting for pickup': 'bg-orange-100 text-orange-800 border-orange-200', 
       'preparing': 'bg-purple-100 text-purple-800 border-purple-200',
       'delivering': 'bg-indigo-100 text-indigo-800 border-indigo-200',
       'completed': 'bg-green-100 text-green-800 border-green-200',
@@ -305,6 +307,16 @@ export default function OrderDetailPage() {
             )}
 
             {order.status === "confirmed" && (
+              <Button
+                onClick={() => showConfirmationModal('preparing')}
+                className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 font-medium"
+              >
+                <FontAwesomeIcon icon={faClock} />
+                Marquer en préparation
+              </Button>
+            )}
+
+            {order.status === "waiting for pickup" && (
               <Button
                 onClick={() => showConfirmationModal('preparing')}
                 className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 font-medium"

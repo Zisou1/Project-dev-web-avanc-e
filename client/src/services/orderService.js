@@ -58,10 +58,10 @@ class OrderService {
     }
   }
 
-  // Accept an order (change status to confirmed)
+  // Accept an order (change status to waiting for pickup)
   async acceptOrder(orderId) {
     try {
-      return await this.updateOrderStatus(orderId, 'confirmed');
+      return await this.updateOrderStatus(orderId, 'waiting for pickup');
     } catch (error) {
       console.error('Error accepting order:', error);
       throw error;
@@ -126,6 +126,66 @@ class OrderService {
       }
       
       throw error;
+    }
+  }
+
+  // Get all orders with a specific status
+  async getOrdersByStatus(status) {
+    try {
+      const response = await baseApi.get('/orders/getAll');
+      
+      if (response.data?.orders) {
+        const filteredOrders = response.data.orders.filter(order => 
+          order.status === status
+        );
+        return { orders: filteredOrders };
+      }
+      
+      return { orders: [] };
+    } catch (error) {
+      console.error('Error fetching orders by status:', error);
+      
+      // If service is unavailable, return empty array with helpful message
+      if (error.response?.status === 503 || error.code === 'ERR_BAD_RESPONSE') {
+        console.warn('Order service is currently unavailable. Returning empty orders list.');
+        return { 
+          orders: [], 
+          error: 'Le service de commandes est temporairement indisponible. Veuillez réessayer plus tard.' 
+        };
+      }
+      
+      throw error;
+    }
+  }
+
+  // Get all available orders for delivery (status: confirmed)
+  async getAvailableOrders() {
+    return await this.getOrdersByStatus('confirmed');
+  }
+
+  // Accept order for delivery (assign delivery person and update status)
+  async acceptOrderForDelivery(orderId, deliveryPersonId) {
+    try {
+      // Update status to 'waiting for pickup' and pass deliveryUser_id for delivery creation
+      const response = await baseApi.put(`/orders/update/${orderId}`, {
+        status: 'waiting for pickup',
+        deliveryUser_id: deliveryPersonId
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error accepting order for delivery:', error);
+      
+      // Handle specific error cases
+      if (error.response?.status === 409) {
+        throw new Error('Cette commande a déjà été acceptée par un autre livreur');
+      }
+      
+      if (error.response?.status === 404) {
+        throw new Error('Commande non trouvée');
+      }
+      
+      throw new Error('Erreur lors de l\'acceptation de la commande');
     }
   }
 }

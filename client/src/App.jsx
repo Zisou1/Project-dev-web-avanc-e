@@ -17,6 +17,7 @@ import RestaurantInClient from './pages/client/RestaurantInClient'
 import HistoriqueClient from './pages/client/HistoriqueClient'
 import ClientOrderTrackingPage from './pages/client/OrderTrackingPage'
 import LivreurPage from './pages/livreur/livreurPage'
+import CommandeDisponible from './pages/livreur/CommandeDisponible'
 import AdminPage from './pages/admin/adminPage'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
@@ -119,7 +120,7 @@ function App() {
             {/* Nested livreur routes */}
             <Route index element={<AccueilLivreur />} />
             <Route path="dashboard" element={<AccueilLivreur />} />
-            <Route path="orders" element={<div>Available Orders Page</div>} />
+            <Route path="orders" element={<CommandeDisponible />} />
             <Route path="deliveries" element={<div>My Deliveries Page</div>} />
             <Route path="earnings" element={<div>Earnings Page</div>} />
             <Route path="profile" element={<div>Livreur Profile Page</div>} />
