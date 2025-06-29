@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import { menuService } from '../../services/menuService';
 
 const RestaurantInClient = () => {
   const { id } = useParams(); // Get restaurant ID from URL
+  const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState(null);
   const [menus, setMenus] = useState([]);
   const [independentItems, setIndependentItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState({ title: '', subtitle: '' });
 
@@ -92,6 +95,41 @@ const RestaurantInClient = () => {
     };
     fetchRestaurantData();
   }, [id]);
+
+  // Helper function to check authentication before cart actions
+  const requireAuthentication = () => {
+    if (!isAuthenticated) {
+      setPopupMessage({
+        title: 'Connexion requise !',
+        subtitle: 'Vous devez vous connecter pour ajouter des articles au panier'
+      });
+      setShowPopup(true);
+      
+      // Redirect to login page after showing the message
+      setTimeout(() => {
+        setShowPopup(false);
+        navigate('/login', { 
+          state: { 
+            from: { pathname: `/restaurantinclient/${id}` },
+            message: 'Veuillez vous connecter pour continuer vos achats'
+          } 
+        });
+      }, 2000);
+      
+      return false;
+    }
+    return true;
+  };
+
+  // Helper function to get button text based on authentication status
+  const getButtonText = (defaultText) => {
+    return isAuthenticated ? defaultText : `🔒 ${defaultText}`;
+  };
+
+  // Helper function to get button tooltip based on authentication status
+  const getButtonTitle = (defaultTitle) => {
+    return isAuthenticated ? defaultTitle : 'Connexion requise pour ajouter au panier';
+  };
 
   if (isLoading) {
     return (
@@ -190,7 +228,7 @@ const RestaurantInClient = () => {
             <div className="space-y-2">
               <div className="flex items-center">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                <span className="text-sm text-green-600 font-medium">Ouvert maintenant</span>
+                <span className="text-sm font-medium text-green-600">Ouvert maintenant</span>
               </div>
               <p className="text-gray-600 text-sm">
                 {restaurant.workingHours || restaurant.openingHours || '09:00 - 22:00'}
@@ -252,6 +290,8 @@ const RestaurantInClient = () => {
                               <button
                                 className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
                                 onClick={() => {
+                                  if (!requireAuthentication()) return;
+                                  
                                   // Add all menu items to cart
                                   menu.items.forEach(item => {
                                     addToCart(item);
@@ -264,11 +304,12 @@ const RestaurantInClient = () => {
                                   setTimeout(() => setShowPopup(false), 3000);
                                 }}
                                 aria-label={`Acheter tout le menu ${menu.name}`}
+                                title={getButtonTitle('Acheter menu')}
                               >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 6H6L5 9z" />
                                 </svg>
-                                <span>Acheter menu</span>
+                                <span>{getButtonText('Acheter menu')}</span>
                                 <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
                                   {menu.items.length} articles
                                 </span>
@@ -324,20 +365,23 @@ const RestaurantInClient = () => {
                               <button
                                 className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 group-hover:shadow-lg transform hover:scale-105"
                                 onClick={() => {
-                                  addToCart(item);
-                                  setPopupMessage({
-                                    title: 'Article ajouté !',
-                                    subtitle: 'Consultez votre panier pour finaliser'
-                                  });
-                                  setShowPopup(true);
-                                  setTimeout(() => setShowPopup(false), 2000);
-                                }}
+                                  if (!requireAuthentication()) return;
+                                
+                                addToCart(item);
+                                setPopupMessage({
+                                  title: 'Article ajouté !',
+                                  subtitle: 'Consultez votre panier pour finaliser'
+                                });
+                                setShowPopup(true);
+                                setTimeout(() => setShowPopup(false), 2000);
+                              }}
                                 aria-label={`Ajouter ${item.name} au panier`}
+                                title={getButtonTitle('Ajouter au panier')}
                               >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5M7 13v6a1 1 0 001 1h7a1 1 0 001-1v-6M7 13H5.4M17 13v6a1 1 0 01-1 1H9a1 1 0 01-1-1v-6" />
                                 </svg>
-                                <span>Ajouter au panier</span>
+                                <span>{getButtonText('Ajouter au panier')}</span>
                               </button>
                             </div>
                           </div>
@@ -413,6 +457,8 @@ const RestaurantInClient = () => {
                             <button
                               className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 group-hover:shadow-lg transform hover:scale-105"
                               onClick={() => {
+                                if (!requireAuthentication()) return;
+                                
                                 addToCart(item);
                                 setPopupMessage({
                                   title: 'Article ajouté !',
@@ -422,11 +468,12 @@ const RestaurantInClient = () => {
                                 setTimeout(() => setShowPopup(false), 2000);
                               }}
                               aria-label={`Ajouter ${item.name} au panier`}
+                              title={getButtonTitle('Ajouter au panier')}
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5M7 13v6a1 1 0 001 1h7a1 1 0 001-1v-6M7 13H5.4M17 13v6a1 1 0 01-1 1H9a1 1 0 01-1-1v-6" />
                               </svg>
-                              <span>Ajouter au panier</span>
+                              <span>{getButtonText('Ajouter au panier')}</span>
                             </button>
                           </div>
                         </div>
@@ -452,14 +499,28 @@ const RestaurantInClient = () => {
           </div>
         </div>
 
-        {/* Enhanced Success Popup */}
+        {/* Enhanced Success/Error Popup */}
         {showPopup && (
           <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50">
-            <div className="bg-white border border-green-200 rounded-2xl shadow-2xl p-6 flex items-center space-x-4 animate-bounce">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+            <div className={`border rounded-2xl shadow-2xl p-6 flex items-center space-x-4 animate-bounce ${
+              popupMessage.title.includes('Connexion requise') 
+                ? 'bg-white border-red-200' 
+                : 'bg-white border-green-200'
+            }`}>
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                popupMessage.title.includes('Connexion requise')
+                  ? 'bg-red-100'
+                  : 'bg-green-100'
+              }`}>
+                {popupMessage.title.includes('Connexion requise') ? (
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
               </div>
               <div>
                 <p className="text-lg font-semibold text-gray-800">{popupMessage.title}</p>

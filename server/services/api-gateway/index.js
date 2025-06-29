@@ -256,7 +256,7 @@ app.all('/api/user/*', authenticateToken, async (req, res) => {
 });
 
 // Public restaurant routes (no authentication required)
-app.get('/api/restaurants/getAll', async (req, res) => {
+app.all('/api/restaurants/*', async (req, res) => {
   await proxyRequest(req, res, services.restaurant.url, {});
 });
 
@@ -279,7 +279,6 @@ const createProtectedRoute = (path, serviceKey) => {
 
 // Register protected routes
 createProtectedRoute('/api/users/*', 'user');
-createProtectedRoute('/api/restaurants/*', 'restaurant');
 createProtectedRoute('/api/orders/*', 'order');
 createProtectedRoute('/api/payments/*', 'payment');
 createProtectedRoute('/api/delivery/*', 'delivery');
@@ -299,8 +298,7 @@ app.get('/api', (req, res) => {
       auth: '/api/auth/* (public)',
       user: '/api/user/* (protected)',
       users: '/api/users/* (protected)',
-      restaurants_public: '/api/restaurants/getAll (public)',
-      restaurants: '/api/restaurants/* (protected)',
+      restaurants: '/api/restaurants/* (public)',
       orders: '/api/orders/* (protected)',
       payments: '/api/payments/* (protected)',
       delivery: '/api/delivery/* (protected)',
