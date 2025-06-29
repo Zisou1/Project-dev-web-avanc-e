@@ -32,7 +32,7 @@ import OrderDetailPage from './pages/restaurant/OrderDetailPage'
 import RestaurantOrderTrackingPage from './pages/restaurant/OrderTrackingPage'
 import OrderHistoryPage from './pages/restaurant/OrderHistoryPage'
 import ClientProfilePage from './pages/client/ClientProfilePage'
-
+import DeliveriesPage from './pages/livreur/DeliveriesPage'
 function App() {
   return (
     <AuthProvider>
@@ -121,7 +121,7 @@ function App() {
             <Route index element={<AccueilLivreur />} />
             <Route path="dashboard" element={<AccueilLivreur />} />
             <Route path="orders" element={<CommandeDisponible />} />
-            <Route path="deliveries" element={<div>My Deliveries Page</div>} />
+            <Route path="deliveries" element={<DeliveriesPage />} />
             <Route path="earnings" element={<div>Earnings Page</div>} />
             <Route path="profile" element={<div>Livreur Profile Page</div>} />
             <Route path="settings" element={<div>Livreur Settings Page</div>} />
