@@ -219,11 +219,51 @@ const updateOrder = async (req, res) => {
       });
     }
 
+    // Store original status for comparison
+    const originalStatus = order.status;
+
     // Update fields
     if (status !== undefined) order.status = status;
     if (total_price !== undefined) order.total_price = total_price;
 
     await order.save();
+
+    // Send notification to client if status changed
+    if (status !== undefined && status !== originalStatus) {
+      try {
+        // Get status message in French
+        const getStatusMessage = (orderStatus) => {
+          switch (orderStatus) {
+            case 'pending': return 'en attente';
+            case 'confirmed': return 'confirmée';
+            case 'preparing': return 'en préparation';
+            case 'ready': return 'prête';
+            case 'waiting for pickup': return 'en attente de récupération';
+            case 'out for delivery': return 'en cours de livraison';
+            case 'delivered': return 'livrée';
+            case 'cancelled': return 'annulée';
+            default: return orderStatus;
+          }
+        };
+
+        const statusMessage = getStatusMessage(status);
+        const notificationMessage = `📦 Votre commande #${order.id} est maintenant ${statusMessage}`;
+
+        await axios.post('http://localhost:3008/notifications', {
+          user_id: order.user_id,
+          message: notificationMessage
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
+        console.log(`🔔 Status change notification sent to user ${order.user_id}: ${statusMessage}`);
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send status change notification to client:', notifyErr.message);
+      }
+    }
 
     // If status is 'waiting for pickup', create a delivery
     if (status === 'waiting for pickup' && deliveryUser_id) {
