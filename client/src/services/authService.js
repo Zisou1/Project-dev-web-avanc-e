@@ -1,4 +1,5 @@
 import axios from 'axios';
+import notificationService from './notificationService.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -95,6 +96,19 @@ export const authService = {
   async login(email, password) {
     try {
       const response = await api.post('/auth/login', { email, password });
+
+      const user = response.data.user; // ✅ get logged-in user from response
+
+      // 👉 Register user for notifications
+      console.log('👤 User logged in:', user);
+      console.log('🔌 About to register user with notification service');
+      
+      // Add a small delay to ensure socket is connected
+      setTimeout(() => {
+        notificationService.registerUser(user);
+        console.log('✅ User registration completed');
+      }, 1000);
+
       return response.data;
     } catch (error) {
       throw error;
@@ -105,6 +119,14 @@ export const authService = {
   async logout(refreshToken) {
     try {
       const response = await api.post('/auth/logout', { refreshToken });
+      
+      // Disconnect from notifications and clear notification data
+      console.log('🔌 Disconnecting from notifications');
+      notificationService.disconnect();
+      
+      // Clear notifications from localStorage on logout
+      localStorage.removeItem('app_notifications');
+      
       return response.data;
     } catch (error) {
       throw error;

@@ -58,6 +58,14 @@ const services = [
     cwd: path.join(__dirname, '../server/services/delivery-service'), // Adjust path as needed
     color: '\x1b[34m', 
     port: process.env.DELIVERY_SERVICE_PORT || 3006
+  },
+  {
+    name: 'Notifications Service',
+    command: 'npm',
+    args: ['run', 'dev'],
+    cwd: path.join(__dirname, '../server/services/notification-service'), 
+    color: '\x1b[30m', 
+    port: process.env.NOTIFICATION_SERVICE_PORT || 3008
   }
 ];
 

@@ -21,7 +21,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import ConfirmationModal from '../components/ConfirmationModal';
 import NotificationDropdown from '../components/NotificationDropdown';
-import { useNotifications } from '../hooks/useNotifications';
+import { useNotifications } from '../context/NotificationContext';
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -70,7 +70,7 @@ const DashboardLayout = () => {
     notifications,
     markAsRead,
     markAllAsRead
-  } = useNotifications(getInitialNotifications());
+  } = useNotifications();
 
   const handleNotificationClick = (notification) => {
     console.log('Dashboard notification clicked:', notification);

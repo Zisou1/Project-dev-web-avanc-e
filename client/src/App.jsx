@@ -2,9 +2,13 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
+import { NotificationProvider } from './context/NotificationContext'
 import Layout from './layout/layout'
 import DashboardLayout from './layout/DashboardLayout'
 import ProtectedRoute from './components/ProtectedRoute'
+
+// Initialize notification service
+import './services/notificationService.js'
 
 // Pages
 import RestaurantPage from './pages/restaurant/restaurantPage'
@@ -32,8 +36,9 @@ import ClientProfilePage from './pages/client/ClientProfilePage'
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <NotificationProvider>
+      <AuthProvider>
+        <Router>
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
@@ -138,6 +143,7 @@ function App() {
         </Routes>
       </Router>
     </AuthProvider>
+    </NotificationProvider>
   )
 }
 
