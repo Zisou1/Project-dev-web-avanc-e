@@ -19,14 +19,6 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // (Optional) Validate items using restaurant-service
-    /*
-    const response = await axios.post('http://restaurant-service/api/items/validate', { itemIds: items });
-    if (!response.data.valid) {
-      return res.status(400).json({ error: 'Invalid Items', message: 'Some items do not exist' });
-    }
-    */
-
     // Create the order
     const order = await Order.create({
       user_id,
@@ -41,6 +33,38 @@ const createOrder = async (req, res) => {
     const orderItems = items.map(item_id => ({ order_id: order.id, item_id }));
     await OrderItem.bulkCreate(orderItems);
 
+    // Fetch restaurant to get the owner user_id
+    let restaurantOwnerId = null;
+    try {
+      const restRes = await axios.get(`http://localhost:3005/api/restaurants/getRestaurent/${restaurant_id}`);
+      console.log('🏪 Restaurant response:', restRes.data);
+      
+      restaurantOwnerId = restRes.data.restaurant?.user_id;
+      console.log('👤 Restaurant owner ID:', restaurantOwnerId);
+      console.log('🏪 Restaurant ID:', restaurant_id);
+
+    } catch (err) {
+      console.warn('⚠️ Could not fetch restaurant owner for notification:', err.message);
+    }
+
+    // Send notification to the restaurant owner
+    if (restaurantOwnerId) {
+      try {
+        await axios.post('http://localhost:3008/notify/restaurant', {
+          restaurant_id: restaurantOwnerId,
+          message: `📦 New order received (Order ID: ${order.id})`
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        console.log(`🔔 Notification sent to restaurant owner ${restaurantOwnerId}`);
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send notification to restaurant:', notifyErr.message);
+      }
+    }
+
     res.status(201).json({
       message: 'Order created successfully',
       order_id: order.id
@@ -54,6 +78,7 @@ const createOrder = async (req, res) => {
     });
   }
 };
+
 
 
 /**

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import UserProfile from '../components/UserProfile';
 import NotificationDropdown from '../components/NotificationDropdown';
-import { useNotifications } from '../hooks/useNotifications';
+import { useNotifications } from '../context/NotificationContext';
 import { useCart } from '../context/CartContext';
 
 const Layout = ({ children}) => {
@@ -12,18 +12,12 @@ const Layout = ({ children}) => {
   const { cart } = useCart(); // Ajout du contexte panier
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Initialize notifications with sample data
-  const initialNotifications = [
-    { id: 1, message: "Votre commande #1234 a été livrée", time: "Il y a 5 min", unread: true, type: "order" },
-    { id: 2, message: "Nouvelle promotion disponible chez Pizza Palace", time: "Il y a 1h", unread: true, type: "promotion" },
-    { id: 3, message: "Votre commande #1233 est en préparation", time: "Il y a 2h", unread: false, type: "order" },
-  ];
-
+  // Get real notifications from context
   const {
     notifications,
     markAsRead,
     markAllAsRead
-  } = useNotifications(initialNotifications);
+  } = useNotifications();
 
   const handleNotificationClick = (notification) => {
     console.log('Notification clicked:', notification);

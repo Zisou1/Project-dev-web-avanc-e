@@ -370,6 +370,8 @@ function RestaurantPage() {
             </button>
           </div>
         </div>
+        
+   
       </div>
 
       {/* Recent Orders Table - Hidden on mobile for better UX */}

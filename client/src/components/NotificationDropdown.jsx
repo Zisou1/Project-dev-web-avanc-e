@@ -129,13 +129,15 @@ const NotificationDropdown = ({
             {/* Footer */}
             {notifications.length > 0 && (
               <div className="px-4 py-2 border-t border-gray-200">
-                <Link
-                  to="/notifications"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                  onClick={() => setIsOpen(false)}
+                <button
+                  onClick={() => {
+                    onClearAll();
+                    setIsOpen(false);
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium w-full text-left"
                 >
-                  Voir toutes les notifications
-                </Link>
+                  Marquer tout comme lu
+                </button>
               </div>
             )}
           </div>
