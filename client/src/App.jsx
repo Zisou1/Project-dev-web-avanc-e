@@ -29,6 +29,8 @@ import OrderDetailPage from './pages/restaurant/OrderDetailPage'
 import OrderTrackingPage from './pages/restaurant/OrderTrackingPage'
 import OrderHistoryPage from './pages/restaurant/OrderHistoryPage'
 import ClientProfilePage from './pages/client/ClientProfilePage'
+import OrderTrackingPage from './pages/livreur/suivrelivraison'
+import Commandes from './pages/livreur/commandes'
 
 function App() {
   return (
@@ -112,8 +114,9 @@ function App() {
             {/* Nested livreur routes */}
             <Route index element={<AccueilLivreur />} />
             <Route path="dashboard" element={<AccueilLivreur />} />
-            <Route path="orders" element={<div>Available Orders Page</div>} />
-            <Route path="deliveries" element={<div>My Deliveries Page</div>} />
+            <Route path="orders" element={<Commandes />} />
+            <Route path="deliveries" element={<OrderTrackingPage />} />
+            <Route path="suivi-livraison/:orderId" element={<OrderTrackingPage />} />
             <Route path="earnings" element={<div>Earnings Page</div>} />
             <Route path="profile" element={<div>Livreur Profile Page</div>} />
             <Route path="settings" element={<div>Livreur Settings Page</div>} />

@@ -6,6 +6,7 @@ class OrderService {
     try {
       // Use existing getAllOrders endpoint and filter client-side
       const response = await baseApi.get('/orders/getAll');
+      console.log('API /orders/getAll response:', response);
       
       // Filter orders for the specific restaurant
       const restaurantOrders = response.data?.orders?.filter(order => 
@@ -29,28 +30,45 @@ class OrderService {
     }
   }
 
-  // Alias for getRestaurantOrders for backward compatibility
-  async getOrdersByRestaurant(restaurantId) {
-    return await this.getRestaurantOrders(restaurantId);
-  }
-
   // Get order by ID using existing endpoint
   async getById(orderId) {
     try {
+      // First try the direct endpoint
       const response = await baseApi.get(`/orders/getOrder/${orderId}`);
+      console.log('API /orders/getOrder response:', response);
       return response.data;
     } catch (error) {
-      console.error('Error fetching order:', error);
-      throw error;
+      console.error('Error fetching order directly:', error);
+      
+      // If direct fetch fails, try getting all orders and filter
+      try {
+        console.log('Trying to fetch order from getAllOrders...');
+        const allOrdersResponse = await baseApi.get('/orders/getAll');
+        const allOrders = allOrdersResponse.data?.orders || [];
+        const targetOrder = allOrders.find(order => order.id === parseInt(orderId));
+        
+        if (targetOrder) {
+          console.log('Found order in getAllOrders:', targetOrder);
+          return { order: targetOrder };
+        } else {
+          throw new Error('Order not found in getAllOrders');
+        }
+      } catch (fallbackError) {
+        console.error('Fallback getAllOrders also failed:', fallbackError);
+        throw error; // throw original error
+      }
     }
   }
 
   // Update order status using existing update endpoint
-  async updateOrderStatus(orderId, status) {
+  async updateOrderStatus(orderId, status, deliveryUserId = null) {
     try {
-      const response = await baseApi.put(`/orders/update/${orderId}`, {
-        status
-      });
+      const requestBody = { status };
+      if (deliveryUserId) {
+        requestBody.deliveryUser_id = deliveryUserId;
+      }
+      
+      const response = await baseApi.put(`/orders/update/${orderId}`, requestBody);
       return response.data;
     } catch (error) {
       console.error('Error updating order status:', error);
@@ -106,6 +124,12 @@ class OrderService {
       console.error('Error marking order as completed:', error);
       throw error;
     }
+  }
+
+  // Get all orders (calls /orders/getAll)
+  async getAllOrders() {
+    const response = await baseApi.get('/orders/getAll');
+    return response.data;
   }
 }
 

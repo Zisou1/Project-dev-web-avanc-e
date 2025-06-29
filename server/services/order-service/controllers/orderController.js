@@ -229,7 +229,31 @@ const updateOrder = async (req, res) => {
         });
       }
     }
-    
+    if ((status === 'cancelled' || status === 'completed') && deliveryUser_id) {
+      console.log( 'hereeeeeeeeeeee', order.id);
+      try {
+        await axios.put(`http://localhost:3006/api/delivery/updateStatus/${order.id}`,
+          {
+            status: false
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          }
+        );
+
+        console.log('📦 Delivery canceled for order:', order.id);
+      } catch (deliveryErr) {
+        console.error('❌ Failed to create delivery:', deliveryErr.response.data);
+        return res.status(500).json({
+          error: 'Delivery Creation Failed',
+          message: 'Order updated, but delivery creation failed',
+          detail: deliveryErr.response.data
+        });
+      }
+    }
 
     res.json({
       message: 'Order updated successfully',

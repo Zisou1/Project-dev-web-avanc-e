@@ -241,7 +241,7 @@ const DashboardLayout = () => {
               active: location.pathname.startsWith('/livreur/orders')
             },
             {
-              name: 'Mes Livraisons',
+              name: 'Commande en cours', // changed from 'Mes Livraisons'
               icon: faTruck,
               path: '/livreur/deliveries',
               active: location.pathname.startsWith('/livreur/deliveries')
