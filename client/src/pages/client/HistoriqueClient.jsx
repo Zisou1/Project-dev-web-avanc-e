@@ -71,10 +71,10 @@ const HistoriqueClient = () => {
     fetchCommandes();
   }, [user]);
 
-  // Filtering logic - only show completed orders in history
+  // Filtering logic - show completed and cancelled orders in history
   const filteredCommandes = commandes.filter((c) => {
-    // First filter: only show completed orders
-    const isCompleted = c.status === 'completed';
+    // First filter: only show completed or cancelled orders
+    const isHistoryOrder = c.status === 'completed' || c.status === 'cancelled';
     
     // Then apply other filters
     const restaurantName = c.restaurant?.name || '';
@@ -84,7 +84,7 @@ const HistoriqueClient = () => {
       !filters.restaurant ||
       restaurantName.toLowerCase().includes(filters.restaurant.toLowerCase());
     
-    return isCompleted && matchesSearch && matchesRestaurant;
+    return isHistoryOrder && matchesSearch && matchesRestaurant;
   });
 
   return (
@@ -103,7 +103,7 @@ const HistoriqueClient = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-slide-in-up">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 animate-slide-in-up">
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg card-hover">
               <div className="flex items-center justify-between">
                 <div>
@@ -111,6 +111,16 @@ const HistoriqueClient = () => {
                   <p className="text-3xl font-bold">{commandes.filter(c => c.status === 'completed').length}</p>
                 </div>
                 <FontAwesomeIcon icon={faReceipt} className="text-3xl text-blue-200 animate-pulse-subtle" />
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-2xl p-6 text-white shadow-lg card-hover">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-red-100 text-sm font-medium">Commandes Annulées</p>
+                  <p className="text-3xl font-bold">{commandes.filter(c => c.status === 'cancelled').length}</p>
+                </div>
+                <FontAwesomeIcon icon={faBoxOpen} className="text-3xl text-red-200 animate-pulse-subtle" />
               </div>
             </div>
             
@@ -184,11 +194,11 @@ const HistoriqueClient = () => {
               <div className="mb-6">
                 <FontAwesomeIcon icon={faCalendarDays} className="text-6xl text-gray-300" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">Aucune commande livrée trouvée</h3>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">Aucune commande trouvée dans l'historique</h3>
               <p className="text-gray-500">
                 {search || Object.keys(filters).length > 0 
                   ? "Essayez de modifier vos critères de recherche" 
-                  : "Vous n'avez pas encore de commandes livrées"}
+                  : "Vous n'avez pas encore de commandes livrées ou annulées"}
               </p>
               {search || Object.keys(filters).length > 0 ? (
                 <button 

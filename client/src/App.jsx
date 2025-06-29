@@ -15,6 +15,7 @@ import SuivreCommande from './pages/client/SuivreCommande'
 import ClientPage from './pages/client/ClientPage'
 import RestaurantInClient from './pages/client/RestaurantInClient'
 import HistoriqueClient from './pages/client/HistoriqueClient'
+import ClientOrderTrackingPage from './pages/client/OrderTrackingPage'
 import LivreurPage from './pages/livreur/livreurPage'
 import AdminPage from './pages/admin/adminPage'
 import LoginPage from './pages/auth/LoginPage'
@@ -27,7 +28,7 @@ import AddItemPage from './pages/restaurant/AddItemPage'
 import EditItemPage from './pages/restaurant/EditItemPage'
 import OrdersPage from './pages/restaurant/OrdersPage'
 import OrderDetailPage from './pages/restaurant/OrderDetailPage'
-import OrderTrackingPage from './pages/restaurant/OrderTrackingPage'
+import RestaurantOrderTrackingPage from './pages/restaurant/OrderTrackingPage'
 import OrderHistoryPage from './pages/restaurant/OrderHistoryPage'
 import ClientProfilePage from './pages/client/ClientProfilePage'
 
@@ -82,6 +83,12 @@ function App() {
                 <ClientProfilePage />
               </Layout>
             } />
+
+            <Route path="/orders/:orderId/tracking" element={
+              <Layout>
+                <ClientOrderTrackingPage />
+              </Layout>
+            } />
           {/* Restaurant Routes with DashboardLayout */}
           <Route path="/restaurant" element={
             <ProtectedRoute requiredRole="restaurant">
@@ -96,7 +103,7 @@ function App() {
             <Route path="items/add" element={<AddItemPage />} />
             <Route path="items/edit/:id" element={<EditItemPage />} />
             <Route path="orders" element={<OrdersPage />} />
-            <Route path="orders/:orderId/tracking" element={<OrderTrackingPage />} />
+            <Route path="orders/:orderId/tracking" element={<RestaurantOrderTrackingPage />} />
             <Route path="orders/history" element={<OrderHistoryPage />} />
             <Route path="orders/history/:orderId/detail" element={<OrderDetailPage />} />
             <Route path="analytics" element={<div>Restaurant Analytics Page</div>} />

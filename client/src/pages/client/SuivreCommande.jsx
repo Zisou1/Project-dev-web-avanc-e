@@ -71,13 +71,13 @@ function SuivreCommande() {
     fetchCommandes();
   }, [user]);
 
-  // Filtering logic - only show NON-completed orders for tracking
+  // Filtering logic - show orders that are not completed and not cancelled (include pending orders)
   const filteredCommandes = commandes.filter((c) => {
     console.log("Filtering order:", c.id || c._id, "Status:", c.status);
     
-    // First filter: only show non-completed orders (everything except completed)
-    const isNotCompleted = c.status !== 'completed';
-    console.log("Is not completed:", isNotCompleted);
+    // First filter: exclude completed and cancelled orders (but include pending)
+    const isNotCompletedOrCancelled = c.status !== 'completed' && c.status !== 'cancelled';
+    console.log("Is not completed or cancelled:", isNotCompletedOrCancelled);
     
     // Then apply other filters
     const restaurantName = c.restaurant?.name || '';
@@ -87,7 +87,7 @@ function SuivreCommande() {
       !filters.restaurant ||
       restaurantName.toLowerCase().includes(filters.restaurant.toLowerCase());
     
-    const finalResult = isNotCompleted && matchesSearch && matchesRestaurant;
+    const finalResult = isNotCompletedOrCancelled && matchesSearch && matchesRestaurant;
     console.log("Final filter result:", finalResult);
     
     return finalResult;

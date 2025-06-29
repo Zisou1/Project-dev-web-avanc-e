@@ -1,15 +1,19 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faStore, 
   faReceipt,
   faCheckCircle,
   faCoins,
-  faCalendarDays
+  faCalendarDays,
+  faEye
 } from "@fortawesome/free-solid-svg-icons";
 import "../styles/animations.css";
 
 const TableHistoriqueClient = ({ deliveries }) => {
+  const navigate = useNavigate();
+  
   // Status mapping function to convert English backend statuses to French display labels
   const getStatusDisplay = (status) => {
     const statusMap = {
@@ -25,6 +29,10 @@ const TableHistoriqueClient = ({ deliveries }) => {
     return statusMap[status] || status;
   };
 
+  const handleOrderClick = (orderId) => {
+    navigate(`/orders/${orderId}/tracking`);
+  };
+
   return (
     <div className="p-6">
       {/* Mobile cards */}
@@ -33,8 +41,9 @@ const TableHistoriqueClient = ({ deliveries }) => {
           deliveries.map((delivery, index) => (
             <div
               key={delivery.id}
-              className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden card-hover animate-slide-in-up"
+              className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden card-hover animate-slide-in-up cursor-pointer transform transition-all duration-200 hover:scale-105"
               style={{ animationDelay: `${index * 0.1}s` }}
+              onClick={() => handleOrderClick(delivery.id || delivery._id)}
             >
               {/* Card Header */}
               <div className="bg-gradient-to-r from-orange-500 to-red-500 p-4 text-white">
@@ -95,6 +104,13 @@ const TableHistoriqueClient = ({ deliveries }) => {
                     {delivery.total_price || delivery.montant} DA
                   </span>
                 </div>
+
+                <div className="pt-2">
+                  <div className="flex items-center justify-center gap-2 text-blue-600 text-sm font-medium">
+                    <FontAwesomeIcon icon={faEye} />
+                    <span>Cliquez pour voir les détails</span>
+                  </div>
+                </div>
               </div>
             </div>
           ))
@@ -141,6 +157,12 @@ const TableHistoriqueClient = ({ deliveries }) => {
                     Date
                   </div>
                 </th>
+                <th className="px-6 py-4 text-left font-bold text-gray-700 text-sm uppercase tracking-wider">
+                  <div className="flex items-center gap-2">
+                    <FontAwesomeIcon icon={faEye} className="text-orange-500" />
+                    Action
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -148,10 +170,11 @@ const TableHistoriqueClient = ({ deliveries }) => {
                 deliveries.map((delivery, index) => (
                   <tr 
                     key={delivery.id} 
-                    className={`hover:bg-gray-50 transition-all duration-200 table-row-enter ${
+                    className={`hover:bg-blue-50 transition-all duration-200 table-row-enter cursor-pointer ${
                       index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
                     }`}
                     style={{ animationDelay: `${index * 0.05}s` }}
+                    onClick={() => handleOrderClick(delivery.id || delivery._id)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
@@ -221,11 +244,17 @@ const TableHistoriqueClient = ({ deliveries }) => {
                         })}
                       </div>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2 text-blue-600 text-sm font-medium">
+                        <FontAwesomeIcon icon={faEye} />
+                        <span>Voir détails</span>
+                      </div>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="text-center py-16">
+                  <td colSpan={6} className="text-center py-16">
                     <FontAwesomeIcon icon={faCalendarDays} className="text-6xl text-gray-300 mb-4" />
                     <p className="text-xl text-gray-500">Aucune commande trouvée</p>
                   </td>
