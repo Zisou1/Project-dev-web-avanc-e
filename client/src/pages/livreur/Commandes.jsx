@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { orderService } from "../../services/orderService";
 import { deliveryService } from "../../services/deliveryService";
+import { restaurantService } from "../../services/restaurantService";
 import { useAuth } from "../../context/AuthContext";
 import SearchBar from "../../components/SearchBar";
 import InfoCard from "../../components/InfoCard";
@@ -18,9 +19,31 @@ export default function Commandes() {
   const [filters, setFilters] = useState({});
   const [userHasActiveDelivery, setUserHasActiveDelivery] = useState(false);
   const [activeDeliveryOrderId, setActiveDeliveryOrderId] = useState(null);
+  const [restaurants, setRestaurants] = useState({});
   
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Function to get restaurant name
+  const getRestaurantName = (order) => {
+    // First try to get from the order's restaurant object
+    if (order.restaurant?.name) {
+      return order.restaurant.name;
+    }
+    
+    // Then try to get from cached restaurants
+    if (restaurants[order.restaurant_id]) {
+      return restaurants[order.restaurant_id].name;
+    }
+    
+    // If we have restaurant_id but no name, show a more helpful message
+    if (order.restaurant_id) {
+      console.log('hereeeeeeeeeeeeeeeeeeeeee',order);
+      return `Restaurant #${order.restaurant_id}`;
+    }
+    
+    return 'Restaurant inconnu';
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -29,8 +52,34 @@ export default function Commandes() {
       try {
         // Fetch all orders
         const response = await orderService.getAllOrders();
-        setOrders(response.orders || []);
-        console.log('Orders set in state:', response.orders || []);
+        console.log('Full orders response:', response);
+        console.log('Sample order structure:', response.orders?.[0]);
+        const ordersData = response.orders || [];
+        setOrders(ordersData);
+
+        // Fetch restaurant data for orders that don't have restaurant info
+        const restaurantIds = [...new Set(ordersData
+          .filter(order => order.restaurant_id && !order.restaurant?.name)
+          .map(order => order.restaurant_id))];
+
+        if (restaurantIds.length > 0) {
+          console.log('Fetching restaurant data for IDs:', restaurantIds);
+          try {
+            const restaurantData = await restaurantService.getAll();
+            const restaurantMap = {};
+            
+            if (restaurantData.restaurants) {
+              restaurantData.restaurants.forEach(restaurant => {
+                restaurantMap[restaurant.id] = restaurant;
+              });
+            }
+            
+            setRestaurants(restaurantMap);
+            console.log('Restaurant data cached:', restaurantMap);
+          } catch (restaurantError) {
+            console.error('Error fetching restaurants:', restaurantError);
+          }
+        }
 
         // Check if current user has an active delivery
         if (user?.id) {
@@ -209,7 +258,9 @@ export default function Commandes() {
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <span className="text-gray-500">🏪 Récupération:</span>
-                        <span className="font-medium">{cmd.restaurant?.name || 'Restaurant inconnu'}</span>
+                        <span className="font-medium">
+                          {getRestaurantName(cmd)}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-gray-500">🏠 Livraison:</span>

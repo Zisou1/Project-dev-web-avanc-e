@@ -28,6 +28,7 @@ export const deliveryService = {
           'Accept': 'application/json',
         },
       });
+      console.log('All deliveries fetched:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error fetching all deliveries:', error);

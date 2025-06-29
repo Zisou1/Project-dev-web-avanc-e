@@ -1,37 +1,158 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { deliveryService } from '../../services/deliveryService';
+import { orderService } from '../../services/orderService';
 import InfoCard from '../../components/InfoCard';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorMessage from '../../components/ErrorMessage';
 
 const AccueilLivreur = () => {
-  // Example data
-  const livreur = {
-    name: 'Ramy test',
-    phone: '0559922630',
-    commandesJour: 47,
-    commandesAttente: 40,
-    commandesTerminer: 5,
-    revenusJour: '7800 DA',
-    rating: 4.8,
-    totalDeliveries: 1247,
-    zone: 'Centre-ville',
-    status: 'En ligne'
-  };
+  const { user } = useAuth();
+  const [deliveryData, setDeliveryData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const recentOrders = [
-    { id: '#CMD001', restaurant: 'Pizza Palace', address: '15 Rue de la Liberté', status: 'En cours', time: '14:30', amount: '2450 DA' },
-    { id: '#CMD002', restaurant: 'Burger King', address: '22 Avenue Mohamed V', status: 'Livré', time: '13:45', amount: '1800 DA' },
-    { id: '#CMD003', restaurant: 'Sushi Bar', address: '8 Rue Didouche Mourad', status: 'Livré', time: '12:20', amount: '3200 DA' },
-    { id: '#CMD004', restaurant: 'Café Central', address: '45 Boulevard Zirout Youcef', status: 'Livré', time: '11:30', amount: '850 DA' }
-  ];
+  // State for calculated statistics
+  const [stats, setStats] = useState({
+    commandesJour: 0,
+    commandesAttente: 0,
+    commandesTerminer: 0,
+    revenusJour: '0 DA',
+    totalDeliveries: 0
+  });
 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch delivery data for the user
+        const deliveryResponse = await deliveryService.getDeliveryByUser(user.id);
+        setDeliveryData(deliveryResponse);
+        
+        // Fetch all orders to count available ones
+        const ordersResponse = await orderService.getAllOrders();
+        const allOrders = ordersResponse.orders || [];
+        
+        // Count available orders (confirmed status)
+        const availableOrders = allOrders.filter(order => order.status === "confirmed").length;
+        
+        // Calculate statistics from delivery data
+        if (deliveryResponse.deliveries && Array.isArray(deliveryResponse.deliveries)) {
+          const today = new Date().toDateString();
+          const todayDeliveries = deliveryResponse.deliveries.filter(delivery => 
+            new Date(delivery.createdAt).toDateString() === today
+          );
+          
+          const commandesAttente = todayDeliveries.filter(delivery => 
+            delivery.status === 'pending' || delivery.status === 'in_progress'
+          ).length;
+          
+          const commandesTerminer = todayDeliveries.filter(delivery => 
+            delivery.status === 'delivered'
+          ).length;
+          
+          // Calculate revenue for today
+          const revenusJour = todayDeliveries.reduce((total, delivery) => {
+            return total + (delivery.amount || 0);
+          }, 0);
+          
+          setStats({
+            commandesJour: availableOrders, // Show available orders count
+            commandesAttente,
+            commandesTerminer,
+            revenusJour: `${revenusJour} DA`,
+            totalDeliveries: deliveryResponse.deliveries.length
+          });
+        } else {
+          // If no delivery data, still show available orders
+          setStats({
+            commandesJour: availableOrders,
+            commandesAttente: 0,
+            commandesTerminer: 0,
+            revenusJour: '0 DA',
+            totalDeliveries: 0
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Erreur lors du chargement des données');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user?.id]);
+
+  // Get recent orders from delivery data
+  const recentOrders = deliveryData?.deliveries 
+    ? deliveryData.deliveries
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 4)
+        .map(delivery => ({
+          id: delivery.id || delivery.orderId,
+          restaurant: delivery.restaurantName || 'Restaurant',
+          address: delivery.deliveryAddress || 'Adresse non disponible',
+          status: delivery.status === 'delivered' ? 'Livré' : 
+                 delivery.status === 'in_progress' ? 'En cours' : 'En attente',
+          time: new Date(delivery.createdAt).toLocaleTimeString('fr-FR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          amount: `${delivery.amount || 0} DA`
+        }))
+    : [];
+
+  // Calculate weekly stats (you might need to modify this based on your data structure)
   const weeklyStats = [
-    { day: 'Lun', orders: 12, revenue: '2100 DA' },
-    { day: 'Mar', orders: 15, revenue: '2850 DA' },
-    { day: 'Mer', orders: 18, revenue: '3200 DA' },
-    { day: 'Jeu', orders: 14, revenue: '2650 DA' },
-    { day: 'Ven', orders: 22, revenue: '4100 DA' },
-    { day: 'Sam', orders: 28, revenue: '5200 DA' },
-    { day: 'Dim', orders: 20, revenue: '3600 DA' }
+    { day: 'Lun', orders: 0, revenue: '0 DA' },
+    { day: 'Mar', orders: 0, revenue: '0 DA' },
+    { day: 'Mer', orders: 0, revenue: '0 DA' },
+    { day: 'Jeu', orders: 0, revenue: '0 DA' },
+    { day: 'Ven', orders: 0, revenue: '0 DA' },
+    { day: 'Sam', orders: 0, revenue: '0 DA' },
+    { day: 'Dim', orders: 0, revenue: '0 DA' }
   ];
+
+  // Calculate weekly stats from delivery data
+  if (deliveryData?.deliveries) {
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    
+    deliveryData.deliveries.forEach(delivery => {
+      const deliveryDate = new Date(delivery.createdAt);
+      if (deliveryDate >= weekAgo) {
+        const dayIndex = (deliveryDate.getDay() + 6) % 7; // Convert Sunday=0 to Monday=0
+        if (weeklyStats[dayIndex]) {
+          weeklyStats[dayIndex].orders += 1;
+          weeklyStats[dayIndex].revenue = `${parseInt(weeklyStats[dayIndex].revenue) + (delivery.amount || 0)} DA`;
+        }
+      }
+    });
+  }
+
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <ErrorMessage message={error} />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen p-4 overflow-y-auto">
@@ -39,7 +160,7 @@ const AccueilLivreur = () => {
         {/* Header */}
         <div className="mb-8 pt-4">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Tableau de Bord Livreur</h1>
-          <p className="text-gray-600">Bonjour {livreur.name}, voici votre aperçu d'aujourd'hui</p>
+          <p className="text-gray-600">Bonjour {user?.name || 'Livreur'}, voici votre aperçu d'aujourd'hui</p>
         </div>
 
         {/* Top Section - Profile and Quick Stats */}
@@ -48,37 +169,24 @@ const AccueilLivreur = () => {
           <div className="lg:col-span-1 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-800">Profil Livreur</h2>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                livreur.status === 'En ligne' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}>
-                {livreur.status}
+              <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                En ligne
               </span>
             </div>
             <div className="space-y-3">
               <div className="flex items-center">
                 <span className="text-gray-600 w-24">Nom:</span>
-                <span className="font-semibold text-gray-800">{livreur.name}</span>
+                <span className="font-semibold text-gray-800">{user?.name || 'Non disponible'}</span>
               </div>
               <div className="flex items-center">
-                <span className="text-gray-600 w-24">Téléphone:</span>
-                <span className="font-semibold text-blue-600">{livreur.phone}</span>
+                <span className="text-gray-600 w-24">Email:</span>
+                <span className="font-semibold text-blue-600">{user?.email || 'Non disponible'}</span>
               </div>
-              <div className="flex items-center">
-                <span className="text-gray-600 w-24">Zone:</span>
-                <span className="font-semibold text-gray-800">{livreur.zone}</span>
-              </div>
-              <div className="flex items-center">
-                <span className="text-gray-600 w-24">Note:</span>
-                <div className="flex items-center">
-                  <span className="font-semibold text-yellow-600 mr-1">{livreur.rating}</span>
-                  <div className="flex text-yellow-400">
-                    {'★'.repeat(Math.floor(livreur.rating))}{'☆'.repeat(5 - Math.floor(livreur.rating))}
-                  </div>
-                </div>
-              </div>
+             
+          
               <div className="flex items-center">
                 <span className="text-gray-600 w-24">Total:</span>
-                <span className="font-semibold text-gray-800">{livreur.totalDeliveries} livraisons</span>
+                <span className="font-semibold text-gray-800">{stats.totalDeliveries} livraisons</span>
               </div>
             </div>
           </div>
@@ -89,7 +197,7 @@ const AccueilLivreur = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm">Commandes du jour</p>
-                  <p className="text-3xl font-bold text-gray-800">{livreur.commandesJour}</p>
+                  <p className="text-3xl font-bold text-gray-800">{stats.commandesJour}</p>
                 </div>
                 <div className="bg-blue-100 p-3 rounded-full">
                   <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +211,7 @@ const AccueilLivreur = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm">En attente</p>
-                  <p className="text-3xl font-bold text-orange-600">{livreur.commandesAttente}</p>
+                  <p className="text-3xl font-bold text-orange-600">{stats.commandesAttente}</p>
                 </div>
                 <div className="bg-orange-100 p-3 rounded-full">
                   <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,7 +225,7 @@ const AccueilLivreur = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm">Terminées</p>
-                  <p className="text-3xl font-bold text-green-600">{livreur.commandesTerminer}</p>
+                  <p className="text-3xl font-bold text-green-600">{stats.commandesTerminer}</p>
                 </div>
                 <div className="bg-green-100 p-3 rounded-full">
                   <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,7 +239,7 @@ const AccueilLivreur = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm">Revenus du jour</p>
-                  <p className="text-3xl font-bold text-green-600">{livreur.revenusJour}</p>
+                  <p className="text-3xl font-bold text-green-600">{stats.revenusJour}</p>
                 </div>
                 <div className="bg-green-100 p-3 rounded-full">
                   <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,26 +257,33 @@ const AccueilLivreur = () => {
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <h3 className="text-xl font-bold text-gray-800 mb-4">Commandes Récentes</h3>
             <div className="space-y-3">
-              {recentOrders.map((order, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-gray-800">{order.id}</span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        order.status === 'En cours' ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'
-                      }`}>
-                        {order.status}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600">{order.restaurant}</p>
-                    <p className="text-xs text-gray-500">{order.address}</p>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-xs text-gray-500">{order.time}</span>
-                      <span className="font-semibold text-green-600">{order.amount}</span>
+              {recentOrders.length > 0 ? (
+                recentOrders.map((order, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-semibold text-gray-800">#{order.id}</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          order.status === 'En cours' ? 'bg-orange-100 text-orange-800' : 
+                          order.status === 'Livré' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {order.status}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600">{order.restaurant}</p>
+                      <p className="text-xs text-gray-500">{order.address}</p>
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-xs text-gray-500">{order.time}</span>
+                        <span className="font-semibold text-green-600">{order.amount}</span>
+                      </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Aucune commande récente</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
@@ -190,7 +305,7 @@ const AccueilLivreur = () => {
                   <div className="w-20 bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-blue-600 h-2 rounded-full" 
-                      style={{width: `${(stat.orders / 30) * 100}%`}}
+                      style={{width: `${Math.min((stat.orders / 10) * 100, 100)}%`}}
                     ></div>
                   </div>
                 </div>
