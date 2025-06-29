@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
 import RestaurantPage from './pages/restaurant/restaurantPage'
+import MenuPage from './pages/restaurant/MenuPage'
 import HomePage from './pages/client/HomePage'
 import PanierClient from './pages/client/PanierClient'
 import SuivreCommande from './pages/client/SuivreCommande'
@@ -90,7 +91,7 @@ function App() {
             {/* Nested restaurant routes */}
             <Route index element={<RestaurantPage />} />
             <Route path="dashboard" element={<RestaurantPage />} />
-            <Route path="menu" element={<div>Menu Management Page</div>} />
+            <Route path="menu" element={<MenuPage />} />
             <Route path="items" element={<ItemsPage />} />
             <Route path="items/add" element={<AddItemPage />} />
             <Route path="items/edit/:id" element={<EditItemPage />} />
@@ -100,7 +101,6 @@ function App() {
             <Route path="orders/history/:orderId/detail" element={<OrderDetailPage />} />
             <Route path="analytics" element={<div>Restaurant Analytics Page</div>} />
             <Route path="profile" element={<div>Restaurant Profile Page</div>} />
-            <Route path="settings" element={<div>Restaurant Settings Page</div>} />
           </Route>
           
           {/* Livreur Routes with DashboardLayout */}

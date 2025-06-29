@@ -355,7 +355,7 @@ function RestaurantPage() {
               <span className="text-xs sm:text-sm font-semibold text-gray-700 text-center">Voir commandes</span>
             </button>
             <button 
-              onClick={() => navigate('/restaurant/menus')}
+              onClick={() => navigate('/restaurant/menu')}
               className="flex flex-col items-center p-4 sm:p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl hover:from-green-100 hover:to-green-200 transition-all duration-200 hover:shadow-md"
             >
               <span className="text-2xl sm:text-3xl mb-2">📖</span>

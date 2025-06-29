@@ -210,7 +210,16 @@ const getItemsByIds = async (req, res) => {
       where: { id: ids }
     });
 
-    res.json({ items });
+    // Add full imageUrl to each item
+    const itemsWithFullUrl = items.map(item => {
+      let imageUrl = item.imageUrl;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+      }
+      return { ...item.toJSON(), imageUrl };
+    });
+
+    res.json({ items: itemsWithFullUrl });
 
   } catch (error) {
     console.error('❌ Get items by IDs Error:', error);
@@ -222,24 +231,33 @@ const getItemsByIds = async (req, res) => {
 };
 
 const getRestaurentItem = async (req, res) => {
-    try {
+  try {
     const { restaurant_id } = req.params;
     const item = await Item.findAll({ where: { restaurant_id } });
 
     if (!item) {
       return res.status(404).json({
         error: 'Not Found',
-        message: 'Menu not found'
+        message: 'Items not found'
       });
     }
 
-    res.json({ item });
+    // Add full imageUrl to each item
+    const itemsWithFullUrl = item.map(itemObj => {
+      let imageUrl = itemObj.imageUrl;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+      }
+      return { ...itemObj.toJSON(), imageUrl };
+    });
+
+    res.json({ item: itemsWithFullUrl });
 
   } catch (error) {
-    console.error('❌ Get Menu Error:', error);
+    console.error('❌ Get Items Error:', error);
     res.status(500).json({
       error: 'Fetch Failed',
-      message: 'Unable to retrieve the menu',
+      message: 'Unable to retrieve the items',
       details: error.message
     });
   }
