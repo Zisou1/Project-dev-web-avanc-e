@@ -15,9 +15,8 @@ import {
   faUtensils,
   faClipboardList,
   faUser,
-  faMapMarkedAlt,
   faDollarSign,
-  faCheckCircle
+  faChartPie
 } from '@fortawesome/free-solid-svg-icons';
 import ConfirmationModal from '../components/ConfirmationModal';
 import NotificationDropdown from '../components/NotificationDropdown';
@@ -95,7 +94,7 @@ const DashboardLayout = () => {
     handleResize(); // Vérifier la taille initiale
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [sidebarOpen]);
 
   const handleLogout = () => {
     setShowLogoutModal(true);
@@ -210,7 +209,7 @@ const DashboardLayout = () => {
             },
             {
               name: 'Analyses',
-              icon: faChartLine,
+              icon: faChartPie,
               path: '/restaurant/analytics',
               active: location.pathname.startsWith('/restaurant/analytics')
             },

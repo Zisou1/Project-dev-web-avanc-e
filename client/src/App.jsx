@@ -29,6 +29,7 @@ import OrderDetailPage from './pages/restaurant/OrderDetailPage'
 import OrderTrackingPage from './pages/restaurant/OrderTrackingPage'
 import OrderHistoryPage from './pages/restaurant/OrderHistoryPage'
 import ClientProfilePage from './pages/client/ClientProfilePage'
+import AnalyticsPage from './pages/restaurant/AnalyticsPage'
 
 function App() {
   return (
@@ -98,7 +99,7 @@ function App() {
             <Route path="orders/:orderId/tracking" element={<OrderTrackingPage />} />
             <Route path="orders/history" element={<OrderHistoryPage />} />
             <Route path="orders/history/:orderId/detail" element={<OrderDetailPage />} />
-            <Route path="analytics" element={<div>Restaurant Analytics Page</div>} />
+            <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="profile" element={<div>Restaurant Profile Page</div>} />
             <Route path="settings" element={<div>Restaurant Settings Page</div>} />
           </Route>
