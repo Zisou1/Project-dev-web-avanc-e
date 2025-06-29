@@ -17,7 +17,12 @@ import RestaurantInClient from './pages/client/RestaurantInClient'
 import HistoriqueClient from './pages/client/HistoriqueClient'
 import ClientOrderTrackingPage from './pages/client/OrderTrackingPage'
 import LivreurPage from './pages/livreur/livreurPage'
-import AdminPage from './pages/admin/adminPage'
+import AdminPage from './pages/admin/AdminPage'
+import UsersPage from './pages/admin/UsersPage'
+import RestaurantsPage from './pages/admin/RestaurantsPage'
+import AdminOrdersPage from './pages/admin/OrdersPage'
+import DeliveryPage from './pages/admin/DeliveryPage'
+import AnalyticsPage from './pages/admin/AnalyticsPage'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
@@ -135,11 +140,11 @@ function App() {
             {/* Nested admin routes */}
             <Route index element={<AdminPage />} />
             <Route path="dashboard" element={<AdminPage />} />
-            <Route path="users" element={<div>Users Management Page</div>} />
-            <Route path="restaurants" element={<div>Restaurants Management Page</div>} />
-            <Route path="orders" element={<div>Orders Management Page</div>} />
-            <Route path="delivery" element={<div>Delivery Management Page</div>} />
-            <Route path="analytics" element={<div>Analytics Page</div>} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="restaurants" element={<RestaurantsPage />} />
+            <Route path="orders" element={<AdminOrdersPage />} />
+            <Route path="delivery" element={<DeliveryPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="settings" element={<div>Settings Page</div>} />
           </Route>
         </Routes>
