@@ -118,8 +118,12 @@ const getRestaurantById = async (req, res) => {
 const updateRestaurant = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, kitchen_type } = req.body;
+    const { name, kitchen_type, description, address, timeStart, timeEnd } = req.body;
+    const image = req.file;
 
+    console.log('updateRestaurant called with ID:', id);
+    console.log('Request body:', req.body);
+    console.log('Request file:', req.file);
 
     const restaurant = await Restaurant.findByPk(id);
     if (!restaurant) {
@@ -129,18 +133,38 @@ const updateRestaurant = async (req, res) => {
       });
     }
 
-    await restaurant.update({ name, kitchen_type });
+    // Prepare update data
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (kitchen_type !== undefined) updateData.kitchen_type = kitchen_type;
+    if (description !== undefined) updateData.description = description;
+    if (address !== undefined) updateData.address = address;
+    if (timeStart !== undefined) updateData.timeStart = timeStart;
+    if (timeEnd !== undefined) updateData.timeEnd = timeEnd;
+
+    // Handle image update if provided
+    if (image) {
+      updateData.imageUrl = `/uploads/restaurants/${image.filename}`;
+    }
+
+    await restaurant.update(updateData);
+
+    // Return restaurant with full image URL
+    let imageUrl = restaurant.imageUrl;
+    if (imageUrl && !imageUrl.startsWith('http')) {
+      imageUrl = `${req.protocol}://${req.get('host')}${imageUrl}`;
+    }
 
     res.json({
       message: 'Restaurant updated successfully',
-      restaurant
+      restaurant: { ...restaurant.toJSON(), imageUrl }
     });
 
   } catch (error) {
-    console.error('❌ Update Error:', error);
+    console.error('❌ Update Restaurant Error:', error);
     res.status(500).json({
       error: 'Update Failed',
-      message: 'An error occurred while updating'
+      message: 'An error occurred while updating restaurant'
     });
   }
 };

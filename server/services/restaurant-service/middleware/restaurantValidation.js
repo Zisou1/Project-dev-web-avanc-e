@@ -192,23 +192,36 @@ const validateRestaurantUpdate = (req, res, next) => {
     })
   });
   const schema = Joi.object({
-
-    user_id: Joi.number().integer().required().messages({
-      'number.base': 'User ID must be a number',
-      'any.required': 'User ID is required'
-    }),
-    name: Joi.string().min(2).max(100).required().messages({
+    name: Joi.string().min(2).max(100).optional().messages({
       'string.base': 'Name must be a string',
       'string.min': 'Name must be at least 2 characters long',
-      'string.max': 'Name must not exceed 100 characters',
-      'any.required': 'Name is required'
+      'string.max': 'Name must not exceed 100 characters'
     }),
-    kitchen_type: Joi.string().min(2).max(100).required().messages({
+    kitchen_type: Joi.string().min(2).max(100).optional().messages({
       'string.base': 'Kitchen type must be a string',
       'string.min': 'Kitchen type must be at least 2 characters long',
-      'string.max': 'Kitchen type must not exceed 100 characters',
-      'any.required': 'Kitchen type is required'
-    })
+      'string.max': 'Kitchen type must not exceed 100 characters'
+    }),
+    description: Joi.string().allow('').optional().messages({
+      'string.base': 'Description must be a string'
+    }),
+    address: Joi.string().max(255).optional().messages({
+      'string.max': 'Address must not exceed 255 characters'
+    }),
+    timeStart: Joi.string()
+      .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)(:([0-5]\d))?$/)
+      .allow('', null)
+      .optional()
+      .messages({
+        'string.pattern.base': 'timeStart must be in HH:MM or HH:MM:SS format'
+      }),
+    timeEnd: Joi.string()
+      .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)(:([0-5]\d))?$/)
+      .allow('', null)
+      .optional()
+      .messages({
+        'string.pattern.base': 'timeEnd must be in HH:MM or HH:MM:SS format'
+      })
   });
 
   const paramResult = paramSchema.validate(req.params);
@@ -220,9 +233,13 @@ const validateRestaurantUpdate = (req, res, next) => {
     });
   }
 
+  console.log('Validating restaurant update with body:', req.body);
+  console.log('timeStart value:', req.body.timeStart, 'type:', typeof req.body.timeStart);
+  console.log('timeEnd value:', req.body.timeEnd, 'type:', typeof req.body.timeEnd);
 
   const { error, value } = schema.validate(req.body);
   if (error) {
+    console.log('Validation error:', error.details);
     return res.status(400).json({
       error: 'Validation Error',
       message: error.details[0].message,

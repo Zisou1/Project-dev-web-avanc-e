@@ -37,8 +37,7 @@ const UsersPage = () => {
     email: '',
     password: '',
     role: 'customer',
-    phone: '',
-    address: ''
+    phone: ''
   });
 
   useEffect(() => {
@@ -69,8 +68,7 @@ const UsersPage = () => {
       email: '',
       password: '',
       role: 'customer',
-      phone: '',
-      address: ''
+      phone: ''
     });
   };
 
@@ -88,8 +86,7 @@ const UsersPage = () => {
         email: userDetails.email || '',
         password: '',
         role: userDetails.role || 'customer',
-        phone: userDetails.phone || '',
-        address: userDetails.address || ''
+        phone: userDetails.phone || ''
       });
       setShowEditModal(true);
     } catch (error) {
@@ -548,17 +545,6 @@ const UsersPage = () => {
                       type="tel"
                       name="phone"
                       value={formData.phone}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-                    <input
-                      type="text"
-                      name="address"
-                      value={formData.address}
                       onChange={handleInputChange}
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />

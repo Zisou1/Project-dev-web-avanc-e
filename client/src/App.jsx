@@ -37,6 +37,7 @@ import RestaurantOrderTrackingPage from './pages/restaurant/OrderTrackingPage'
 import OrderHistoryPage from './pages/restaurant/OrderHistoryPage'
 import ClientProfilePage from './pages/client/ClientProfilePage'
 import AnalyticsPagerest from './pages/restaurant/AnalyticsPagerest'
+import RestaurantProfilePage from './pages/restaurant/RestaurantProfilePage'
 
 function App() {
   return (
@@ -104,7 +105,7 @@ function App() {
             {/* Nested restaurant routes */}
             <Route index element={<RestaurantPage />} />
             <Route path="dashboard" element={<RestaurantPage />} />
-            <Route path="menu" element={<MenuPage />} />
+            <Route path="menu" element={<MenuPage/>} />
             <Route path="items" element={<ItemsPage />} />
             <Route path="items/add" element={<AddItemPage />} />
             <Route path="items/edit/:id" element={<EditItemPage />} />
@@ -112,8 +113,8 @@ function App() {
             <Route path="orders/:orderId/tracking" element={<RestaurantOrderTrackingPage />} />
             <Route path="orders/history" element={<OrderHistoryPage />} />
             <Route path="orders/history/:orderId/detail" element={<OrderDetailPage />} />
-            <Route path="analytics" element={<AnalyticsPagerest />} />
-            <Route path="profile" element={<div>Restaurant Profile Page</div>} />
+            <Route path="analytics" element={<AnalyticsPagerest/>} />
+            <Route path="profile" element={<RestaurantProfilePage/>} />
           </Route>
           
           {/* Livreur Routes with DashboardLayout */}

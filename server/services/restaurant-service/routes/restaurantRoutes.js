@@ -26,7 +26,7 @@ router.post('/creat', upload.single('image'), validateRestaurant, restaurantCont
 router.post('/createForUser', upload.single('image'), validateRestaurantForUser, restaurantController.createOrGetRestaurantForUser);
 router.get('/getAll', restaurantController.getAllRestaurants);
 router.get('/getRestaurent/:id', restaurantController.getRestaurantById);
-router.put('/update/:id', validateRestaurantUpdate, restaurantController.updateRestaurant);
+router.put('/update/:id', upload.single('image'), validateRestaurantUpdate, restaurantController.updateRestaurant);
 router.delete('/delete/:id', restaurantController.deleteRestaurant);
 //menu routes
 router.post('/menu/create', upload.single('image'), validateMenu, menuController.createMenu);

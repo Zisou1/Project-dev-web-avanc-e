@@ -375,31 +375,59 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-const { id } = req.params;
-  const {username, email, phone} = req.body;
+    const { id } = req.params;
+    const { name, email, phone, password } = req.body;
 
-  const user = await User.findByPk(id);
-  if (!user) {
-    return res.status(404).json({
-      error: 'Not Found',
-      message: 'Restaurant not found'
-    });
-  }
-  await user.update({username, email, phone});
-  res.json({
+    console.log('updateUser called with ID:', id);
+    console.log('Request params:', req.params);
+    console.log('Request body:', req.body);
+
+    if (!id) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'User ID is required'
+      });
+    }
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'User not found'
+      });
+    }
+
+    // Prepare update data
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+    if (phone !== undefined) updateData.phone = phone;
+    
+    // Handle password update if provided
+    if (password && password.trim() !== '') {
+      const saltRounds = 10;
+      updateData.password = await bcrypt.hash(password, saltRounds);
+    }
+
+    console.log('Update data:', updateData);
+
+    await user.update(updateData);
+    
+    // Return user without password
+    const { password: _, refreshToken: __, ...userResponse } = user.toJSON();
+    
+    res.json({
       message: 'User updated successfully',
-      user
+      user: userResponse
     });
-  }catch (error) {
-    console.error('❌ Update Error:', error);
+  } catch (error) {
+    console.error('❌ Update User Error:', error);
     res.status(500).json({
       error: 'Update Failed',
-      message: 'An error occurred while updating'
+      message: 'An error occurred while updating user'
     });
   }
-  
-
-}
+};
 
 const deleteUser = async (req, res) => {
   try {
