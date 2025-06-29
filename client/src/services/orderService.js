@@ -6,28 +6,14 @@ class OrderService {
     try {
       // Use existing getAllOrders endpoint and filter client-side
       const response = await baseApi.get('/orders/getAll');
-      console.log('API /orders/getAll response for restaurant filter:', response);
-      console.log('API /orders/getAll response data:', response.data);
+      console.log('API /orders/getAll response:', response);
       
-      // Ensure we have the orders array and preserve all nested data
-      const allOrders = response.data?.orders || [];
-      console.log('All orders before filtering:', allOrders);
+      // Filter orders for the specific restaurant
+      const restaurantOrders = response.data?.orders?.filter(order => 
+        order.restaurant_id === parseInt(restaurantId)
+      ) || [];
       
-      // Filter orders for the specific restaurant while preserving all nested data
-      const restaurantOrders = allOrders.filter(order => {
-        const matches = order.restaurant_id === parseInt(restaurantId);
-        if (matches) {
-          console.log('Matching order found:', order);
-        }
-        return matches;
-      });
-      
-      console.log('Filtered restaurant orders:', restaurantOrders);
-      
-      return { 
-        orders: restaurantOrders,
-        total: restaurantOrders.length 
-      };
+      return { orders: restaurantOrders };
     } catch (error) {
       console.error('Error fetching restaurant orders:', error);
       
@@ -46,33 +32,62 @@ class OrderService {
 
   // Get order by ID using existing endpoint
   async getById(orderId) {
+    console.log('📋 OrderService: === START getById ===');
+    console.log('📋 OrderService: Fetching order with ID:', orderId);
+    console.log('📋 OrderService: Current timestamp:', new Date().toISOString());
+    
     try {
+      console.log('📋 OrderService: Attempting direct API call to /orders/getOrder/', orderId);
       // First try the direct endpoint
       const response = await baseApi.get(`/orders/getOrder/${orderId}`);
-      console.log('API /orders/getOrder response:', response);
-      console.log('API /orders/getOrder response data:', response.data);
-      
-      // Ensure we return the complete order data with nested objects
+      console.log('✅ OrderService: Direct API call successful');
+      console.log('✅ OrderService: Response status:', response.status);
+      console.log('✅ OrderService: Response data:', response.data);
+      console.log('✅ OrderService: Response data structure:', {
+        hasOrder: !!response.data?.order,
+        orderId: response.data?.order?.id,
+        orderStatus: response.data?.order?.status,
+        dataKeys: response.data ? Object.keys(response.data) : 'null'
+      });
+      console.log('📋 OrderService: === END getById SUCCESS ===');
       return response.data;
     } catch (error) {
-      console.error('Error fetching order directly:', error);
+      console.error('❌ OrderService: Direct API call failed:', error);
+      console.error('❌ OrderService: Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method
+        }
+      });
       
       // If direct fetch fails, try getting all orders and filter
       try {
-        console.log('Trying to fetch order from getAllOrders...');
+        console.log('🔄 OrderService: Trying fallback - fetching from getAllOrders...');
         const allOrdersResponse = await baseApi.get('/orders/getAll');
+        console.log('🔄 OrderService: getAllOrders response:', allOrdersResponse.data);
+        
         const allOrders = allOrdersResponse.data?.orders || [];
+        console.log('🔄 OrderService: Total orders found:', allOrders.length);
+        console.log('🔄 OrderService: Looking for order with ID:', parseInt(orderId));
+        
         const targetOrder = allOrders.find(order => order.id === parseInt(orderId));
         
         if (targetOrder) {
-          console.log('Found order in getAllOrders with full data:', targetOrder);
-          // Return the order with the same structure as the direct endpoint
+          console.log('✅ OrderService: Found order in getAllOrders:', targetOrder);
+          console.log('📋 OrderService: === END getById FALLBACK SUCCESS ===');
           return { order: targetOrder };
         } else {
+          console.log('❌ OrderService: Order not found in getAllOrders');
+          console.log('❌ OrderService: Available order IDs:', allOrders.map(o => o.id));
           throw new Error('Order not found in getAllOrders');
         }
       } catch (fallbackError) {
-        console.error('Fallback getAllOrders also failed:', fallbackError);
+        console.error('❌ OrderService: Fallback getAllOrders also failed:', fallbackError);
+        console.log('📋 OrderService: === END getById COMPLETE FAILURE ===');
         throw error; // throw original error
       }
     }
@@ -146,17 +161,9 @@ class OrderService {
 
   // Get all orders (calls /orders/getAll)
   async getAllOrders() {
-    try {
-      const response = await baseApi.get('/orders/getAll');
-      console.log('getAllOrders API response:', response);
-      console.log('getAllOrders API response data:', response.data);
-      
-      // Ensure we return the full data structure with nested objects
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching all orders:', error);
-      throw error;
-    }
+    const response = await baseApi.get('/orders/getAll');
+    console.log('22222222222222222222222222222222222222222222222222', response);
+    return response.data;
   }
 }
 

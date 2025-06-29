@@ -254,6 +254,41 @@ const updateOrder = async (req, res) => {
         });
       }
     }
+    if (status === 'cancelled' && deliveryUser_id) {
+      console.log('🚫 Cancelling order:', order.id);
+      try {
+        // First, find the delivery by user_id to get the delivery ID
+        const deliveryRes = await axios.get(`http://localhost:3006/api/delivery/getDeliveryByUser/${deliveryUser_id}`);
+        const delivery = deliveryRes.data;
+        
+        if (delivery && delivery.id) {
+          // Update the delivery status to false (inactive)
+          await axios.put(
+            `http://localhost:3006/api/delivery/updateStatus/${delivery.id}`,
+            {
+              status: false
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              }
+            }
+          );
+
+          console.log('📦 Delivery status updated to false for order:', order.id);
+        } else {
+          console.warn('⚠️ No active delivery found for user:', deliveryUser_id);
+        }
+      } catch (deliveryErr) {
+        console.error('❌ Failed to update delivery status:', deliveryErr.response?.data || deliveryErr.message);
+        return res.status(500).json({
+          error: 'Delivery Update Failed',
+          message: 'Order updated, but delivery status update failed',
+          detail: deliveryErr.response?.data || deliveryErr.message
+        });
+      }
+    }
     
 
     res.json({

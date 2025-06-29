@@ -113,7 +113,7 @@ function App() {
             <Route index element={<AccueilLivreur />} />
             <Route path="dashboard" element={<AccueilLivreur />} />
             <Route path="orders" element={<Commandes />} />
-            <Route path="deliveries" element={<OrderTrackingPage />} />
+            <Route path="deliveries" element={<SuivreCommande />} />
             <Route path="suivi-livraison/:orderId" element={<OrderTrackingPage />} />
             <Route path="earnings" element={<div>Earnings Page</div>} />
             <Route path="profile" element={<div>Livreur Profile Page</div>} />
