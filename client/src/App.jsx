@@ -60,7 +60,7 @@ function App() {
 
             <Route path="/suivrecommande" element={
               <Layout>
-                <SuivreCommande />
+                <SuivreCommande /> 
               </Layout>
             } />
 

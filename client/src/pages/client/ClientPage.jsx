@@ -194,7 +194,7 @@ const ClientPage = () => {
               <SearchBar
                 query={searchTerm}
                 setQuery={setSearchTerm}
-                placeholder="🔍 Rechercher un restaurant..."
+                placeholder="Rechercher un restaurant..."
               />
               <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-white/30 rounded-full"></div>
             </div>
